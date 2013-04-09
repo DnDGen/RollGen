@@ -7,7 +7,7 @@
     <ProjectGuid>{1E946755-ACA8-4C4A-8116-82B6E11E5F8A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>D20_Dice</RootNamespace>
+    <RootNamespace>D20Dice</RootNamespace>
     <AssemblyName>D20-Dice</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -39,6 +39,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Dice\CoreDice.cs" />
+    <Compile Include="Dice\DiceFactory.cs" />
+    <Compile Include="Dice\IDice.cs" />
     <Compile Include="RandomWrappers\IRandomWrapper.cs" />
     <Compile Include="RandomWrappers\RandomFactory.cs" />
     <Compile Include="RandomWrappers\RandomWrapper.cs" />
