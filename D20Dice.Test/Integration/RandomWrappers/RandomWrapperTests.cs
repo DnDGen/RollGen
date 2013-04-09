@@ -2,7 +2,7 @@
 using D20Dice.RandomWrappers;
 using NUnit.Framework;
 
-namespace D20Dice.Test.Unit.RandomWrappers
+namespace D20Dice.Test.Integration.RandomWrappers
 {
     [TestFixture]
     public class RandomWrapperTests
@@ -19,7 +19,7 @@ namespace D20Dice.Test.Unit.RandomWrappers
         }
 
         [Test]
-        public void WrapperNext()
+        public void InRange()
         {
             for (var i = 0; i < TESTRUNS; i++)
             {
@@ -27,6 +27,27 @@ namespace D20Dice.Test.Unit.RandomWrappers
                 Assert.That(result, Is.LessThan(POSMAX));
                 Assert.That(result, Is.GreaterThanOrEqualTo(0));
             }
+        }
+
+        [Test]
+        public void HitsMinAndMax()
+        {
+            var hitMin = false;
+            var hitMax = false;
+            var count = TESTRUNS;
+
+            while (!(hitMin && hitMax) && count-- > 0)
+            {
+                var result = wrapper.Next(POSMAX);
+
+                if (result == 0)
+                    hitMin = true;
+                else if (result == POSMAX - 1)
+                    hitMax = true;
+            }
+
+            Assert.That(hitMin, Is.True, "Did not hit minimum");
+            Assert.That(hitMax, Is.True, "Did not hit maximum");
         }
     }
 }

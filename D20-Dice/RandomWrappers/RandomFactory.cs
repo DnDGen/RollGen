@@ -11,16 +11,5 @@ namespace D20Dice.RandomWrappers
 
             return randomWrapper;
         }
-        
-        public static IRandomWrapper CreateCryptographicallyStrong()
-        {
-            var crypto = new RNGCryptoServiceProvider();
-            var cryptoByteBuffer = new Byte[4];
- 
-            crypto.GetBytes(cryptoByteBuffer);
-            var random = new Random(BitConverter.ToInt32(cryptoByteBuffer, 0));
-
-            return Create(random);
-        }
     }
 }
