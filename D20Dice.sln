@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "D20Dice", "D20-Dice\D20Dice.csproj", "{1E946755-ACA8-4C4A-8116-82B6E11E5F8A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "D20Dice", "D20Dice\D20Dice.csproj", "{1E946755-ACA8-4C4A-8116-82B6E11E5F8A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "D20Dice.Test", "D20Dice.Test\D20Dice.Test.csproj", "{515B1863-22B5-43D2-B178-13BE556BB948}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "D20Dice.Tests", "Tests\D20Dice.Tests.csproj", "{515B1863-22B5-43D2-B178-13BE556BB948}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

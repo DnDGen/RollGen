@@ -11,6 +11,7 @@ namespace D20Dice.Test.Unit.Dice
     {
         private const Int32 MIN = 1;
         private const Int32 TWICE = 2;
+        private const Int32 BONUS = 3;
 
         private IDice dice;
         private Mock<IRandomWrapper> mockRandom;
@@ -46,16 +47,16 @@ namespace D20Dice.Test.Unit.Dice
         [Test]
         public void Bonus()
         {
-            var roll = dice.d10(bonus: 1);
-            Assert.That(roll, Is.EqualTo(MIN + 1));
+            var roll = dice.d10(bonus: BONUS);
+            Assert.That(roll, Is.EqualTo(MIN + BONUS));
         }
 
         [Test]
         public void QuantityAndBonus()
         {
-            var roll = dice.d10(TWICE, 1);
+            var roll = dice.d10(TWICE, BONUS);
             mockRandom.Verify(r => r.Next(10), Times.Exactly(TWICE));
-            Assert.That(roll, Is.EqualTo(MIN * TWICE + 1));
+            Assert.That(roll, Is.EqualTo(MIN * TWICE + BONUS));
         }
     }
 }

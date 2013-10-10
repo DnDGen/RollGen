@@ -1,21 +1,22 @@
 ﻿using System;
-using D20Dice.RandomWrappers;
+using D20Dice.Dice;
 using NUnit.Framework;
 
-namespace D20Dice.Test.Integration.RandomWrappers
+namespace D20Dice.Test.Integration.Dice
 {
     [TestFixture]
-    public class RandomWrapperTests
+    public class d20Tests
     {
-        private const Int32 POSMAX = 10;
         private const Int32 TESTRUNS = 1000000;
+        private const Int32 MIN = 1;
+        private const Int32 MAX = 20;
 
-        private IRandomWrapper wrapper;
+        private IDice dice;
 
         [SetUp]
         public void Setup()
         {
-            wrapper = new RandomWrapper(new Random());
+            dice = DiceFactory.Create(new Random());
         }
 
         [Test]
@@ -23,9 +24,8 @@ namespace D20Dice.Test.Integration.RandomWrappers
         {
             for (var i = 0; i < TESTRUNS; i++)
             {
-                var result = wrapper.Next(POSMAX);
-                Assert.That(result, Is.LessThan(POSMAX));
-                Assert.That(result, Is.GreaterThanOrEqualTo(0));
+                var result = dice.d20();
+                Assert.That(result, Is.InRange<Int32>(MIN, MAX));
             }
         }
 
@@ -38,11 +38,11 @@ namespace D20Dice.Test.Integration.RandomWrappers
 
             while (!(hitMin && hitMax) && count-- > 0)
             {
-                var result = wrapper.Next(POSMAX);
+                var result = dice.d20();
 
-                if (result == 0)
+                if (result == MIN)
                     hitMin = true;
-                else if (result == POSMAX - 1)
+                else if (result == MAX)
                     hitMax = true;
             }
 

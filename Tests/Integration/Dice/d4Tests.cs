@@ -5,11 +5,11 @@ using NUnit.Framework;
 namespace D20Dice.Test.Integration.Dice
 {
     [TestFixture]
-    public class d3Tests
+    public class d4Tests
     {
         private const Int32 TESTRUNS = 1000000;
         private const Int32 MIN = 1;
-        private const Int32 MAX = 3;
+        private const Int32 MAX = 4;
 
         private IDice dice;
 
@@ -24,9 +24,8 @@ namespace D20Dice.Test.Integration.Dice
         {
             for (var i = 0; i < TESTRUNS; i++)
             {
-                var result = dice.d3();
-                Assert.That(result, Is.LessThanOrEqualTo(MAX));
-                Assert.That(result, Is.GreaterThanOrEqualTo(MIN));
+                var result = dice.d4();
+                Assert.That(result, Is.InRange<Int32>(MIN, MAX));
             }
         }
 
@@ -39,7 +38,7 @@ namespace D20Dice.Test.Integration.Dice
 
             while (!(hitMin && hitMax) && count-- > 0)
             {
-                var result = dice.d3();
+                var result = dice.d4();
 
                 if (result == MIN)
                     hitMin = true;
