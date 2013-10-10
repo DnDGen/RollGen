@@ -7,7 +7,7 @@ namespace D20Dice.Test.Integration.RandomWrappers
     [TestFixture]
     public class RandomWrapperTests
     {
-        private const Int32 POSMAX = 10;
+        private const Int32 MAX = 10;
         private const Int32 TESTRUNS = 1000000;
 
         private IRandomWrapper wrapper;
@@ -23,8 +23,8 @@ namespace D20Dice.Test.Integration.RandomWrappers
         {
             for (var i = 0; i < TESTRUNS; i++)
             {
-                var result = wrapper.Next(POSMAX);
-                Assert.That(result, Is.InRange<Int32>(0, POSMAX));
+                var result = wrapper.Next(MAX);
+                Assert.That(result, Is.InRange<Int32>(0, MAX));
             }
         }
 
@@ -37,12 +37,10 @@ namespace D20Dice.Test.Integration.RandomWrappers
 
             while (!(hitMin && hitMax) && count-- > 0)
             {
-                var result = wrapper.Next(POSMAX);
+                var result = wrapper.Next(MAX);
 
-                if (result == 0)
-                    hitMin = true;
-                else if (result == POSMAX - 1)
-                    hitMax = true;
+                hitMin |= result == 0;
+                hitMax |= result == MAX - 1;
             }
 
             Assert.That(hitMin, Is.True, "Did not hit minimum");
