@@ -72,6 +72,7 @@
     <Compile Include="Unit\d4Tests.cs" />
     <Compile Include="Unit\d2Tests.cs" />
     <Compile Include="Unit\d3Tests.cs" />
+    <Compile Include="Unit\StringParseTests.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
