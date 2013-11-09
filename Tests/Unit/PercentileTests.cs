@@ -1,10 +1,8 @@
-﻿using System;
-using D20Dice.Dice;
-using D20Dice.RandomWrappers;
-using Moq;
+﻿using Moq;
 using NUnit.Framework;
+using System;
 
-namespace D20Dice.Test.Unit.Dice
+namespace D20Dice.Test.Unit
 {
     [TestFixture]
     public class PercentileTests
@@ -13,12 +11,12 @@ namespace D20Dice.Test.Unit.Dice
         private const Int32 TWICE = 2;
 
         private IDice dice;
-        private Mock<IRandomWrapper> mockRandom;
+        private Mock<Random> mockRandom;
 
         [SetUp]
         public void Setup()
         {
-            mockRandom = new Mock<IRandomWrapper>();
+            mockRandom = new Mock<Random>();
             dice = new CoreDice(mockRandom.Object);
         }
 
@@ -41,21 +39,6 @@ namespace D20Dice.Test.Unit.Dice
         {
             dice.Percentile(TWICE);
             mockRandom.Verify(r => r.Next(100), Times.Exactly(TWICE));
-        }
-
-        [Test]
-        public void Bonus()
-        {
-            var roll = dice.Percentile(bonus: 1);
-            Assert.That(roll, Is.EqualTo(MIN + 1));
-        }
-
-        [Test]
-        public void QuantityAndBonus()
-        {
-            var roll = dice.Percentile(TWICE, 1);
-            mockRandom.Verify(r => r.Next(100), Times.Exactly(TWICE));
-            Assert.That(roll, Is.EqualTo(MIN * TWICE + 1));
         }
     }
 }

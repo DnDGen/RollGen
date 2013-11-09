@@ -1,22 +1,21 @@
-﻿using System;
-using D20Dice.Dice;
-using NUnit.Framework;
+﻿using NUnit.Framework;
+using System;
 
-namespace D20Dice.Test.Integration.Dice
+namespace D20Dice.Test.Integration
 {
     [TestFixture]
-    public class d10Tests
+    public class d12Tests
     {
         private const Int32 TESTRUNS = 1000000;
         private const Int32 MIN = 1;
-        private const Int32 MAX = 10;
+        private const Int32 MAX = 12;
 
         private IDice dice;
 
         [SetUp]
         public void Setup()
         {
-            dice = DiceFactory.Create(new Random());
+            dice = DiceFactory.Create();
         }
 
         [Test]
@@ -24,7 +23,7 @@ namespace D20Dice.Test.Integration.Dice
         {
             for (var i = 0; i < TESTRUNS; i++)
             {
-                var result = dice.d10();
+                var result = dice.d12();
                 Assert.That(result, Is.InRange<Int32>(MIN, MAX));
             }
         }
@@ -34,16 +33,13 @@ namespace D20Dice.Test.Integration.Dice
         {
             var hitMin = false;
             var hitMax = false;
-            var count = TESTRUNS;
 
-            while (!(hitMin && hitMax) && count-- > 0)
+            for (var i = 0; i < TESTRUNS; i++)
             {
-                var result = dice.d10();
+                var result = dice.d12();
 
-                if (result == MIN)
-                    hitMin = true;
-                else if (result == MAX)
-                    hitMax = true;
+                hitMin |= result == MIN;
+                hitMax |= result == MAX;
             }
 
             Assert.That(hitMin, Is.True, "Did not hit minimum");

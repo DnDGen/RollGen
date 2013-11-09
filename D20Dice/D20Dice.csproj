@@ -39,12 +39,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Dice\CoreDice.cs" />
-    <Compile Include="Dice\DiceFactory.cs" />
-    <Compile Include="Dice\IDice.cs" />
-    <Compile Include="RandomWrappers\IRandomWrapper.cs" />
-    <Compile Include="RandomWrappers\RandomFactory.cs" />
-    <Compile Include="RandomWrappers\RandomWrapper.cs" />
+    <Compile Include="CoreDice.cs" />
+    <Compile Include="DiceFactory.cs" />
+    <Compile Include="IDice.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -53,26 +53,25 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
-    <Compile Include="Integration\Dice\d2Tests.cs" />
-    <Compile Include="Integration\Dice\d10Tests.cs" />
-    <Compile Include="Integration\Dice\d12Tests.cs" />
-    <Compile Include="Integration\Dice\d20Tests.cs" />
-    <Compile Include="Integration\Dice\PercentileTests.cs" />
-    <Compile Include="Integration\Dice\d8Tests.cs" />
-    <Compile Include="Integration\Dice\d6Tests.cs" />
-    <Compile Include="Integration\Dice\d4Tests.cs" />
-    <Compile Include="Integration\Dice\d3Tests.cs" />
+    <Compile Include="Integration\d2Tests.cs" />
+    <Compile Include="Integration\d10Tests.cs" />
+    <Compile Include="Integration\d12Tests.cs" />
+    <Compile Include="Integration\d20Tests.cs" />
+    <Compile Include="Integration\PercentileTests.cs" />
+    <Compile Include="Integration\d8Tests.cs" />
+    <Compile Include="Integration\d6Tests.cs" />
+    <Compile Include="Integration\d4Tests.cs" />
+    <Compile Include="Integration\d3Tests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Unit\Dice\PercentileTests.cs" />
-    <Compile Include="Unit\Dice\d20Tests.cs" />
-    <Compile Include="Unit\Dice\d12Tests.cs" />
-    <Compile Include="Unit\Dice\d10Tests.cs" />
-    <Compile Include="Unit\Dice\d8Tests.cs" />
-    <Compile Include="Unit\Dice\d6Tests.cs" />
-    <Compile Include="Unit\Dice\d4Tests.cs" />
-    <Compile Include="Unit\Dice\d2Tests.cs" />
-    <Compile Include="Unit\Dice\d3Tests.cs" />
-    <Compile Include="Integration\RandomWrappers\RandomWrapperTests.cs" />
+    <Compile Include="Unit\PercentileTests.cs" />
+    <Compile Include="Unit\d20Tests.cs" />
+    <Compile Include="Unit\d12Tests.cs" />
+    <Compile Include="Unit\d10Tests.cs" />
+    <Compile Include="Unit\d8Tests.cs" />
+    <Compile Include="Unit\d6Tests.cs" />
+    <Compile Include="Unit\d4Tests.cs" />
+    <Compile Include="Unit\d2Tests.cs" />
+    <Compile Include="Unit\d3Tests.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
