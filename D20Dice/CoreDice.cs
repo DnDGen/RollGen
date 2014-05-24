@@ -13,17 +13,12 @@ namespace D20Dice
             this.random = random;
         }
 
-        private Int32 Roll(Int32 die)
-        {
-            return random.Next(die) + 1;
-        }
-
         private Int32 Roll(Int32 quantity, Int32 die)
         {
             var roll = 0;
 
             while (quantity-- > 0)
-                roll += Roll(die);
+                roll += random.Next(die) + 1;
 
             return roll;
         }

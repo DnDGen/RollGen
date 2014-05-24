@@ -1,29 +1,26 @@
 ﻿using NUnit.Framework;
 using System;
+using Ninject;
+using D20Dice.Tests.Integration.Common;
 
 namespace D20Dice.Test.Integration
 {
     [TestFixture]
-    public class PercentileTests
+    public class d6Tests : IntegrationTests
     {
+        [Inject]
+        public IDice Dice { get; set; }
+
         private const Int32 TESTRUNS = 1000000;
         private const Int32 MIN = 1;
-        private const Int32 MAX = 100;
-
-        private IDice dice;
-
-        [SetUp]
-        public void Setup()
-        {
-            dice = DiceFactory.Create();
-        }
+        private const Int32 MAX = 6;
 
         [Test]
         public void InRange()
         {
             for (var i = 0; i < TESTRUNS; i++)
             {
-                var result = dice.Percentile();
+                var result = Dice.d6();
                 Assert.That(result, Is.InRange<Int32>(MIN, MAX));
             }
         }
@@ -36,7 +33,7 @@ namespace D20Dice.Test.Integration
 
             for (var i = 0; i < TESTRUNS; i++)
             {
-                var result = dice.Percentile();
+                var result = Dice.d6();
 
                 hitMin |= result == MIN;
                 hitMax |= result == MAX;

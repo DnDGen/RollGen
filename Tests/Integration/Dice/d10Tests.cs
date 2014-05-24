@@ -1,29 +1,26 @@
-﻿using NUnit.Framework;
-using System;
+﻿using System;
+using D20Dice.Tests.Integration.Common;
+using Ninject;
+using NUnit.Framework;
 
 namespace D20Dice.Test.Integration
 {
     [TestFixture]
-    public class d8Tests
+    public class d10Tests : IntegrationTests
     {
+        [Inject]
+        public IDice Dice { get; set; }
+
         private const Int32 TESTRUNS = 1000000;
         private const Int32 MIN = 1;
-        private const Int32 MAX = 8;
-
-        private IDice dice;
-
-        [SetUp]
-        public void Setup()
-        {
-            dice = DiceFactory.Create();
-        }
+        private const Int32 MAX = 10;
 
         [Test]
         public void InRange()
         {
             for (var i = 0; i < TESTRUNS; i++)
             {
-                var result = dice.d8();
+                var result = Dice.d10();
                 Assert.That(result, Is.InRange<Int32>(MIN, MAX));
             }
         }
@@ -36,7 +33,7 @@ namespace D20Dice.Test.Integration
 
             for (var i = 0; i < TESTRUNS; i++)
             {
-                var result = dice.d8();
+                var result = Dice.d10();
 
                 hitMin |= result == MIN;
                 hitMax |= result == MAX;
