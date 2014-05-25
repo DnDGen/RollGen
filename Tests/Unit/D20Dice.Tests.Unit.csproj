@@ -63,9 +63,8 @@
     <Compile Include="d4Tests.cs" />
     <Compile Include="d2Tests.cs" />
     <Compile Include="d3Tests.cs" />
-    <Compile Include="StringParseTests.cs" />
+    <Compile Include="RollTests.cs" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\..\D20Dice\D20Dice.csproj">
       <Project>{1e946755-aca8-4c4a-8116-82b6e11e5f8a}</Project>

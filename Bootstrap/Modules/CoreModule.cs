@@ -1,4 +1,5 @@
-﻿using Ninject.Modules;
+﻿using System;
+using Ninject.Modules;
 
 namespace D20Dice.Bootstrap.Modules
 {
@@ -6,7 +7,8 @@ namespace D20Dice.Bootstrap.Modules
     {
         public override void Load()
         {
-            Bind<IDice>().To<CoreDice>().InSingletonScope();
+            Bind<Random>().ToSelf().InSingletonScope();
+            Bind<IDice>().To<Dice>();
         }
     }
 }

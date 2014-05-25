@@ -17,7 +17,7 @@ namespace D20Dice.Test.Unit
         public void Setup()
         {
             mockRandom = new Mock<Random>();
-            dice = new CoreDice(mockRandom.Object);
+            dice = new Dice(mockRandom.Object);
         }
 
         [Test]

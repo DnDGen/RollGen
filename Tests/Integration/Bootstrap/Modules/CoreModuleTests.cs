@@ -1,4 +1,5 @@
-﻿using D20Dice.Tests.Integration.Common;
+﻿using System;
+using D20Dice.Tests.Integration.Common;
 using NUnit.Framework;
 
 namespace D20Dice.Tests.Bootstrap.Modules
@@ -7,11 +8,19 @@ namespace D20Dice.Tests.Bootstrap.Modules
     public class CoreModuleTests : IntegrationTests
     {
         [Test]
-        public void DiceAreCreatedAsSingletons()
+        public void DiceAreNotCreatedAsSingletons()
         {
             var dice1 = GetNewInstanceOf<IDice>();
             var dice2 = GetNewInstanceOf<IDice>();
-            Assert.That(dice1, Is.EqualTo(dice2));
+            Assert.That(dice1, Is.Not.EqualTo(dice2));
+        }
+
+        [Test]
+        public void RandomIsCreatedAsSingleton()
+        {
+            var random1 = GetNewInstanceOf<Random>();
+            var random2 = GetNewInstanceOf<Random>();
+            Assert.That(random1, Is.EqualTo(random2));
         }
     }
 }

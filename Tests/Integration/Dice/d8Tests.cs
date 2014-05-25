@@ -1,46 +1,24 @@
-﻿using NUnit.Framework;
-using System;
+﻿using System;
+using System.Collections.Generic;
 using Ninject;
-using D20Dice.Tests.Integration.Common;
+using NUnit.Framework;
 
-namespace D20Dice.Test.Integration
+namespace D20Dice.Tests.Integration.Dice
 {
     [TestFixture]
-    public class d8Tests : IntegrationTests
+    public class d8Tests : ProvidedDiceTests
     {
         [Inject]
         public IDice Dice { get; set; }
 
-        private const Int32 TESTRUNS = 1000000;
-        private const Int32 MIN = 1;
-        private const Int32 MAX = 8;
-
-        [Test]
-        public void InRange()
+        protected override Int32 maximum
         {
-            for (var i = 0; i < TESTRUNS; i++)
-            {
-                var result = Dice.d8();
-                Assert.That(result, Is.InRange<Int32>(MIN, MAX));
-            }
+            get { return 8; }
         }
 
-        [Test]
-        public void HitsMinAndMax()
+        protected override Int32 GetRoll()
         {
-            var hitMin = false;
-            var hitMax = false;
-
-            for (var i = 0; i < TESTRUNS; i++)
-            {
-                var result = Dice.d8();
-
-                hitMin |= result == MIN;
-                hitMax |= result == MAX;
-            }
-
-            Assert.That(hitMin, Is.True, "Did not hit minimum");
-            Assert.That(hitMax, Is.True, "Did not hit maximum");
+            return Dice.d8();
         }
     }
 }
