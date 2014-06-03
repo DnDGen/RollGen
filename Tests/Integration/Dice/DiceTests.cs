@@ -33,7 +33,7 @@ namespace D20Dice.Tests.Integration.Dice
 
         protected Boolean LoopShouldStillRun()
         {
-            return iterations++ < 1000000 && Stopwatch.Elapsed.Seconds < TimeLimitInSeconds;
+            return iterations++ < ConfidentIterations && Stopwatch.Elapsed.Seconds < TimeLimitInSeconds;
         }
     }
 }

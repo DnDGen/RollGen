@@ -1,6 +1,7 @@
 ﻿using System;
+using System.Reflection;
 using System.Text.RegularExpressions;
-using NCalc;
+using Ciloci.Flee;
 
 namespace D20Dice
 {
@@ -10,11 +11,16 @@ namespace D20Dice
 
         private Random random;
         private Regex regex;
+        private ExpressionContext context;
 
         public Dice(Random random)
         {
             this.random = random;
+
             regex = new Regex(DieRollRegexPattern);
+            context = new ExpressionContext(this);
+
+            context.Options.OwnerMemberAccess = BindingFlags.Public | BindingFlags.NonPublic;
         }
 
         private Int32 Roll(Int32 quantity, Int32 die)
@@ -74,30 +80,27 @@ namespace D20Dice
 
         public Int32 Roll(String roll)
         {
-            var matches = regex.Matches(roll);
+            var formattedRoll = ConvertDieRollsToFunctionCalls(roll);
+            var expression = context.CompileDynamic(formattedRoll);
+            var answer = expression.Evaluate();
+
+            return Convert.ToInt32(answer);
+        }
+
+        private String ConvertDieRollsToFunctionCalls(String roll)
+        {
+            var formattedRoll = roll;
+            var matches = regex.Matches(formattedRoll);
 
             foreach (var match in matches)
             {
                 var matchString = Convert.ToString(match);
                 var arguments = matchString.Split('d');
-                var replacement = String.Format("d({0},{1})", arguments[0], arguments[1]);
-                roll = roll.Replace(matchString, replacement);
+                var replacement = String.Format("Roll({0},{1})", arguments[0], arguments[1]);
+                formattedRoll = formattedRoll.Replace(matchString, replacement);
             }
 
-            var expression = new Expression(roll);
-            expression.EvaluateFunction += delegate(String name, FunctionArgs args)
-            {
-                if (name == "d")
-                {
-                    var quantity = Convert.ToInt32(args.Parameters[0].Evaluate());
-                    var die = Convert.ToInt32(args.Parameters[1].Evaluate());
-                    args.Result = Roll(quantity, die);
-                }
-            };
-
-            var answer = expression.Evaluate();
-
-            return Convert.ToInt32(answer);
+            return formattedRoll;
         }
     }
 }

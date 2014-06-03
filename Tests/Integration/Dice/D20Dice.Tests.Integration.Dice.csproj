@@ -30,6 +30,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Ciloci.Flee">
+      <HintPath>..\..\..\packages\Trove.FLEE.0.9.26.0\lib\net20\Ciloci.Flee.dll</HintPath>
+    </Reference>
     <Reference Include="Ninject">
       <HintPath>..\..\..\packages\Ninject.3.2.2.0\lib\net45-full\Ninject.dll</HintPath>
     </Reference>
@@ -54,6 +57,7 @@
     <Compile Include="d6Tests.cs" />
     <Compile Include="d8Tests.cs" />
     <Compile Include="DiceTests.cs" />
+    <Compile Include="MetricsTests.cs" />
     <Compile Include="PercentileTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ProvidedDiceTests.cs" />
