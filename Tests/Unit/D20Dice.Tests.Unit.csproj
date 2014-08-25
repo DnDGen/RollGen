@@ -63,6 +63,7 @@
     <Compile Include="d4Tests.cs" />
     <Compile Include="d2Tests.cs" />
     <Compile Include="d3Tests.cs" />
+    <Compile Include="RollIndexTests.cs" />
     <Compile Include="RollTests.cs" />
   </ItemGroup>
   <ItemGroup>

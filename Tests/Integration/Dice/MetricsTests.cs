@@ -1,4 +1,5 @@
-﻿using Ninject;
+﻿using System;
+using Ninject;
 using NUnit.Framework;
 
 namespace D20Dice.Tests.Integration.Dice
@@ -8,6 +9,8 @@ namespace D20Dice.Tests.Integration.Dice
     {
         [Inject]
         public IDice Dice { get; set; }
+        [Inject]
+        public Random Random { get; set; }
 
         [Test]
         public void d2IterationsTest()
@@ -166,6 +169,22 @@ namespace D20Dice.Tests.Integration.Dice
         public void RollSpeedTest()
         {
             Dice.Roll("1d10*2-1d10/2+12-10");
+            Assert.Pass("Elapsed ticks: {0}", Stopwatch.ElapsedTicks);
+        }
+
+        [Test]
+        public void RollIndexIterationsTest()
+        {
+            while (LoopShouldStillRun())
+                Dice.RollIndex(Random.Next());
+
+            Assert.Pass("Iterations: {0}", iterations);
+        }
+
+        [Test]
+        public void RollIndexSpeedTest()
+        {
+            Dice.RollIndex(Random.Next());
             Assert.Pass("Elapsed ticks: {0}", Stopwatch.ElapsedTicks);
         }
     }

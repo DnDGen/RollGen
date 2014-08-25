@@ -14,5 +14,6 @@ namespace D20Dice
         Int32 d8(Int32 quantity = 1);
         Int32 Percentile(Int32 quantity = 1);
         Int32 Roll(String roll);
+        Int32 RollIndex(Int32 collectionCount);
     }
 }

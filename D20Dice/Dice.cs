@@ -102,5 +102,11 @@ namespace D20Dice
 
             return formattedRoll;
         }
+
+
+        public Int32 RollIndex(Int32 collectionCount)
+        {
+            return Roll(1, collectionCount) - 1;
+        }
     }
 }
