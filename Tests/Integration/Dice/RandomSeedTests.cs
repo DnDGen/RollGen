@@ -29,8 +29,8 @@ namespace D20Dice.Tests.Integration.Dice
         {
             for (var i = 0; i < ConfidentIterations; i++)
             {
-                dice1Rolls.Add(Dice1.Percentile());
-                dice2Rolls.Add(Dice2.Percentile());
+                dice1Rolls.Add(Dice1.Roll().Percentile());
+                dice2Rolls.Add(Dice2.Roll().Percentile());
             }
 
             var different = false;
@@ -44,7 +44,7 @@ namespace D20Dice.Tests.Integration.Dice
         public void RollsAreDifferentBetweenRolls()
         {
             for (var i = 0; i < ConfidentIterations; i++)
-                dice1Rolls.Add(Dice1.Percentile());
+                dice1Rolls.Add(Dice1.Roll().Percentile());
 
             var distinctRolls = dice1Rolls.Distinct();
             Assert.That(distinctRolls.Count(), Is.EqualTo(100));

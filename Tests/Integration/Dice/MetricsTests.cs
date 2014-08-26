@@ -16,7 +16,7 @@ namespace D20Dice.Tests.Integration.Dice
         public void d2IterationsTest()
         {
             while (LoopShouldStillRun())
-                Dice.d2();
+                Dice.Roll().d2();
 
             Assert.Pass("Iterations: {0}", iterations);
         }
@@ -24,7 +24,7 @@ namespace D20Dice.Tests.Integration.Dice
         [Test]
         public void d2SpeedTest()
         {
-            Dice.d2();
+            Dice.Roll().d2();
             Assert.Pass("Elapsed ticks: {0}", Stopwatch.ElapsedTicks);
         }
 
@@ -32,7 +32,7 @@ namespace D20Dice.Tests.Integration.Dice
         public void d3IterationsTest()
         {
             while (LoopShouldStillRun())
-                Dice.d3();
+                Dice.Roll().d3();
 
             Assert.Pass("Iterations: {0}", iterations);
         }
@@ -40,7 +40,7 @@ namespace D20Dice.Tests.Integration.Dice
         [Test]
         public void d3SpeedTest()
         {
-            Dice.d3();
+            Dice.Roll().d3();
             Assert.Pass("Elapsed ticks: {0}", Stopwatch.ElapsedTicks);
         }
 
@@ -48,7 +48,7 @@ namespace D20Dice.Tests.Integration.Dice
         public void d4IterationsTest()
         {
             while (LoopShouldStillRun())
-                Dice.d4();
+                Dice.Roll().d4();
 
             Assert.Pass("Iterations: {0}", iterations);
         }
@@ -56,7 +56,7 @@ namespace D20Dice.Tests.Integration.Dice
         [Test]
         public void d4SpeedTest()
         {
-            Dice.d4();
+            Dice.Roll().d4();
             Assert.Pass("Elapsed ticks: {0}", Stopwatch.ElapsedTicks);
         }
 
@@ -64,7 +64,7 @@ namespace D20Dice.Tests.Integration.Dice
         public void d6IterationsTest()
         {
             while (LoopShouldStillRun())
-                Dice.d6();
+                Dice.Roll().d6();
 
             Assert.Pass("Iterations: {0}", iterations);
         }
@@ -72,7 +72,7 @@ namespace D20Dice.Tests.Integration.Dice
         [Test]
         public void d6SpeedTest()
         {
-            Dice.d6();
+            Dice.Roll().d6();
             Assert.Pass("Elapsed ticks: {0}", Stopwatch.ElapsedTicks);
         }
 
@@ -80,7 +80,7 @@ namespace D20Dice.Tests.Integration.Dice
         public void d8IterationsTest()
         {
             while (LoopShouldStillRun())
-                Dice.d8();
+                Dice.Roll().d8();
 
             Assert.Pass("Iterations: {0}", iterations);
         }
@@ -88,7 +88,7 @@ namespace D20Dice.Tests.Integration.Dice
         [Test]
         public void d8SpeedTest()
         {
-            Dice.d8();
+            Dice.Roll().d8();
             Assert.Pass("Elapsed ticks: {0}", Stopwatch.ElapsedTicks);
         }
 
@@ -96,7 +96,7 @@ namespace D20Dice.Tests.Integration.Dice
         public void d10IterationsTest()
         {
             while (LoopShouldStillRun())
-                Dice.d10();
+                Dice.Roll().d10();
 
             Assert.Pass("Iterations: {0}", iterations);
         }
@@ -104,7 +104,7 @@ namespace D20Dice.Tests.Integration.Dice
         [Test]
         public void d10SpeedTest()
         {
-            Dice.d10();
+            Dice.Roll().d10();
             Assert.Pass("Elapsed ticks: {0}", Stopwatch.ElapsedTicks);
         }
 
@@ -112,7 +112,7 @@ namespace D20Dice.Tests.Integration.Dice
         public void d12IterationsTest()
         {
             while (LoopShouldStillRun())
-                Dice.d12();
+                Dice.Roll().d12();
 
             Assert.Pass("Iterations: {0}", iterations);
         }
@@ -120,7 +120,7 @@ namespace D20Dice.Tests.Integration.Dice
         [Test]
         public void d12SpeedTest()
         {
-            Dice.d12();
+            Dice.Roll().d12();
             Assert.Pass("Elapsed ticks: {0}", Stopwatch.ElapsedTicks);
         }
 
@@ -128,7 +128,7 @@ namespace D20Dice.Tests.Integration.Dice
         public void d20IterationsTest()
         {
             while (LoopShouldStillRun())
-                Dice.d20();
+                Dice.Roll().d20();
 
             Assert.Pass("Iterations: {0}", iterations);
         }
@@ -136,7 +136,7 @@ namespace D20Dice.Tests.Integration.Dice
         [Test]
         public void d20SpeedTest()
         {
-            Dice.d20();
+            Dice.Roll().d20();
             Assert.Pass("Elapsed ticks: {0}", Stopwatch.ElapsedTicks);
         }
 
@@ -144,7 +144,7 @@ namespace D20Dice.Tests.Integration.Dice
         public void PercentileIterationsTest()
         {
             while (LoopShouldStillRun())
-                Dice.Percentile();
+                Dice.Roll().Percentile();
 
             Assert.Pass("Iterations: {0}", iterations);
         }
@@ -152,39 +152,23 @@ namespace D20Dice.Tests.Integration.Dice
         [Test]
         public void PercentileSpeedTest()
         {
-            Dice.Percentile();
+            Dice.Roll().Percentile();
             Assert.Pass("Elapsed ticks: {0}", Stopwatch.ElapsedTicks);
         }
 
         [Test]
-        public void RollIterationsTest()
+        public void dIterationsTest()
         {
             while (LoopShouldStillRun())
-                Dice.Roll("1d10*2-1d10/2+12-10");
+                Dice.Roll().d(Random.Next());
 
             Assert.Pass("Iterations: {0}", iterations);
         }
 
         [Test]
-        public void RollSpeedTest()
+        public void dSpeedTest()
         {
-            Dice.Roll("1d10*2-1d10/2+12-10");
-            Assert.Pass("Elapsed ticks: {0}", Stopwatch.ElapsedTicks);
-        }
-
-        [Test]
-        public void RollIndexIterationsTest()
-        {
-            while (LoopShouldStillRun())
-                Dice.RollIndex(Random.Next());
-
-            Assert.Pass("Iterations: {0}", iterations);
-        }
-
-        [Test]
-        public void RollIndexSpeedTest()
-        {
-            Dice.RollIndex(Random.Next());
+            Dice.Roll().d(Random.Next());
             Assert.Pass("Elapsed ticks: {0}", Stopwatch.ElapsedTicks);
         }
     }

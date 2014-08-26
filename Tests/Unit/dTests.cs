@@ -5,7 +5,7 @@ using NUnit.Framework;
 namespace D20Dice.Test.Unit
 {
     [TestFixture]
-    public class PercentileTests
+    public class dTests
     {
         private Mock<Random> mockRandom;
         private IPartialRoll partialRoll;
@@ -20,9 +20,9 @@ namespace D20Dice.Test.Unit
         public void ReturnRollValue()
         {
             partialRoll = new PartialRoll(1, mockRandom.Object);
-            mockRandom.Setup(r => r.Next(100)).Returns(42);
+            mockRandom.Setup(r => r.Next(9266)).Returns(42);
 
-            var roll = partialRoll.Percentile();
+            var roll = partialRoll.d(9266);
             Assert.That(roll, Is.EqualTo(43));
         }
 
@@ -30,9 +30,9 @@ namespace D20Dice.Test.Unit
         public void RollQuantity()
         {
             partialRoll = new PartialRoll(2, mockRandom.Object);
-            mockRandom.SetupSequence(r => r.Next(100)).Returns(4).Returns(2);
+            mockRandom.SetupSequence(r => r.Next(7)).Returns(4).Returns(2);
 
-            var roll = partialRoll.Percentile();
+            var roll = partialRoll.d(7);
             Assert.That(roll, Is.EqualTo(8));
         }
 
@@ -40,10 +40,10 @@ namespace D20Dice.Test.Unit
         public void AfterRoll_AlwaysReturnZero()
         {
             partialRoll = new PartialRoll(1, mockRandom.Object);
-            mockRandom.Setup(r => r.Next(100)).Returns(42);
+            mockRandom.Setup(r => r.Next(9266)).Returns(42);
 
-            partialRoll.Percentile();
-            var roll = partialRoll.Percentile();
+            partialRoll.d(9266);
+            var roll = partialRoll.d(9266);
             Assert.That(roll, Is.EqualTo(0));
         }
 
@@ -51,10 +51,10 @@ namespace D20Dice.Test.Unit
         public void AfterOtherRoll_AlwaysReturnZero()
         {
             partialRoll = new PartialRoll(1, mockRandom.Object);
-            mockRandom.Setup(r => r.Next(100)).Returns(42);
+            mockRandom.Setup(r => r.Next(9266)).Returns(42);
 
-            partialRoll.d(21);
-            var roll = partialRoll.Percentile();
+            partialRoll.Percentile();
+            var roll = partialRoll.d(9266);
             Assert.That(roll, Is.EqualTo(0));
         }
     }

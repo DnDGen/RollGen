@@ -17,7 +17,7 @@ namespace D20Dice.Tests.Integration.Dice
 
         protected override Int32 GetRoll()
         {
-            return Dice.d10();
+            return Dice.Roll().d10();
         }
     }
 }

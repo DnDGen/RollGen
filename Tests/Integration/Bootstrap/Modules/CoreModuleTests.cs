@@ -22,5 +22,11 @@ namespace D20Dice.Tests.Bootstrap.Modules
             var random2 = GetNewInstanceOf<Random>();
             Assert.That(random1, Is.EqualTo(random2));
         }
+
+        [Test]
+        public void CannotInjectPartialRoll()
+        {
+            Assert.That(() => GetNewInstanceOf<IPartialRoll>(), Throws.Exception);
+        }
     }
 }

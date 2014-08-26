@@ -1,44 +1,61 @@
-﻿using Moq;
+﻿using System;
+using Moq;
 using NUnit.Framework;
-using System;
 
 namespace D20Dice.Test.Unit
 {
     [TestFixture]
     public class d3Tests
     {
-        private const Int32 MIN = 1;
-        private const Int32 TWICE = 2;
-
-        private IDice dice;
         private Mock<Random> mockRandom;
+        private IPartialRoll partialRoll;
 
         [SetUp]
         public void Setup()
         {
             mockRandom = new Mock<Random>();
-            dice = new Dice(mockRandom.Object);
         }
 
         [Test]
-        public void Default()
+        public void ReturnRollValue()
         {
-            dice.d3();
-            mockRandom.Verify(r => r.Next(3), Times.Once());
+            partialRoll = new PartialRoll(1, mockRandom.Object);
+            mockRandom.Setup(r => r.Next(3)).Returns(42);
+
+            var roll = partialRoll.d3();
+            Assert.That(roll, Is.EqualTo(43));
         }
 
         [Test]
-        public void Minimum()
+        public void RollQuantity()
         {
-            var roll = dice.d3();
-            Assert.That(roll, Is.EqualTo(MIN));
+            partialRoll = new PartialRoll(2, mockRandom.Object);
+            mockRandom.SetupSequence(r => r.Next(3)).Returns(4).Returns(2);
+
+            var roll = partialRoll.d3();
+            Assert.That(roll, Is.EqualTo(8));
         }
 
         [Test]
-        public void Quantity()
+        public void AfterRoll_AlwaysReturnZero()
         {
-            dice.d3(TWICE);
-            mockRandom.Verify(r => r.Next(3), Times.Exactly(TWICE));
+            partialRoll = new PartialRoll(1, mockRandom.Object);
+            mockRandom.Setup(r => r.Next(3)).Returns(42);
+
+            partialRoll.d3();
+            var roll = partialRoll.d3();
+            Assert.That(roll, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void AfterOtherRoll_AlwaysReturnZero()
+        {
+            partialRoll = new PartialRoll(1, mockRandom.Object);
+            mockRandom.Setup(r => r.Next(3)).Returns(42);
+
+            partialRoll.d(21);
+            var roll = partialRoll.d3();
+            Assert.That(roll, Is.EqualTo(0));
         }
     }
 }

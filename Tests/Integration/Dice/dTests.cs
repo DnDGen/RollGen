@@ -1,28 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Ninject;
 using NUnit.Framework;
 
 namespace D20Dice.Tests.Integration.Dice
 {
     [TestFixture]
-    public abstract class ProvidedDiceTests : DiceTests
+    public class dTests : DiceTests
     {
-        protected abstract Int32 maximum { get; }
+        [Inject]
+        public IDice Dice { get; set; }
 
-        [Test]
-        public void FullRangeHit()
+        [TestCase(9266)]
+        [TestCase(42)]
+        [TestCase(7)]
+        public void FullRangeHit(Int32 maximum)
         {
             var rolls = new HashSet<Int32>();
             while (LoopShouldStillRun() && rolls.Count < maximum)
-                rolls.Add(GetRoll());
+                rolls.Add(Dice.Roll().d(maximum));
 
             Assert.That(rolls.Min(), Is.EqualTo(1));
             Assert.That(rolls.Max(), Is.EqualTo(maximum));
             Assert.That(rolls.Count, Is.EqualTo(maximum));
             Assert.Pass("Iterations: {0}", iterations);
         }
-
-        protected abstract Int32 GetRoll();
     }
 }
