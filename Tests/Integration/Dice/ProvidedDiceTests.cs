@@ -1,9 +1,9 @@
-﻿using System;
+﻿using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using NUnit.Framework;
 
-namespace D20Dice.Tests.Integration.Dice
+namespace RollGen.Tests.Integration.Dice
 {
     [TestFixture]
     public abstract class ProvidedDiceTests : DiceTests

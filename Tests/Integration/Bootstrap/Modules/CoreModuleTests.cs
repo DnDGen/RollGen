@@ -1,8 +1,8 @@
-﻿using System;
-using D20Dice.Tests.Integration.Common;
-using NUnit.Framework;
+﻿using NUnit.Framework;
+using RollGen.Tests.Integration.Common;
+using System;
 
-namespace D20Dice.Tests.Bootstrap.Modules
+namespace RollGen.Tests.Bootstrap.Modules
 {
     [TestFixture]
     public class CoreModuleTests : IntegrationTests

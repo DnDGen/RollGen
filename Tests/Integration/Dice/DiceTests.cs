@@ -1,10 +1,10 @@
-﻿using System;
-using System.Diagnostics;
-using D20Dice.Tests.Integration.Common;
-using Ninject;
+﻿using Ninject;
 using NUnit.Framework;
+using RollGen.Tests.Integration.Common;
+using System;
+using System.Diagnostics;
 
-namespace D20Dice.Tests.Integration.Dice
+namespace RollGen.Tests.Integration.Dice
 {
     [TestFixture]
     public abstract class DiceTests : IntegrationTests

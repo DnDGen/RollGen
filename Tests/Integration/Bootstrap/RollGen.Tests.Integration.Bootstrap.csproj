@@ -4,13 +4,14 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{41D20EC2-8B21-422F-AAFA-3EBC4CDCF792}</ProjectGuid>
+    <ProjectGuid>{EA914488-C037-458E-BFCE-D679502EF537}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>D20Dice.Tests.Integration.Dice</RootNamespace>
-    <AssemblyName>D20Dice.Tests.Integration.Dice</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <RootNamespace>RollGen.Tests.Integration.Bootstrap</RootNamespace>
+    <AssemblyName>RollGen.Tests.Integration.Bootstrap</AssemblyName>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -46,37 +47,28 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="d10Tests.cs" />
-    <Compile Include="d12Tests.cs" />
-    <Compile Include="d20Tests.cs" />
-    <Compile Include="d2Tests.cs" />
-    <Compile Include="d3Tests.cs" />
-    <Compile Include="d4Tests.cs" />
-    <Compile Include="d6Tests.cs" />
-    <Compile Include="d8Tests.cs" />
-    <Compile Include="DiceTests.cs" />
-    <Compile Include="MetricsTests.cs" />
-    <Compile Include="PercentileTests.cs" />
+    <Compile Include="Modules\CoreModuleTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ProvidedDiceTests.cs" />
-    <Compile Include="RandomSeedTests.cs" />
-    <Compile Include="dTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Bootstrap\D20Dice.Bootstrap.csproj">
+    <ProjectReference Include="..\..\..\Bootstrap\RollGen.Bootstrap.csproj">
       <Project>{92ccbdba-6f70-49d6-bf06-e49f47f7fb13}</Project>
-      <Name>D20Dice.Bootstrap</Name>
+      <Name>RollGen.Bootstrap</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Common\D20Dice.Tests.Integration.Common.csproj">
-      <Project>{50a4ca5a-8f54-4261-b742-0f8537c253a8}</Project>
-      <Name>D20Dice.Tests.Integration.Common</Name>
+    <ProjectReference Include="..\..\..\Domain\RollGen.Domain.csproj">
+      <Project>{a04a2392-a66d-4fee-a931-4a17991af64c}</Project>
+      <Name>RollGen.Domain</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\D20Dice\D20Dice.csproj">
+    <ProjectReference Include="..\..\..\RollGen\RollGen.csproj">
       <Project>{1e946755-aca8-4c4a-8116-82b6e11e5f8a}</Project>
-      <Name>D20Dice</Name>
+      <Name>RollGen</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Common\RollGen.Tests.Integration.Common.csproj">
+      <Project>{50A4CA5A-8F54-4261-B742-0F8537C253A8}</Project>
+      <Name>RollGen.Tests.Integration.Common</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using Ninject;
+﻿using Ninject;
 using NUnit.Framework;
+using System;
 
-namespace D20Dice.Tests.Integration.Dice
+namespace RollGen.Tests.Integration.Dice
 {
     [TestFixture]
     public class d8Tests : ProvidedDiceTests

@@ -1,10 +1,10 @@
 ﻿using System;
 
-namespace D20Dice
+namespace RollGen.Domain
 {
     public class Dice : IDice
     {
-        private Random random;
+        private readonly Random random;
 
         public Dice(Random random)
         {

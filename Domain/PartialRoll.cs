@@ -1,11 +1,11 @@
 ﻿using System;
 
-namespace D20Dice
+namespace RollGen.Domain
 {
     public class PartialRoll : IPartialRoll
     {
         private Int32 quantity;
-        private Random random;
+        private readonly Random random;
 
         public PartialRoll(Int32 quantity, Random random)
         {

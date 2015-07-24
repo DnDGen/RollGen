@@ -1,8 +1,8 @@
-﻿using D20Dice.Bootstrap;
-using Ninject;
+﻿using Ninject;
 using NUnit.Framework;
+using RollGen.Bootstrap;
 
-namespace D20Dice.Tests.Integration.Common
+namespace RollGen.Tests.Integration.Common
 {
     [TestFixture]
     public abstract class IntegrationTests
@@ -13,8 +13,8 @@ namespace D20Dice.Tests.Integration.Common
         {
             kernel = new StandardKernel();
 
-            var d20DiceModuleLoader = new D20DiceModuleLoader();
-            d20DiceModuleLoader.LoadModules(kernel);
+            var rollGenModuleLoader = new RollGenModuleLoader();
+            rollGenModuleLoader.LoadModules(kernel);
 
             kernel.Inject(this);
         }

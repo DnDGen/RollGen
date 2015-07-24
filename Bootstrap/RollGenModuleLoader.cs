@@ -1,9 +1,9 @@
-﻿using D20Dice.Bootstrap.Modules;
-using Ninject;
+﻿using Ninject;
+using RollGen.Bootstrap.Modules;
 
-namespace D20Dice.Bootstrap
+namespace RollGen.Bootstrap
 {
-    public class D20DiceModuleLoader
+    public class RollGenModuleLoader
     {
         public void LoadModules(IKernel kernel)
         {

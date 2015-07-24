@@ -1,8 +1,9 @@
-﻿using System;
-using Moq;
+﻿using Moq;
 using NUnit.Framework;
+using RollGen.Domain;
+using System;
 
-namespace D20Dice.Test.Unit
+namespace RollGen.Test.Unit
 {
     [TestFixture]
     public class d20Tests

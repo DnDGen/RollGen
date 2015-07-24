@@ -1,7 +1,8 @@
-﻿using System;
-using Ninject.Modules;
+﻿using Ninject.Modules;
+using RollGen.Domain;
+using System;
 
-namespace D20Dice.Bootstrap.Modules
+namespace RollGen.Bootstrap.Modules
 {
     public class CoreModule : NinjectModule
     {

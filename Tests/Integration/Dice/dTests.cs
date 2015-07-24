@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Ninject;
+using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Ninject;
-using NUnit.Framework;
 
-namespace D20Dice.Tests.Integration.Dice
+namespace RollGen.Tests.Integration.Dice
 {
     [TestFixture]
     public class dTests : DiceTests

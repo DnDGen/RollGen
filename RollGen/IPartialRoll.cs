@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace D20Dice
+namespace RollGen
 {
     public interface IPartialRoll
     {
