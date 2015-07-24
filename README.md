@@ -1,4 +1,4 @@
-D20-Dice
+RollGen
 ========
 
 Rolls a set of dice, as determined by the D20 die system.
