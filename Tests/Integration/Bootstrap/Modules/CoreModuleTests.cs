@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using Ninject;
+using NUnit.Framework;
 using RollGen.Tests.Integration.Common;
 using System;
 
@@ -10,8 +11,8 @@ namespace RollGen.Tests.Bootstrap.Modules
         [Test]
         public void DiceAreNotCreatedAsSingletons()
         {
-            var dice1 = GetNewInstanceOf<IDice>();
-            var dice2 = GetNewInstanceOf<IDice>();
+            var dice1 = GetNewInstanceOf<Dice>();
+            var dice2 = GetNewInstanceOf<Dice>();
             Assert.That(dice1, Is.Not.EqualTo(dice2));
         }
 
@@ -26,7 +27,7 @@ namespace RollGen.Tests.Bootstrap.Modules
         [Test]
         public void CannotInjectPartialRoll()
         {
-            Assert.That(() => GetNewInstanceOf<IPartialRoll>(), Throws.Exception);
+            Assert.That(() => GetNewInstanceOf<PartialRoll>(), Throws.InstanceOf<ActivationException>());
         }
     }
 }

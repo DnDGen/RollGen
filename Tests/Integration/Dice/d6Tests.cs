@@ -2,13 +2,13 @@
 using NUnit.Framework;
 using System;
 
-namespace RollGen.Tests.Integration.Dice
+namespace RollGen.Tests.Integration.Rolls
 {
     [TestFixture]
     public class d6Tests : ProvidedDiceTests
     {
         [Inject]
-        public IDice Dice { get; set; }
+        public Dice Dice { get; set; }
 
         protected override Int32 maximum
         {

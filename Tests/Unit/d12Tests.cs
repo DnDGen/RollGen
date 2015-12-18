@@ -9,7 +9,7 @@ namespace RollGen.Test.Unit
     public class d12Tests
     {
         private Mock<Random> mockRandom;
-        private IPartialRoll partialRoll;
+        private PartialRoll partialRoll;
 
         [SetUp]
         public void Setup()
@@ -20,7 +20,7 @@ namespace RollGen.Test.Unit
         [Test]
         public void ReturnRollValue()
         {
-            partialRoll = new PartialRoll(1, mockRandom.Object);
+            partialRoll = new RandomPartialRoll(1, mockRandom.Object);
             mockRandom.Setup(r => r.Next(12)).Returns(42);
 
             var roll = partialRoll.d12();
@@ -30,7 +30,7 @@ namespace RollGen.Test.Unit
         [Test]
         public void RollQuantity()
         {
-            partialRoll = new PartialRoll(2, mockRandom.Object);
+            partialRoll = new RandomPartialRoll(2, mockRandom.Object);
             mockRandom.SetupSequence(r => r.Next(12)).Returns(4).Returns(2);
 
             var roll = partialRoll.d12();
@@ -40,7 +40,7 @@ namespace RollGen.Test.Unit
         [Test]
         public void AfterRoll_AlwaysReturnZero()
         {
-            partialRoll = new PartialRoll(1, mockRandom.Object);
+            partialRoll = new RandomPartialRoll(1, mockRandom.Object);
             mockRandom.Setup(r => r.Next(12)).Returns(42);
 
             partialRoll.d12();
@@ -51,7 +51,7 @@ namespace RollGen.Test.Unit
         [Test]
         public void AfterOtherRoll_AlwaysReturnZero()
         {
-            partialRoll = new PartialRoll(1, mockRandom.Object);
+            partialRoll = new RandomPartialRoll(1, mockRandom.Object);
             mockRandom.Setup(r => r.Next(12)).Returns(42);
 
             partialRoll.d(21);

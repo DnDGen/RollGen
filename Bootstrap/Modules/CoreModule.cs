@@ -9,7 +9,7 @@ namespace RollGen.Bootstrap.Modules
         public override void Load()
         {
             Bind<Random>().ToSelf().InSingletonScope();
-            Bind<IDice>().To<Dice>();
+            Bind<Dice>().To<RandomDice>();
         }
     }
 }

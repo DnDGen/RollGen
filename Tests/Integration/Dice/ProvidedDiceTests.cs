@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace RollGen.Tests.Integration.Dice
+namespace RollGen.Tests.Integration.Rolls
 {
     [TestFixture]
     public abstract class ProvidedDiceTests : DiceTests

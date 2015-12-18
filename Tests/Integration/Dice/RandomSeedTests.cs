@@ -4,15 +4,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace RollGen.Tests.Integration.Dice
+namespace RollGen.Tests.Integration.Rolls
 {
     [TestFixture]
     public class RandomSeedTests : DiceTests
     {
         [Inject]
-        public IDice Dice1 { get; set; }
+        public Dice Dice1 { get; set; }
         [Inject]
-        public IDice Dice2 { get; set; }
+        public Dice Dice2 { get; set; }
 
         private List<Int32> dice1Rolls;
         private List<Int32> dice2Rolls;

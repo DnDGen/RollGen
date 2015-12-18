@@ -4,7 +4,7 @@ using RollGen.Tests.Integration.Common;
 using System;
 using System.Diagnostics;
 
-namespace RollGen.Tests.Integration.Dice
+namespace RollGen.Tests.Integration.Rolls
 {
     [TestFixture]
     public abstract class DiceTests : IntegrationTests

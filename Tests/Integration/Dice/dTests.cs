@@ -4,13 +4,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace RollGen.Tests.Integration.Dice
+namespace RollGen.Tests.Integration.Rolls
 {
     [TestFixture]
     public class dTests : DiceTests
     {
         [Inject]
-        public IDice Dice { get; set; }
+        public Dice Dice { get; set; }
 
         [TestCase(9266)]
         [TestCase(42)]
