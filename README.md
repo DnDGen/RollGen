@@ -37,7 +37,9 @@ You can obtain a `Dice` object in one of 2 ways:
    **Important** If you are newing up dice objects multiple times, the seed for the `Random` class that you use will potentially be the same, and will not produce random results.  The Ninject bootstrapper has taken this into account and helps ensure random seeds for the `Random` object - which is why it is the recommended way to build your `Dice` object.
 
 ###Installing RollGen
-Install via the NuGet Package Manager.
+The project is on [Nuget](https://www.nuget.org/packages/D20Dice). Install via the NuGet Package Manager.
+
+PM > Install-Package D20Dice
 
 #### There's RollGen and RollGen.Bootstrap - which do I install?
 That depends on your project.  If you are making a library that will only **reference** RollGen, but does not expressly implement it (such as the TreasureGen project), then you only need the RollGen package.  If you actually want to run and implement the dice (such as on the DnDGenSite or in the tests for TreasureGen), then you need RollGen.Bootstrap, which will install RollGen as a dependency.
