@@ -44,7 +44,7 @@ You can obtain a `Dice` object in one of 2 ways:
 
 The project is on [Nuget](https://www.nuget.org/packages/D20Dice). Install via the NuGet Package Manager.
 
-PM > Install-Package D20Dice
+    PM > Install-Package D20Dice
 
 #### There's RollGen and RollGen.Bootstrap - which do I install?
 
