@@ -16,12 +16,12 @@ namespace RollGen.Domain
             rollRegex = new Regex("\\d+d\\d+");
         }
 
-        public PartialRoll Roll(int quantity = 1)
+        public override PartialRoll Roll(int quantity = 1)
         {
             return new RandomPartialRoll(quantity, random);
         }
 
-        public int Roll(string roll)
+        public override string RolledString(string roll)
         {
             var matches = rollRegex.Matches(roll);
 
@@ -30,10 +30,10 @@ namespace RollGen.Domain
                 var result = GetRoll(match.ToString());
                 roll = roll.Replace(match.ToString(), result.ToString());
             }
-
-            var rawValue = Parser.GetParser().Compile(roll).EvalValue(null);
-            return Convert.ToInt32(rawValue);
+            return roll;
         }
+
+        public override int Compiled(string rolled) => Convert.ToInt32(Parser.GetParser().Compile(rolled).EvalValue(null));
 
         private int GetRoll(string roll)
         {

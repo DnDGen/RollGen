@@ -1,8 +1,10 @@
 ﻿namespace RollGen
 {
-    public interface Dice
+    public abstract class Dice
     {
-        PartialRoll Roll(int quantity = 1);
-        int Roll(string roll);
+        public abstract PartialRoll Roll(int quantity = 1);
+        public abstract string RolledString(string roll);
+        public abstract int Compiled(string rolled);
+        public int Roll(string roll) => Compiled(RolledString(roll));
     }
 }
