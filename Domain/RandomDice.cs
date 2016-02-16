@@ -33,7 +33,7 @@ namespace RollGen.Domain
             return roll;
         }
 
-        public override int Compiled(string rolled) => Convert.ToInt32(Parser.GetParser().Compile(rolled).EvalValue(null));
+        public override object CompiledObj(string rolled) => Parser.GetParser().Compile(rolled).EvalValue(null);
 
         private int GetRoll(string roll)
         {
