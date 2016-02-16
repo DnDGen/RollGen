@@ -1,5 +1,6 @@
 ﻿using Albatross.Expression;
 using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 namespace RollGen.Domain
@@ -13,7 +14,7 @@ namespace RollGen.Domain
         {
             this.random = random;
 
-            rollRegex = new Regex("\\d+d\\d+");
+            rollRegex = new Regex("\\d* *d *\\d+");
         }
 
         public override PartialRoll Roll(int quantity = 1)
@@ -27,21 +28,21 @@ namespace RollGen.Domain
 
             foreach (var match in matches)
             {
-                var result = GetRoll(match.ToString());
-                roll = roll.Replace(match.ToString(), result.ToString());
+                roll = roll.Replace(match.ToString(), $"({string.Join(" + ", GetRoll(match.ToString()))})");
             }
             return roll;
         }
 
         public override object CompiledObj(string rolled) => Parser.GetParser().Compile(rolled).EvalValue(null);
 
-        private int GetRoll(string roll)
+        private IEnumerable<int> GetRoll(string roll)
         {
             var sections = roll.Split('d');
-            var quantity = Convert.ToInt32(sections[0]);
-            var die = Convert.ToInt32(sections[1]);
+            var quantity_string = sections[0].Trim();
+            var quantity = quantity_string.Length == 0 ? 1 : Convert.ToInt32(quantity_string);
+            var die = Convert.ToInt32(sections[1].Trim());
 
-            return Roll(quantity).d(die);
+            return Roll(quantity).multi_d(die);
         }
     }
 }

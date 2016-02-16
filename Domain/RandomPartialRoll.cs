@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace RollGen.Domain
 {
@@ -13,14 +14,10 @@ namespace RollGen.Domain
             this.random = random;
         }
 
-        public int d(int die)
+        public override IEnumerable<int> multi_d(int die)
         {
-            var roll = 0;
-
             while (quantity-- > 0)
-                roll += random.Next(die) + 1;
-
-            return roll;
+                yield return random.Next(die) + 1;
         }
     }
 }
