@@ -28,7 +28,9 @@ namespace RollGen.Domain
 
             foreach (var match in matches)
             {
-                roll = roll.Replace(match.ToString(), $"({string.Join(" + ", GetRoll(match.ToString()))})");
+                var m = match.ToString();
+                int i = roll.IndexOf(m);
+                roll = $"{roll.Substring(0, i)}({string.Join(" + ", GetRoll(m))}){roll.Substring(i+m.Length)}";
             }
             return roll;
         }
