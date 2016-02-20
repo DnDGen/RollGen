@@ -67,6 +67,26 @@ namespace RollGen.Test.Unit
         }
 
         [Test]
+        public void RollFromStringSpaces()
+        {
+            var count = 0;
+            mockRandom.Setup(r => r.Next(90210)).Returns(() => count++);
+
+            var roll = dice.Roll("  9266    d  90210   ");
+            Assert.That(roll, Is.EqualTo(42934011));
+            mockRandom.Verify(r => r.Next(90210), Times.Exactly(9266));
+        }
+
+        [Test]
+        public void RollFromStringNoQuantity()
+        {
+            mockRandom.Setup(r => r.Next(90210)).Returns(629);
+
+            Assert.That(dice.Roll("d90210"), Is.EqualTo(dice.Roll("1d90210")));
+            mockRandom.Verify(r => r.Next(90210), Times.Exactly(2));
+        }
+
+        [Test]
         public void RollFromStringWithBonus()
         {
             var count = 0;
