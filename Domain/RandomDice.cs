@@ -40,9 +40,9 @@ namespace RollGen.Domain
         private IEnumerable<int> GetRoll(string roll)
         {
             var sections = roll.Split('d');
-            var quantity_string = sections[0].Trim();
+            var quantity_string = sections[0];
             var quantity = quantity_string.Length == 0 ? 1 : Convert.ToInt32(quantity_string);
-            var die = Convert.ToInt32(sections[1].Trim());
+            var die = Convert.ToInt32(sections[1]);
 
             return Roll(quantity).multi_d(die);
         }
