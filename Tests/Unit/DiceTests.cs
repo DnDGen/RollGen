@@ -100,5 +100,16 @@ namespace RollGen.Test.Unit
             mockRandom.Verify(r => r.Next(90210), Times.Exactly(9266));
             mockRandom.Verify(r => r.Next(600), Times.Exactly(42));
         }
+
+        [Test]
+        public void RollMultipleSameRollString()
+        {
+            var count = 0;
+            mockRandom.Setup(r => r.Next(629)).Returns(() => count++);
+
+            var roll = dice.RolledString("7d629%7d629").Split('%');
+            Assert.That(!roll[0].Equals(roll[1]));
+            mockRandom.Verify(r => r.Next(629), Times.Exactly(14));
+        }
     }
 }
