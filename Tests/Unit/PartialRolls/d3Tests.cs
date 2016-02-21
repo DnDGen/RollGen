@@ -3,7 +3,7 @@ using NUnit.Framework;
 using RollGen.Domain;
 using System;
 
-namespace RollGen.Test.Unit
+namespace RollGen.Test.Unit.PartialRolls
 {
     [TestFixture]
     public class d3Tests

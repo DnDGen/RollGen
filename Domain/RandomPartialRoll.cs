@@ -14,7 +14,7 @@ namespace RollGen.Domain
             this.random = random;
         }
 
-        public override IEnumerable<int> multi_d(int die)
+        public override IEnumerable<int> IndividualRolls(int die)
         {
             while (quantity-- > 0)
                 yield return random.Next(die) + 1;

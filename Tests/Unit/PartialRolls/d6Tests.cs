@@ -3,10 +3,10 @@ using NUnit.Framework;
 using RollGen.Domain;
 using System;
 
-namespace RollGen.Test.Unit
+namespace RollGen.Test.Unit.PartialRolls
 {
     [TestFixture]
-    public class d12Tests
+    public class d6Tests
     {
         private Mock<Random> mockRandom;
         private PartialRoll partialRoll;
@@ -21,9 +21,9 @@ namespace RollGen.Test.Unit
         public void ReturnRollValue()
         {
             partialRoll = new RandomPartialRoll(1, mockRandom.Object);
-            mockRandom.Setup(r => r.Next(12)).Returns(42);
+            mockRandom.Setup(r => r.Next(6)).Returns(42);
 
-            var roll = partialRoll.d12();
+            var roll = partialRoll.d6();
             Assert.That(roll, Is.EqualTo(43));
         }
 
@@ -31,9 +31,9 @@ namespace RollGen.Test.Unit
         public void RollQuantity()
         {
             partialRoll = new RandomPartialRoll(2, mockRandom.Object);
-            mockRandom.SetupSequence(r => r.Next(12)).Returns(4).Returns(2);
+            mockRandom.SetupSequence(r => r.Next(6)).Returns(4).Returns(2);
 
-            var roll = partialRoll.d12();
+            var roll = partialRoll.d6();
             Assert.That(roll, Is.EqualTo(8));
         }
 
@@ -41,10 +41,10 @@ namespace RollGen.Test.Unit
         public void AfterRoll_AlwaysReturnZero()
         {
             partialRoll = new RandomPartialRoll(1, mockRandom.Object);
-            mockRandom.Setup(r => r.Next(12)).Returns(42);
+            mockRandom.Setup(r => r.Next(6)).Returns(42);
 
-            partialRoll.d12();
-            var roll = partialRoll.d12();
+            partialRoll.d6();
+            var roll = partialRoll.d6();
             Assert.That(roll, Is.EqualTo(0));
         }
 
@@ -52,10 +52,10 @@ namespace RollGen.Test.Unit
         public void AfterOtherRoll_AlwaysReturnZero()
         {
             partialRoll = new RandomPartialRoll(1, mockRandom.Object);
-            mockRandom.Setup(r => r.Next(12)).Returns(42);
+            mockRandom.Setup(r => r.Next(6)).Returns(42);
 
             partialRoll.d(21);
-            var roll = partialRoll.d12();
+            var roll = partialRoll.d6();
             Assert.That(roll, Is.EqualTo(0));
         }
     }

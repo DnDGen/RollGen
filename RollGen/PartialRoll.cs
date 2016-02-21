@@ -14,7 +14,7 @@ namespace RollGen
         public int d12() => d(12);
         public int d20() => d(20);
         public int Percentile() => d(100);
-        public int d(int die) => multi_d(die).Sum();
-        public abstract IEnumerable<int> multi_d(int die);
+        public int d(int die) => IndividualRolls(die).Sum();
+        public abstract IEnumerable<int> IndividualRolls(int die);
     }
 }

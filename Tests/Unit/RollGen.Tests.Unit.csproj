@@ -56,17 +56,18 @@
   </Choose>
   <ItemGroup>
     <Compile Include="DiceTests.cs" />
+    <Compile Include="PartialRolls\IndividualRollsTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PercentileTests.cs" />
-    <Compile Include="d20Tests.cs" />
-    <Compile Include="d12Tests.cs" />
-    <Compile Include="d10Tests.cs" />
-    <Compile Include="d8Tests.cs" />
-    <Compile Include="d6Tests.cs" />
-    <Compile Include="d4Tests.cs" />
-    <Compile Include="d2Tests.cs" />
-    <Compile Include="d3Tests.cs" />
-    <Compile Include="dTests.cs" />
+    <Compile Include="PartialRolls\PercentileTests.cs" />
+    <Compile Include="PartialRolls\d20Tests.cs" />
+    <Compile Include="PartialRolls\d12Tests.cs" />
+    <Compile Include="PartialRolls\d10Tests.cs" />
+    <Compile Include="PartialRolls\d8Tests.cs" />
+    <Compile Include="PartialRolls\d6Tests.cs" />
+    <Compile Include="PartialRolls\d4Tests.cs" />
+    <Compile Include="PartialRolls\d2Tests.cs" />
+    <Compile Include="PartialRolls\d3Tests.cs" />
+    <Compile Include="PartialRolls\dTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Domain\RollGen.Domain.csproj">

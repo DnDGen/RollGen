@@ -1,6 +1,5 @@
 ﻿using Ninject;
 using NUnit.Framework;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -14,14 +13,14 @@ namespace RollGen.Tests.Integration.Rolls
         [Inject]
         public Dice Dice2 { get; set; }
 
-        private List<Int32> dice1Rolls;
-        private List<Int32> dice2Rolls;
+        private List<int> dice1Rolls;
+        private List<int> dice2Rolls;
 
         [SetUp]
         public void Setup()
         {
-            dice1Rolls = new List<Int32>();
-            dice2Rolls = new List<Int32>();
+            dice1Rolls = new List<int>();
+            dice2Rolls = new List<int>();
         }
 
         [Test]

@@ -22,29 +22,39 @@ namespace RollGen.Domain
             return new RandomPartialRoll(quantity, random);
         }
 
-        public override string RolledString(string roll)
+        public override string RollString(string roll)
         {
             var matches = rollRegex.Matches(roll);
 
             foreach (var match in matches)
             {
-                var m = match.ToString();
-                int i = roll.IndexOf(m);
-                roll = $"{roll.Substring(0, i)}({string.Join(" + ", GetRoll(m))}){roll.Substring(i+m.Length)}";
+                var matchValue = match.ToString();
+                var matchIndex = roll.IndexOf(matchValue);
+
+                var rolls = GetIndividualRolls(matchValue);
+                var sumOfRolls = string.Join(" + ", rolls);
+                var sumOfRollsInParantheses = string.Format("({0})", sumOfRolls);
+
+                roll = roll.Remove(matchIndex, matchValue.Length);
+                roll = roll.Insert(matchIndex, sumOfRollsInParantheses);
             }
+
             return roll;
         }
 
-        public override object CompiledObj(string rolled) => Parser.GetParser().Compile(rolled).EvalValue(null);
+        public override object CompileRaw(string rolled) => Parser.GetParser().Compile(rolled).EvalValue(null);
 
-        private IEnumerable<int> GetRoll(string roll)
+        private IEnumerable<int> GetIndividualRolls(string roll)
         {
             var sections = roll.Split('d');
-            var quantity_string = sections[0];
-            var quantity = quantity_string.Length == 0 ? 1 : Convert.ToInt32(quantity_string);
+            var quantity = 1;
+
+            if (string.IsNullOrEmpty(sections[0]) == false)
+                quantity = Convert.ToInt32(sections[0]);
+
             var die = Convert.ToInt32(sections[1]);
 
-            return Roll(quantity).multi_d(die);
+            return Roll(quantity).IndividualRolls(die);
         }
     }
 }

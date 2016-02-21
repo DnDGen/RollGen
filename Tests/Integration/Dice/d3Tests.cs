@@ -1,6 +1,5 @@
 ﻿using Ninject;
 using NUnit.Framework;
-using System;
 
 namespace RollGen.Tests.Integration.Rolls
 {
@@ -10,12 +9,12 @@ namespace RollGen.Tests.Integration.Rolls
         [Inject]
         public Dice Dice { get; set; }
 
-        protected override Int32 maximum
+        protected override int maximum
         {
             get { return 3; }
         }
 
-        protected override Int32 GetRoll()
+        protected override int GetRoll()
         {
             return Dice.Roll().d3();
         }

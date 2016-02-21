@@ -2,11 +2,12 @@
 using NUnit.Framework;
 using RollGen.Domain;
 using System;
+using System.Linq;
 
-namespace RollGen.Test.Unit
+namespace RollGen.Test.Unit.PartialRolls
 {
     [TestFixture]
-    public class dTests
+    public class IndividualRollsTests
     {
         private Mock<Random> mockRandom;
         private PartialRoll partialRoll;
@@ -18,13 +19,14 @@ namespace RollGen.Test.Unit
         }
 
         [Test]
-        public void ReturnRollValue()
+        public void ReturnRollValues()
         {
             partialRoll = new RandomPartialRoll(1, mockRandom.Object);
             mockRandom.Setup(r => r.Next(9266)).Returns(42);
 
-            var roll = partialRoll.d(9266);
-            Assert.That(roll, Is.EqualTo(43));
+            var rolls = partialRoll.IndividualRolls(9266).ToList();
+            Assert.That(rolls, Contains.Item(43));
+            Assert.That(rolls.Count, Is.EqualTo(1));
         }
 
         [Test]
@@ -33,30 +35,34 @@ namespace RollGen.Test.Unit
             partialRoll = new RandomPartialRoll(2, mockRandom.Object);
             mockRandom.SetupSequence(r => r.Next(7)).Returns(4).Returns(2);
 
-            var roll = partialRoll.d(7);
-            Assert.That(roll, Is.EqualTo(8));
+            var rolls = partialRoll.IndividualRolls(7).ToList();
+            Assert.That(rolls, Contains.Item(5));
+            Assert.That(rolls, Contains.Item(3));
+            Assert.That(rolls.Count, Is.EqualTo(2));
         }
 
         [Test]
-        public void AfterRoll_AlwaysReturnZero()
+        public void AfterRoll_AlwaysReturnNothing()
         {
             partialRoll = new RandomPartialRoll(1, mockRandom.Object);
             mockRandom.Setup(r => r.Next(9266)).Returns(42);
 
             partialRoll.d(9266);
-            var roll = partialRoll.d(9266);
-            Assert.That(roll, Is.EqualTo(0));
+
+            var rolls = partialRoll.IndividualRolls(9266);
+            Assert.That(rolls, Is.Empty);
         }
 
         [Test]
-        public void AfterOtherRoll_AlwaysReturnZero()
+        public void AfterOtherRoll_AlwaysReturnNothing()
         {
             partialRoll = new RandomPartialRoll(1, mockRandom.Object);
             mockRandom.Setup(r => r.Next(9266)).Returns(42);
 
             partialRoll.Percentile();
-            var roll = partialRoll.d(9266);
-            Assert.That(roll, Is.EqualTo(0));
+
+            var rolls = partialRoll.IndividualRolls(9266);
+            Assert.That(rolls, Is.Empty);
         }
     }
 }
