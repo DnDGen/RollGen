@@ -17,7 +17,7 @@ namespace RollGen.Tests.Integration.Rolls
         public void FullRangeHit(int maximum)
         {
             var rolls = new HashSet<int>();
-            while (LoopShouldStillRun() && rolls.Count < maximum)
+            while (LoopShouldKeepRunning() && rolls.Count < maximum)
                 rolls.Add(Dice.Roll().d(maximum));
 
             Assert.That(rolls.Min(), Is.EqualTo(1));

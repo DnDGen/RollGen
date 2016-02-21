@@ -26,14 +26,14 @@ namespace RollGen.Tests.Integration.Rolls
         [Test]
         public void RollsAreDifferentBetweenDice()
         {
-            for (var i = 0; i < ConfidentIterations; i++)
+            for (var i = 0; i < ConfidenceIterations; i++)
             {
                 dice1Rolls.Add(Dice1.Roll().Percentile());
                 dice2Rolls.Add(Dice2.Roll().Percentile());
             }
 
             var different = false;
-            for (var i = 0; i < ConfidentIterations; i++)
+            for (var i = 0; i < ConfidenceIterations; i++)
                 different |= dice1Rolls[i] != dice2Rolls[i];
 
             Assert.That(different, Is.True);
@@ -42,7 +42,7 @@ namespace RollGen.Tests.Integration.Rolls
         [Test]
         public void RollsAreDifferentBetweenRolls()
         {
-            for (var i = 0; i < ConfidentIterations; i++)
+            for (var i = 0; i < ConfidenceIterations; i++)
                 dice1Rolls.Add(Dice1.Roll().Percentile());
 
             var distinctRolls = dice1Rolls.Distinct();

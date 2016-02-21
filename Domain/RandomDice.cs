@@ -1,20 +1,15 @@
 ﻿using Albatross.Expression;
 using System;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
 
 namespace RollGen.Domain
 {
     public class RandomDice : Dice
     {
         private readonly Random random;
-        private Regex rollRegex;
 
         public RandomDice(Random random)
         {
             this.random = random;
-
-            rollRegex = new Regex("\\d* *d *\\d+");
         }
 
         public override PartialRoll Roll(int quantity = 1)
@@ -22,39 +17,17 @@ namespace RollGen.Domain
             return new RandomPartialRoll(quantity, random);
         }
 
-        public override string RollString(string roll)
+        public override object Compute(string rolled)
         {
-            var matches = rollRegex.Matches(roll);
+            var unrolledDieRolls = rollRegex.Matches(rolled);
 
-            foreach (var match in matches)
+            if (unrolledDieRolls.Count > 0)
             {
-                var matchValue = match.ToString();
-                var matchIndex = roll.IndexOf(matchValue);
-
-                var rolls = GetIndividualRolls(matchValue);
-                var sumOfRolls = string.Join(" + ", rolls);
-                var sumOfRollsInParantheses = string.Format("({0})", sumOfRolls);
-
-                roll = roll.Remove(matchIndex, matchValue.Length);
-                roll = roll.Insert(matchIndex, sumOfRollsInParantheses);
+                var message = string.Format("Cannot compute unrolled die roll {0}", unrolledDieRolls[0]);
+                throw new ArgumentException(message);
             }
 
-            return roll;
-        }
-
-        public override object CompileRaw(string rolled) => Parser.GetParser().Compile(rolled).EvalValue(null);
-
-        private IEnumerable<int> GetIndividualRolls(string roll)
-        {
-            var sections = roll.Split('d');
-            var quantity = 1;
-
-            if (string.IsNullOrEmpty(sections[0]) == false)
-                quantity = Convert.ToInt32(sections[0]);
-
-            var die = Convert.ToInt32(sections[1]);
-
-            return Roll(quantity).IndividualRolls(die);
+            return Parser.GetParser().Compile(rolled).EvalValue(null);
         }
     }
 }

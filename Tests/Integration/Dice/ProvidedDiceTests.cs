@@ -13,7 +13,7 @@ namespace RollGen.Tests.Integration.Rolls
         public void FullRangeHit()
         {
             var rolls = new HashSet<int>();
-            while (LoopShouldStillRun() && rolls.Count < maximum)
+            while (LoopShouldKeepRunning() && rolls.Count < maximum)
                 rolls.Add(GetRoll());
 
             Assert.That(rolls.Min(), Is.EqualTo(1));

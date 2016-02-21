@@ -139,7 +139,7 @@ namespace RollGen.Test.Unit
         [Test]
         public void GetRawCompiledValue()
         {
-            var roll = dice.CompileRaw("15/40");
+            var roll = dice.Compute("15/40");
             Assert.That(Convert.ToInt32(roll), Is.EqualTo(0));
             Assert.That(Convert.ToDouble(roll), Is.EqualTo(0.375));
         }
@@ -147,15 +147,14 @@ namespace RollGen.Test.Unit
         [Test]
         public void GetDecimalCompiledValue()
         {
-            var roll = dice.Roll<double>("15/40");
+            var roll = dice.Compute<double>("15/40");
             Assert.That(roll, Is.EqualTo(0.375));
         }
 
         [Test]
-        public void ReturnDefaultIfCastIsInvalid()
+        public void ThrowExceptionIfCastIsInvalid()
         {
-            var roll = dice.Roll<DiceTests>("15/40");
-            Assert.That(roll, Is.Null);
+            Assert.That(() => dice.Compute<DiceTests>("15/40"), Throws.InstanceOf<InvalidCastException>());
         }
 
         [TestCase("1d2", "(1)")]
@@ -173,6 +172,12 @@ namespace RollGen.Test.Unit
 
             var result = dice.RollString(roll);
             Assert.That(result, Is.EqualTo(rolled));
+        }
+
+        [Test]
+        public void ThrowExceptionIfYouTryToComputeAStringWithUnrolledDieRolls()
+        {
+            Assert.That(() => dice.Compute("1+2d3-45d67"), Throws.InstanceOf<ArgumentException>().With.Message.EqualTo("Cannot compute unrolled die roll 2d3"));
         }
     }
 }

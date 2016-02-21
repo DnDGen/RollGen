@@ -1,6 +1,7 @@
 ﻿using Ninject;
 using NUnit.Framework;
 using RollGen.Tests.Integration.Common;
+using System;
 using System.Diagnostics;
 
 namespace RollGen.Tests.Integration.Rolls
@@ -11,11 +12,11 @@ namespace RollGen.Tests.Integration.Rolls
         [Inject]
         public Stopwatch Stopwatch { get; set; }
 
-        protected const int ConfidentIterations = 1000000;
-
-        protected int iterations;
+        protected const int ConfidenceIterations = 1000000;
 
         private const int TimeLimitInSeconds = 1;
+
+        private int iterations;
 
         [SetUp]
         public void DiceTestSetup()
@@ -30,9 +31,18 @@ namespace RollGen.Tests.Integration.Rolls
             Stopwatch.Reset();
         }
 
-        protected bool LoopShouldStillRun()
+        protected bool LoopShouldKeepRunning()
         {
-            return iterations++ < ConfidentIterations && Stopwatch.Elapsed.Seconds < TimeLimitInSeconds;
+            return iterations++ < ConfidenceIterations && Stopwatch.Elapsed.Seconds < TimeLimitInSeconds;
+        }
+
+        protected void Stress(Action makeAssertions)
+        {
+            do makeAssertions();
+            while (LoopShouldKeepRunning());
+
+            if (Stopwatch.Elapsed.TotalSeconds > TimeLimitInSeconds + 1)
+                Assert.Fail("Something took way too long");
         }
     }
 }

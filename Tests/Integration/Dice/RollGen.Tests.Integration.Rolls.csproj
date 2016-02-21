@@ -56,6 +56,7 @@
     <Compile Include="d6Tests.cs" />
     <Compile Include="d8Tests.cs" />
     <Compile Include="DiceTests.cs" />
+    <Compile Include="ExpressionTests.cs" />
     <Compile Include="PercentileTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ProvidedDiceTests.cs" />
