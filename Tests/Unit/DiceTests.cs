@@ -223,6 +223,25 @@ namespace RollGen.Test.Unit
             Assert.That(result, Is.EqualTo(rolled));
         }
 
+        [TestCase("1d2", true)]
+        [TestCase("2d3", true)]
+        [TestCase("1+2d3", true)]
+        [TestCase("1d2+3", true)]
+        [TestCase("1d2+3d4", true)]
+        [TestCase("1+2d3-4d6*5", true)]
+        [TestCase("1+2d3-4d5*6", true)]
+        [TestCase("1+2d3-2d3/4", true)]
+        [TestCase("d2", true)]
+        [TestCase("I want to roll a d2.", true)]
+        [TestCase("1+2", false)]
+        [TestCase("  1  d     2    ", true)]
+        [TestCase("one d two", false)]
+        [TestCase("other things", false)]
+        public void ExpressionContainsRoll(string expression, bool containsRoll)
+        {
+            Assert.That(dice.ContainsRoll(expression), Is.EqualTo(containsRoll));
+        }
+
         private IEnumerable<int> BuildIndividualRolls(int die)
         {
             var count = 1;

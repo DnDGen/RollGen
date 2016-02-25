@@ -42,14 +42,14 @@ namespace RollGen.Domain
             return Evaluate<int>(expression);
         }
 
-        public T Evaluate<T>(string rolled)
+        public T Evaluate<T>(string expression)
         {
-            var rawRoll = Evaluate(rolled);
+            var rawEvaluatedExpression = Evaluate(expression);
 
-            if (rawRoll is T)
-                return (T)rawRoll;
+            if (rawEvaluatedExpression is T)
+                return (T)rawEvaluatedExpression;
 
-            return (T)Convert.ChangeType(rawRoll, typeof(T));
+            return (T)Convert.ChangeType(rawEvaluatedExpression, typeof(T));
         }
 
         public string RollExpression(string expression)
@@ -83,6 +83,12 @@ namespace RollGen.Domain
             var die = Convert.ToInt32(sections[1]);
 
             return Roll(quantity).IndividualRolls(die);
+        }
+
+        public bool ContainsRoll(string expression)
+        {
+            var match = rollRegex.Match(expression);
+            return match.Success;
         }
     }
 }
