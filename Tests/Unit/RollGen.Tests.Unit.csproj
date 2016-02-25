@@ -36,6 +36,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Albatross.Expression, Version=1.1.5700.39687, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Albatross.Expression.1.1.5700.39687\lib\net40\Albatross.Expression.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Moq, Version=4.2.1510.2205, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Moq.4.2.1510.2205\lib\net40\Moq.dll</HintPath>
       <Private>True</Private>
@@ -55,6 +59,7 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="AlbatrossExpressionEvaluatorTests.cs" />
     <Compile Include="DiceTests.cs" />
     <Compile Include="PartialRolls\IndividualRollsTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -68,6 +73,7 @@
     <Compile Include="PartialRolls\d2Tests.cs" />
     <Compile Include="PartialRolls\d3Tests.cs" />
     <Compile Include="PartialRolls\dTests.cs" />
+    <Compile Include="RandomPartialRollFactoryTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Domain\RollGen.Domain.csproj">

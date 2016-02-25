@@ -41,7 +41,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Dice.cs" />
+    <Compile Include="ExpressionEvaluator.cs" />
     <Compile Include="PartialRoll.cs" />
+    <Compile Include="PartialRollFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

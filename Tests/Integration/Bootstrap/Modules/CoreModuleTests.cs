@@ -1,5 +1,7 @@
-﻿using Ninject;
+﻿using Albatross.Expression;
+using Ninject;
 using NUnit.Framework;
+using RollGen.Domain;
 using RollGen.Tests.Integration.Common;
 using System;
 
@@ -28,6 +30,30 @@ namespace RollGen.Tests.Bootstrap.Modules
         public void CannotInjectPartialRoll()
         {
             Assert.That(() => GetNewInstanceOf<PartialRoll>(), Throws.InstanceOf<ActivationException>());
+        }
+
+        [Test]
+        public void ExpressionEvaluatorIsInjected()
+        {
+            var evaluator = GetNewInstanceOf<ExpressionEvaluator>();
+            Assert.That(evaluator, Is.Not.Null);
+            Assert.That(evaluator, Is.InstanceOf<AlbatrossExpressionEvaluator>());
+        }
+
+        [Test]
+        public void PartialRollFactoryIsInjected()
+        {
+            var factory = GetNewInstanceOf<PartialRollFactory>();
+            Assert.That(factory, Is.Not.Null);
+            Assert.That(factory, Is.InstanceOf<RandomPartialRollFactory>());
+        }
+
+        [Test]
+        public void AlbatrossParserIsInjected()
+        {
+            var parser = GetNewInstanceOf<IParser>();
+            Assert.That(parser, Is.Not.Null);
+            Assert.That(parser, Is.InstanceOf<Parser>());
         }
     }
 }

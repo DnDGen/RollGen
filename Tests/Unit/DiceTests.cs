@@ -2,6 +2,7 @@
 using NUnit.Framework;
 using RollGen.Domain;
 using System;
+using System.Collections.Generic;
 
 namespace RollGen.Test.Unit
 {
@@ -9,175 +10,234 @@ namespace RollGen.Test.Unit
     public class DiceTests
     {
         private Dice dice;
-        private Mock<Random> mockRandom;
+        private Mock<ExpressionEvaluator> mockExpressionEvaluator;
+        private Mock<PartialRollFactory> mockPartialRollFactory;
+        private Mock<PartialRoll> mockPartialRoll;
 
         [SetUp]
         public void Setup()
         {
-            mockRandom = new Mock<Random>();
-            dice = new RandomDice(mockRandom.Object);
+            mockExpressionEvaluator = new Mock<ExpressionEvaluator>();
+            mockPartialRollFactory = new Mock<PartialRollFactory>();
+            dice = new DomainDice(mockExpressionEvaluator.Object, mockPartialRollFactory.Object);
+
+            mockPartialRoll = new Mock<PartialRoll>();
+            mockPartialRollFactory.Setup(f => f.Build(It.IsAny<int>())).Returns(mockPartialRoll.Object);
         }
 
         [Test]
         public void ReturnPartialRoll()
         {
-            Assert.That(dice.Roll(), Is.InstanceOf<PartialRoll>());
+            var mockDefaultPartialRoll = new Mock<PartialRoll>();
+            mockPartialRollFactory.Setup(f => f.Build(1)).Returns(mockDefaultPartialRoll.Object);
+
+            var partialRoll = dice.Roll();
+            Assert.That(partialRoll, Is.InstanceOf<PartialRoll>());
+            Assert.That(partialRoll, Is.EqualTo(mockDefaultPartialRoll.Object));
         }
 
         [Test]
-        public void PartialRollUsesRandom()
+        public void ReturnPartialRollWithQuantity()
         {
-            mockRandom.Setup(r => r.Next(9266)).Returns(90210);
+            var mockPartialRollWithQuantity = new Mock<PartialRoll>();
+            mockPartialRollFactory.Setup(f => f.Build(42)).Returns(mockPartialRollWithQuantity.Object);
 
-            var roll = dice.Roll().d(9266);
-            Assert.That(roll, Is.EqualTo(90211));
-            mockRandom.Verify(r => r.Next(9266), Times.Once);
+            var partialRoll = dice.Roll(42);
+            Assert.That(partialRoll, Is.InstanceOf<PartialRoll>());
+            Assert.That(partialRoll, Is.EqualTo(mockPartialRollWithQuantity.Object));
         }
 
         [Test]
-        public void PartialRollUsesQuantity()
+        public void EvaluateExpression()
         {
-            var count = 0;
-            mockRandom.Setup(r => r.Next(42)).Returns(() => count++);
+            mockExpressionEvaluator.Setup(e => e.Evaluate("expression")).Returns(9266);
 
-            var roll = dice.Roll(9266).d(42);
-            Assert.That(roll, Is.EqualTo(42934011));
-            mockRandom.Verify(r => r.Next(42), Times.Exactly(9266));
-        }
-
-        [TestCase("9266", 9266)]
-        [TestCase("9266+90210", 9266 + 90210)]
-        [TestCase("9266-90210", 9266 - 90210)]
-        [TestCase("9266*90210", 9266 * 90210)]
-        public void ComputeExpression(string expression, int result)
-        {
-            var roll = dice.Roll(expression);
-            Assert.That(roll, Is.EqualTo(result));
+            var roll = dice.Roll("expression");
+            Assert.That(roll, Is.EqualTo(9266));
         }
 
         [Test]
-        public void RollFromString()
+        public void RollExpression()
         {
-            var count = 0;
-            mockRandom.Setup(r => r.Next(66)).Returns(() => count++);
+            var mockPartialRollWithQuantity = new Mock<PartialRoll>();
+            mockPartialRollFactory.Setup(f => f.Build(92)).Returns(mockPartialRollWithQuantity.Object);
+
+            mockPartialRollWithQuantity.Setup(r => r.IndividualRolls(66)).Returns(new[] { 90210 });
+            mockExpressionEvaluator.Setup(e => e.Evaluate("(90210)")).Returns(90210);
 
             var roll = dice.Roll("92d66");
-            Assert.That(roll, Is.EqualTo(4278));
-            mockRandom.Verify(r => r.Next(66), Times.Exactly(92));
+            Assert.That(roll, Is.EqualTo(90210));
         }
 
         [Test]
-        public void RollFromStringSpaces()
+        public void TrimRolledExpression()
         {
-            var count = 0;
-            mockRandom.Setup(r => r.Next(66)).Returns(() => count++);
+            var mockPartialRollWithQuantity = new Mock<PartialRoll>();
+            mockPartialRollFactory.Setup(f => f.Build(92)).Returns(mockPartialRollWithQuantity.Object);
+
+            mockPartialRollWithQuantity.Setup(r => r.IndividualRolls(66)).Returns(new[] { 90210 });
+
+            var expression = dice.RollExpression("  92    d  66   ");
+            Assert.That(expression, Is.EqualTo("(90210)"));
+        }
+
+        [Test]
+        public void HaveSummedSpacesInExpression()
+        {
+            var mockPartialRollWithQuantity = new Mock<PartialRoll>();
+            mockPartialRollFactory.Setup(f => f.Build(92)).Returns(mockPartialRollWithQuantity.Object);
+
+            mockPartialRollWithQuantity.Setup(r => r.IndividualRolls(66)).Returns(new[] { 90210, 42 });
+
+            var expression = dice.RollExpression("  92    d  66   ");
+            Assert.That(expression, Is.EqualTo("(90210 + 42)"));
+        }
+
+        [Test]
+        public void RollExpressionWithSpaces()
+        {
+            var mockPartialRollWithQuantity = new Mock<PartialRoll>();
+            mockPartialRollFactory.Setup(f => f.Build(92)).Returns(mockPartialRollWithQuantity.Object);
+
+            mockPartialRollWithQuantity.Setup(r => r.IndividualRolls(66)).Returns(new[] { 90210 });
+            mockExpressionEvaluator.Setup(e => e.Evaluate("(90210)")).Returns(600);
 
             var roll = dice.Roll("  92    d  66   ");
-            Assert.That(roll, Is.EqualTo(4278));
-            mockRandom.Verify(r => r.Next(66), Times.Exactly(92));
+            Assert.That(roll, Is.EqualTo(600));
         }
 
         [Test]
-        public void RollFromStringNoQuantity()
+        public void RollExpressionWithNoQuantity()
         {
-            mockRandom.Setup(r => r.Next(90210)).Returns(629);
+            var mockPartialRollWithQuantity = new Mock<PartialRoll>();
+            mockPartialRollFactory.Setup(f => f.Build(1)).Returns(mockPartialRollWithQuantity.Object);
 
-            var roll = dice.Roll("1d90210");
+            mockPartialRollWithQuantity.Setup(r => r.IndividualRolls(90210)).Returns(new[] { 9266 });
+            mockExpressionEvaluator.Setup(e => e.Evaluate("(9266)")).Returns(9266);
+
             var rollWithoutQuantity = dice.Roll("d90210");
+            var roll = dice.Roll("1d90210");
 
             Assert.That(rollWithoutQuantity, Is.EqualTo(roll));
-            Assert.That(rollWithoutQuantity, Is.EqualTo(630));
-            mockRandom.Verify(r => r.Next(90210), Times.Exactly(2));
+            Assert.That(rollWithoutQuantity, Is.EqualTo(9266));
         }
 
         [Test]
-        public void RollFromStringWithBonus()
+        public void RollExpressionWithBonus()
         {
-            var count = 0;
-            mockRandom.Setup(r => r.Next(66)).Returns(() => count++);
+            var mockPartialRollWithQuantity = new Mock<PartialRoll>();
+            mockPartialRollFactory.Setup(f => f.Build(92)).Returns(mockPartialRollWithQuantity.Object);
+
+            mockPartialRollWithQuantity.Setup(r => r.IndividualRolls(66)).Returns(new[] { 90210 });
+            mockExpressionEvaluator.Setup(e => e.Evaluate("(90210)+42")).Returns(600);
 
             var roll = dice.Roll("92d66+42");
-            Assert.That(roll, Is.EqualTo(4320));
-            mockRandom.Verify(r => r.Next(66), Times.Exactly(92));
+            Assert.That(roll, Is.EqualTo(600));
         }
 
         [Test]
-        public void RollFromStringWithMultiplier()
+        public void RollExpressionWithMultiplier()
         {
-            var count = 0;
-            mockRandom.Setup(r => r.Next(66)).Returns(() => count++);
+            var mockPartialRollWithQuantity = new Mock<PartialRoll>();
+            mockPartialRollFactory.Setup(f => f.Build(92)).Returns(mockPartialRollWithQuantity.Object);
+
+            mockPartialRollWithQuantity.Setup(r => r.IndividualRolls(66)).Returns(new[] { 90210 });
+            mockExpressionEvaluator.Setup(e => e.Evaluate("(90210)*42")).Returns(600);
 
             var roll = dice.Roll("92d66*42");
-            Assert.That(roll, Is.EqualTo(179676));
-            mockRandom.Verify(r => r.Next(66), Times.Exactly(92));
+            Assert.That(roll, Is.EqualTo(600));
         }
 
         [Test]
-        public void RollMultipleRolls()
+        public void RollExpressionWithMultipleRolls()
         {
-            var count = 0;
-            mockRandom.Setup(r => r.Next(66)).Returns(() => count++);
-            mockRandom.Setup(r => r.Next(600)).Returns(() => count++);
+            var mockFirstPartialRoll = new Mock<PartialRoll>();
+            var mockSecondPartialRoll = new Mock<PartialRoll>();
+            mockPartialRollFactory.Setup(f => f.Build(92)).Returns(mockFirstPartialRoll.Object);
+            mockPartialRollFactory.Setup(f => f.Build(42)).Returns(mockSecondPartialRoll.Object);
+
+            mockFirstPartialRoll.Setup(r => r.IndividualRolls(66)).Returns(new[] { 90210 });
+            mockSecondPartialRoll.Setup(r => r.IndividualRolls(600)).Returns(new[] { 1337 });
+
+            mockExpressionEvaluator.Setup(e => e.Evaluate("(90210)+(1337)")).Returns(1234);
 
             var roll = dice.Roll("92d66+42d600");
-            Assert.That(roll, Is.EqualTo(9045));
-            mockRandom.Verify(r => r.Next(66), Times.Exactly(92));
-            mockRandom.Verify(r => r.Next(600), Times.Exactly(42));
+            Assert.That(roll, Is.EqualTo(1234));
         }
 
         [Test]
-        public void RollMultipleOfSameRoll()
+        public void RollExpressionWithMultipleOfSameRoll()
         {
-            var count = 0;
-            mockRandom.Setup(r => r.Next(629)).Returns(() => count++);
+            var mockFirstPartialRoll = new Mock<PartialRoll>();
+            var mockSecondPartialRoll = new Mock<PartialRoll>();
+            mockPartialRollFactory.SetupSequence(f => f.Build(7)).Returns(mockFirstPartialRoll.Object).Returns(mockSecondPartialRoll.Object);
 
-            var roll = dice.RollString("7d629%7d629");
-            Assert.That(roll, Is.EqualTo("(1 + 2 + 3 + 4 + 5 + 6 + 7)%(8 + 9 + 10 + 11 + 12 + 13 + 14)"));
-            mockRandom.Verify(r => r.Next(629), Times.Exactly(14));
+            mockFirstPartialRoll.Setup(r => r.IndividualRolls(629)).Returns(new[] { 9266, 90210 });
+            mockSecondPartialRoll.Setup(r => r.IndividualRolls(629)).Returns(new[] { 42, 600 });
+
+            var roll = dice.RollExpression("7d629%7d629");
+            Assert.That(roll, Is.EqualTo("(9266 + 90210)%(42 + 600)"));
         }
 
         [Test]
-        public void GetRawCompiledValue()
+        public void GetRawEvaluatedValue()
         {
-            var roll = dice.Compute("15/40");
+            mockExpressionEvaluator.Setup(e => e.Evaluate("expression")).Returns(.375);
+
+            var roll = dice.Evaluate("expression");
+            Assert.That(roll, Is.InstanceOf<object>());
             Assert.That(Convert.ToInt32(roll), Is.EqualTo(0));
             Assert.That(Convert.ToDouble(roll), Is.EqualTo(0.375));
         }
 
         [Test]
-        public void GetDecimalCompiledValue()
+        public void GetDecimalEvaluatedValue()
         {
-            var roll = dice.Compute<double>("15/40");
+            mockExpressionEvaluator.Setup(e => e.Evaluate("expression")).Returns(.375);
+
+            var roll = dice.Evaluate<double>("expression");
             Assert.That(roll, Is.EqualTo(0.375));
         }
 
         [Test]
         public void ThrowExceptionIfCastIsInvalid()
         {
-            Assert.That(() => dice.Compute<DiceTests>("15/40"), Throws.InstanceOf<InvalidCastException>());
+            mockExpressionEvaluator.Setup(e => e.Evaluate("expression")).Returns(.375);
+
+            Assert.That(() => dice.Evaluate<DiceTests>("expression"), Throws.InstanceOf<InvalidCastException>());
         }
 
-        [TestCase("1d2", "(1)")]
-        [TestCase("2d3", "(1 + 4)")]
-        [TestCase("1+2d3", "1+(1 + 4)")]
-        [TestCase("1d2+3", "(1)+3")]
-        [TestCase("1d2+3d4", "(1)+(5 + 9 + 13)")]
-        [TestCase("1+2d3-4d6*5", "1+(1 + 4)-(13 + 19 + 25 + 31)*5")]
-        [TestCase("1+2d3-4d5*6", "1+(1 + 4)-(11 + 16 + 21 + 26)*6")]
-        [TestCase("1+2d3-2d3/4", "1+(1 + 4)-(7 + 10)/4")]
-        public void ReplaceRollsInString(string roll, string rolled)
+        [TestCase("1d2", "(1 + 0)")]
+        [TestCase("2d3", "(2 + 2 + 0)")]
+        [TestCase("1+2d3", "1+(2 + 2 + 0)")]
+        [TestCase("1d2+3", "(1 + 0)+3")]
+        [TestCase("1d2+3d4", "(1 + 0)+(3 + 4 + 3 + 0)")]
+        [TestCase("1+2d3-4d6*5", "1+(2 + 2 + 0)-(5 + 8 + 9 + 8 + 5 + 0)*5")]
+        [TestCase("1+2d3-4d5*6", "1+(2 + 2 + 0)-(4 + 6 + 6 + 4 + 0)*6")]
+        [TestCase("1+2d3-2d3/4", "1+(2 + 2 + 0)-(2 + 2 + 0)/4")]
+        public void ReplaceRollsInExpression(string roll, string rolled)
         {
-            var count = 0;
-            mockRandom.Setup(r => r.Next(It.IsAny<int>())).Returns((int d) => count++ * d);
+            mockPartialRoll.Setup(r => r.IndividualRolls(It.IsAny<int>())).Returns((int d) => BuildIndividualRolls(d));
 
-            var result = dice.RollString(roll);
+            var result = dice.RollExpression(roll);
             Assert.That(result, Is.EqualTo(rolled));
         }
 
-        [Test]
-        public void ThrowExceptionIfYouTryToComputeAStringWithUnrolledDieRolls()
+        private IEnumerable<int> BuildIndividualRolls(int die)
         {
-            Assert.That(() => dice.Compute("1+2d3-45d67"), Throws.InstanceOf<ArgumentException>().With.Message.EqualTo("Cannot compute unrolled die roll 2d3"));
+            var count = 1;
+            var rolls = new List<int>();
+
+            while (die-- > 0)
+                rolls.Add(count++ * die);
+
+            return rolls;
+        }
+
+        [Test]
+        public void ThrowExceptionIfYouTryToEvaluateAnExpressionWithUnrolledDieRolls()
+        {
+            Assert.That(() => dice.Evaluate("1+2d3-45d67"), Throws.InstanceOf<ArgumentException>().With.Message.EqualTo("Cannot evaluate unrolled die roll 2d3"));
         }
     }
 }

@@ -31,6 +31,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Albatross.Expression, Version=1.1.5700.39687, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\..\packages\Albatross.Expression.1.1.5700.39687\lib\net40\Albatross.Expression.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Ninject">
       <HintPath>..\..\..\packages\Ninject.3.2.2.0\lib\net45-full\Ninject.dll</HintPath>
     </Reference>
