@@ -18,27 +18,16 @@ var parsedRoll = dice.Roll("5+3d4*2");
 
 ### Getting `Dice` Objects
 
-You can obtain a `Dice` object in one of 2 ways:
+You can obtain dice from the bootstrapper project. Because the dice are very complex and are decorated in various ways, there is not a (recommended) way to build these objects manually. Please use the Bootstrapper package.
 
-1. **Recommended** Use the Ninject Bootstrapper to inject the `Dice` object into your constructor
+```C#
+var kernel = new StandardKernel();
+var rollGenModuleLoader = new RollGenModuleLoader();
 
-   ```C#
-   var kernel = new StandardKernel();
-   var rollGenModuleLoader = new RollGenModuleLoader();
+rollGenModuleLoader.LoadModules(kernel);
+```
 
-   rollGenModuleLoader.LoadModules(kernel);
-   ```
-
-   Your particular syntax for how the Ninject injection should work will depend on your project (class library, web site, etc.)
-
-2. Manually build the `Dice` object:
-
-   ```C#
-   var random = new Random();
-   var dice = new RandomDice(random);
-   ```
-
-   **Important** If you are newing up dice objects multiple times, the seed for the `Random` class that you use will potentially be the same, and will not produce random results.  The Ninject bootstrapper has taken this into account and helps ensure random seeds for the `Random` object - which is why it is the recommended way to build your `Dice` object.
+Your particular syntax for how the Ninject injection should work will depend on your project (class library, web site, etc.)
 
 ### Installing RollGen
 
