@@ -19,9 +19,10 @@ namespace RollGen.Domain
 
         public override object Compute(string rolled)
         {
-            if (rollRegex.IsMatch(rolled))
+            var match = rollRegex.Match(rolled);
+
+            if (match.Success)
             {
-                var match = rollRegex.Match(rolled);
                 var message = string.Format("Cannot compute unrolled die roll {0}", match.Value);
                 throw new ArgumentException(message);
             }
