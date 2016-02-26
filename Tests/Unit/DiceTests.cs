@@ -13,6 +13,7 @@ namespace RollGen.Test.Unit
         private Mock<ExpressionEvaluator> mockExpressionEvaluator;
         private Mock<PartialRollFactory> mockPartialRollFactory;
         private Mock<PartialRoll> mockPartialRoll;
+        private Queue<int> quantities;
 
         [SetUp]
         public void Setup()
@@ -22,7 +23,25 @@ namespace RollGen.Test.Unit
             dice = new DomainDice(mockExpressionEvaluator.Object, mockPartialRollFactory.Object);
 
             mockPartialRoll = new Mock<PartialRoll>();
-            mockPartialRollFactory.Setup(f => f.Build(It.IsAny<int>())).Returns(mockPartialRoll.Object);
+            quantities = new Queue<int>();
+
+            mockPartialRollFactory.Setup(f => f.Build(It.IsAny<int>())).Returns((int q) => BuildMockPartialRoll(q));
+            mockExpressionEvaluator.Setup(e => e.Evaluate(It.IsAny<string>())).Returns((string e) => ParseExpression(e));
+        }
+
+        private PartialRoll BuildMockPartialRoll(int quantity)
+        {
+            quantities.Enqueue(quantity);
+            return mockPartialRoll.Object;
+        }
+
+        private int ParseExpression(string expression)
+        {
+            var value = 0;
+            if (int.TryParse(expression, out value))
+                return value;
+
+            throw new ArgumentException("This expression was not set up to be parsed");
         }
 
         [Test]
@@ -63,21 +82,20 @@ namespace RollGen.Test.Unit
             mockPartialRollFactory.Setup(f => f.Build(92)).Returns(mockPartialRollWithQuantity.Object);
 
             mockPartialRollWithQuantity.Setup(r => r.IndividualRolls(66)).Returns(new[] { 90210 });
-            mockExpressionEvaluator.Setup(e => e.Evaluate("(90210)")).Returns(90210);
 
             var roll = dice.Roll("92d66");
             Assert.That(roll, Is.EqualTo(90210));
         }
 
         [Test]
-        public void TrimRolledExpression()
+        public void TrimExpressionWithReplacedRolls()
         {
             var mockPartialRollWithQuantity = new Mock<PartialRoll>();
             mockPartialRollFactory.Setup(f => f.Build(92)).Returns(mockPartialRollWithQuantity.Object);
 
             mockPartialRollWithQuantity.Setup(r => r.IndividualRolls(66)).Returns(new[] { 90210 });
 
-            var expression = dice.RollExpression("  92    d  66   ");
+            var expression = dice.ReplaceRollsWithSum("  92    d  66   ");
             Assert.That(expression, Is.EqualTo("(90210)"));
         }
 
@@ -89,7 +107,7 @@ namespace RollGen.Test.Unit
 
             mockPartialRollWithQuantity.Setup(r => r.IndividualRolls(66)).Returns(new[] { 90210, 42 });
 
-            var expression = dice.RollExpression("  92    d  66   ");
+            var expression = dice.ReplaceRollsWithSum("  92    d  66   ");
             Assert.That(expression, Is.EqualTo("(90210 + 42)"));
         }
 
@@ -100,10 +118,18 @@ namespace RollGen.Test.Unit
             mockPartialRollFactory.Setup(f => f.Build(92)).Returns(mockPartialRollWithQuantity.Object);
 
             mockPartialRollWithQuantity.Setup(r => r.IndividualRolls(66)).Returns(new[] { 90210 });
-            mockExpressionEvaluator.Setup(e => e.Evaluate("(90210)")).Returns(600);
 
             var roll = dice.Roll("  92    d  66   ");
-            Assert.That(roll, Is.EqualTo(600));
+            Assert.That(roll, Is.EqualTo(90210));
+        }
+
+        [Test]
+        public void DoNotRollInvalidExpression()
+        {
+            var exception = new Exception();
+            mockExpressionEvaluator.Setup(e => e.Evaluate("invalid expression")).Throws(exception);
+
+            Assert.That(() => dice.Roll("invalid expression"), Throws.Exception.EqualTo(exception));
         }
 
         [Test]
@@ -113,7 +139,6 @@ namespace RollGen.Test.Unit
             mockPartialRollFactory.Setup(f => f.Build(1)).Returns(mockPartialRollWithQuantity.Object);
 
             mockPartialRollWithQuantity.Setup(r => r.IndividualRolls(90210)).Returns(new[] { 9266 });
-            mockExpressionEvaluator.Setup(e => e.Evaluate("(9266)")).Returns(9266);
 
             var rollWithoutQuantity = dice.Roll("d90210");
             var roll = dice.Roll("1d90210");
@@ -129,7 +154,7 @@ namespace RollGen.Test.Unit
             mockPartialRollFactory.Setup(f => f.Build(92)).Returns(mockPartialRollWithQuantity.Object);
 
             mockPartialRollWithQuantity.Setup(r => r.IndividualRolls(66)).Returns(new[] { 90210 });
-            mockExpressionEvaluator.Setup(e => e.Evaluate("(90210)+42")).Returns(600);
+            mockExpressionEvaluator.Setup(e => e.Evaluate("90210+42")).Returns(600);
 
             var roll = dice.Roll("92d66+42");
             Assert.That(roll, Is.EqualTo(600));
@@ -142,7 +167,7 @@ namespace RollGen.Test.Unit
             mockPartialRollFactory.Setup(f => f.Build(92)).Returns(mockPartialRollWithQuantity.Object);
 
             mockPartialRollWithQuantity.Setup(r => r.IndividualRolls(66)).Returns(new[] { 90210 });
-            mockExpressionEvaluator.Setup(e => e.Evaluate("(90210)*42")).Returns(600);
+            mockExpressionEvaluator.Setup(e => e.Evaluate("90210*42")).Returns(600);
 
             var roll = dice.Roll("92d66*42");
             Assert.That(roll, Is.EqualTo(600));
@@ -159,7 +184,7 @@ namespace RollGen.Test.Unit
             mockFirstPartialRoll.Setup(r => r.IndividualRolls(66)).Returns(new[] { 90210 });
             mockSecondPartialRoll.Setup(r => r.IndividualRolls(600)).Returns(new[] { 1337 });
 
-            mockExpressionEvaluator.Setup(e => e.Evaluate("(90210)+(1337)")).Returns(1234);
+            mockExpressionEvaluator.Setup(e => e.Evaluate("90210+1337")).Returns(1234);
 
             var roll = dice.Roll("92d66+42d600");
             Assert.That(roll, Is.EqualTo(1234));
@@ -175,7 +200,7 @@ namespace RollGen.Test.Unit
             mockFirstPartialRoll.Setup(r => r.IndividualRolls(629)).Returns(new[] { 9266, 90210 });
             mockSecondPartialRoll.Setup(r => r.IndividualRolls(629)).Returns(new[] { 42, 600 });
 
-            var roll = dice.RollExpression("7d629%7d629");
+            var roll = dice.ReplaceRollsWithSum("7d629%7d629");
             Assert.That(roll, Is.EqualTo("(9266 + 90210)%(42 + 600)"));
         }
 
@@ -207,19 +232,38 @@ namespace RollGen.Test.Unit
             Assert.That(() => dice.Evaluate<DiceTests>("expression"), Throws.InstanceOf<InvalidCastException>());
         }
 
-        [TestCase("1d2", "(1 + 0)")]
-        [TestCase("2d3", "(2 + 2 + 0)")]
-        [TestCase("1+2d3", "1+(2 + 2 + 0)")]
-        [TestCase("1d2+3", "(1 + 0)+3")]
-        [TestCase("1d2+3d4", "(1 + 0)+(3 + 4 + 3 + 0)")]
-        [TestCase("1+2d3-4d6*5", "1+(2 + 2 + 0)-(5 + 8 + 9 + 8 + 5 + 0)*5")]
-        [TestCase("1+2d3-4d5*6", "1+(2 + 2 + 0)-(4 + 6 + 6 + 4 + 0)*6")]
-        [TestCase("1+2d3-2d3/4", "1+(2 + 2 + 0)-(2 + 2 + 0)/4")]
-        public void ReplaceRollsInExpression(string roll, string rolled)
+        [TestCase("1d2", "(2)")]
+        [TestCase("2d3", "(3 + 2)")]
+        [TestCase("1+2d3", "1+(3 + 2)")]
+        [TestCase("1d2+3", "(2)+3")]
+        [TestCase("1d2+3d4", "(2)+(4 + 3 + 2)")]
+        [TestCase("1+2d3-4d6*5", "1+(3 + 2)-(6 + 5 + 4 + 3)*5")]
+        [TestCase("1+2d3-4d5*6", "1+(3 + 2)-(5 + 4 + 3 + 2)*6")]
+        [TestCase("1+2d3-2d3/4", "1+(3 + 2)-(3 + 2)/4")]
+        [TestCase("1+2d3-2d3*4/5", "1+(3 + 2)-(3 + 2)*4/5")]
+        [TestCase("d2", "(2)")]
+        [TestCase("I want to roll a d2.", "I want to roll a (2).")]
+        [TestCase("I want to roll 1 d2.", "I want to roll (2).")]
+        [TestCase("1+2", "1+2")]
+        [TestCase("  1  d     2    ", "(2)")]
+        [TestCase("one d two", "one d two")]
+        [TestCase("other things", "other things")]
+        [TestCase("Contains 1d6+2 ghouls and 2d4 zombies", "Contains (6)+2 ghouls and (4 + 3) zombies")]
+        [TestCase("Contains 1d6+2 ghouls, 1d4+1 skeletons, and 2d4 zombies", "Contains (6)+2 ghouls, (4)+1 skeletons, and (4 + 3) zombies")]
+        [TestCase("Hydra (1d4+4 heads)", "Hydra ((4)+4 heads)")]
+        [TestCase("Hydra (10+2 heads)", "Hydra (10+2 heads)")]
+        [TestCase("6d6 fire damage", "(6 + 5 + 4 + 3 + 2 + 1) fire damage")]
+        [TestCase("I hit for 1d4", "I hit for (4)")]
+        [TestCase("I found 5 golden rings, 4 calling birds, 3 french hens, 2 turtle doves, and 1 partridge in a pear tree",
+            "I found 5 golden rings, 4 calling birds, 3 french hens, 2 turtle doves, and 1 partridge in a pear tree")]
+        [TestCase("I am 1d100% confident", "I am (100)% confident")]
+        [TestCase("Fred2 has 4d16 health.", "Fred2 has (16 + 15 + 14 + 13) health.")]
+        [TestCase("Fred2", "Fred2")]
+        public void ReplaceRollsInExpressionWithSums(string roll, string rolled)
         {
             mockPartialRoll.Setup(r => r.IndividualRolls(It.IsAny<int>())).Returns((int d) => BuildIndividualRolls(d));
 
-            var result = dice.RollExpression(roll);
+            var result = dice.ReplaceRollsWithSum(roll);
             Assert.That(result, Is.EqualTo(rolled));
         }
 
@@ -233,10 +277,21 @@ namespace RollGen.Test.Unit
         [TestCase("1+2d3-2d3/4", true)]
         [TestCase("d2", true)]
         [TestCase("I want to roll a d2.", true)]
+        [TestCase("I want to roll 1 d2.", true)]
         [TestCase("1+2", false)]
         [TestCase("  1  d     2    ", true)]
         [TestCase("one d two", false)]
         [TestCase("other things", false)]
+        [TestCase("Contains 1d6+2 ghouls and 2d4 zombies", true)]
+        [TestCase("Contains 1d6+2 ghouls, 1d4+1 skeletons, and 2d4 zombies", true)]
+        [TestCase("Hydra (1d4+4 heads)", true)]
+        [TestCase("Hydra (10+2 heads)", false)]
+        [TestCase("6d6 fire damage", true)]
+        [TestCase("I hit for 1d4", true)]
+        [TestCase("I found 5 golden rings, 4 calling birds, 3 french hens, 2 turtle doves, and 1 partridge in a pear tree", false)]
+        [TestCase("I am 1d100% confident", true)]
+        [TestCase("Fred2 has 4d16 health.", true)]
+        [TestCase("Fred2", false)]
         public void ExpressionContainsRoll(string expression, bool containsRoll)
         {
             Assert.That(dice.ContainsRoll(expression), Is.EqualTo(containsRoll));
@@ -244,11 +299,11 @@ namespace RollGen.Test.Unit
 
         private IEnumerable<int> BuildIndividualRolls(int die)
         {
-            var count = 1;
             var rolls = new List<int>();
+            var quantity = quantities.Dequeue();
 
-            while (die-- > 0)
-                rolls.Add(count++ * die);
+            while (quantity-- > 0)
+                rolls.Add(die--);
 
             return rolls;
         }
@@ -257,6 +312,45 @@ namespace RollGen.Test.Unit
         public void ThrowExceptionIfYouTryToEvaluateAnExpressionWithUnrolledDieRolls()
         {
             Assert.That(() => dice.Evaluate("1+2d3-45d67"), Throws.InstanceOf<ArgumentException>().With.Message.EqualTo("Cannot evaluate unrolled die roll 2d3"));
+        }
+
+        [TestCase("1d2", "2")]
+        [TestCase("2d3", "5")]
+        [TestCase("1+2d3", "1")]
+        [TestCase("1d2+3", "1")]
+        [TestCase("1d2+3d4", "1")]
+        [TestCase("1+2d3-4d6*5", "1")]
+        [TestCase("1+2d3-4d5*6", "1")]
+        [TestCase("1+2d3-2d3/4", "1")]
+        [TestCase("1+2d3-2d3*4/5", "1")]
+        [TestCase("d2", "2")]
+        [TestCase("I want to roll a d2.", "I want to roll a 2.")]
+        [TestCase("I want to roll 1 d2.", "I want to roll 2.")]
+        [TestCase("1+2", "1")]
+        [TestCase("  1  d     2    ", "  2    ")]
+        [TestCase("one d two", "one d two")]
+        [TestCase("other things", "other things")]
+        [TestCase("Contains 1d6+2 ghouls and 2d4 zombies", "Contains 1 ghouls and 7 zombies")]
+        [TestCase("Contains 1d6+2 ghouls, 1d4+1 skeletons, and 2d4 zombies", "Contains 1 ghouls, 2 skeletons, and 7 zombies")]
+        [TestCase("Hydra (1d4+4 heads)", "Hydra (1 heads)")]
+        [TestCase("Hydra (10+2 heads)", "Hydra (1 heads)")]
+        [TestCase("6d6 fire damage", "21 fire damage")]
+        [TestCase("I hit for 1d4", "I hit for 4")]
+        [TestCase("I hit for 1d4+1", "I hit for 1")]
+        [TestCase("I found 5 golden rings, 4 calling birds, 3 french hens, 2 turtle doves, and 1 partridge in a pear tree",
+            "I found 5 golden rings, 4 calling birds, 3 french hens, 2 turtle doves, and 1 partridge in a pear tree")]
+        [TestCase("I am 1d100% confident", "I am 100% confident")]
+        [TestCase("Fred2 has 4d16 health.", "Fred2 has 58 health.")]
+        [TestCase("Fred2", "Fred2")]
+        public void ReplaceExpressionWithTotals(string expression, string expectedExpression)
+        {
+            mockPartialRoll.Setup(r => r.IndividualRolls(It.IsAny<int>())).Returns((int d) => BuildIndividualRolls(d));
+
+            var count = 1;
+            mockExpressionEvaluator.Setup(e => e.Evaluate(It.IsAny<string>())).Returns(() => count++);
+
+            var newExpression = dice.ReplaceExpressionWithTotal(expression);
+            Assert.That(newExpression, Is.EqualTo(expectedExpression));
         }
     }
 }

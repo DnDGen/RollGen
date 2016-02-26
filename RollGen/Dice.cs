@@ -6,7 +6,8 @@
         object Evaluate(string expression);
         int Roll(string roll);
         T Evaluate<T>(string expression);
-        string RollExpression(string expression);
+        string ReplaceRollsWithSum(string expression);
         bool ContainsRoll(string expression);
+        string ReplaceExpressionWithTotal(string expression);
     }
 }

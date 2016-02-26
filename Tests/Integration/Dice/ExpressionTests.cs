@@ -1,5 +1,6 @@
 ﻿using Ninject;
 using NUnit.Framework;
+using System;
 
 namespace RollGen.Tests.Integration.Rolls
 {
@@ -44,12 +45,23 @@ namespace RollGen.Tests.Integration.Rolls
         [TestCase(10, 1)]
         [TestCase(100, 1)]
         [TestCase(1000, 1)]
+        [TestCase(10000, 1)]
+        [TestCase(100000, 1)]
+        [TestCase(1000000, 1)]
+        [TestCase(10000000, 1)] //INFO: Any more than this causes the test to time out, so this is the inclusive upper limit of supported rolls
         [TestCase(1, 10)]
         [TestCase(1, 100)]
         [TestCase(1, 1000)]
+        [TestCase(1, 10000)]
+        [TestCase(1, 100000)]
+        [TestCase(1, 1000000)]
+        [TestCase(1, 10000000)]
+        [TestCase(1, 100000000)]
+        [TestCase(1, 1000000000)] //INFO: Any more than this is a long, not an int, so this is the inclusive upper limit of supported rolls
         [TestCase(10, 10)]
         [TestCase(100, 100)]
         [TestCase(1000, 1000)]
+        [TestCase(10000, 10000)]
         public void RollExpressionWithALargeDieRoll(int quantity, int die)
         {
             Stress(() => AssertExpressionWithALargeDieRoll(quantity, die));
@@ -60,6 +72,13 @@ namespace RollGen.Tests.Integration.Rolls
             var rollExpression = string.Format("{0}d{1}", quantity, die);
             var roll = Dice.Roll(rollExpression);
             Assert.That(roll, Is.InRange(quantity, quantity * die));
+        }
+
+        [TestCase(100000, 100000)]
+        public void CauseArithmeticOverflow(int quantity, int die)
+        {
+            var rollExpression = string.Format("{0}d{1}", quantity, die);
+            Assert.That(() => Dice.Roll(rollExpression), Throws.InstanceOf<OverflowException>());
         }
     }
 }
