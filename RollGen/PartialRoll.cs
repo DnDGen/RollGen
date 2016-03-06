@@ -17,6 +17,10 @@ namespace RollGen
         public int d(int die) => IndividualRolls(die).Sum();
         public abstract IEnumerable<int> IndividualRolls(int die);
         public IEnumerable<int> KeepIndividualRolls(IEnumerable<int> rolls, int keep)
-            => rolls.Count() == keep ? rolls : rolls.OrderByDescending(r => r).Take(keep);
+        {
+            if (rolls.Count() == keep)
+                return rolls;
+            return rolls.OrderByDescending(r => r).Take(keep);
+        }
     }
 }
