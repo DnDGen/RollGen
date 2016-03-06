@@ -8,6 +8,6 @@
         T Evaluate<T>(string expression);
         string ReplaceRollsWithSum(string expression);
         bool ContainsRoll(string expression);
-        string ReplaceExpressionWithTotal(string expression);
+        string ReplaceExpressionWithTotal(string expression, bool lenient = false);
     }
 }

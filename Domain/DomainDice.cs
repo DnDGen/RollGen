@@ -8,6 +8,7 @@ namespace RollGen.Domain
     public class DomainDice : Dice
     {
         private Regex rollRegex;
+        private Regex lenientRollRegex;
         private Regex expressionRegex;
         private ExpressionEvaluator expressionEvaluator;
         private PartialRollFactory partialRollFactory;
@@ -18,6 +19,7 @@ namespace RollGen.Domain
             this.partialRollFactory = partialRollFactory;
 
             rollRegex = new Regex("(?:(?:\\d* +)|(?:\\d+ *)|^)d *\\d+");
+            lenientRollRegex = new Regex("\\d* *d *\\d+");
             expressionRegex = new Regex("(?:[-+]?\\d*\\.?\\d+[%/\\+\\-\\*])+(?:[-+]?\\d*\\.?\\d+)");
         }
 
@@ -41,7 +43,7 @@ namespace RollGen.Domain
 
         public int Roll(string roll)
         {
-            var expression = ReplaceExpressionWithTotal(roll);
+            var expression = ReplaceExpressionWithTotal(roll, true);
             return Evaluate<int>(expression);
         }
 
@@ -87,9 +89,12 @@ namespace RollGen.Domain
             return match.Success;
         }
 
-        public string ReplaceExpressionWithTotal(string expression)
+        private string ReplaceDiceExpression(string expression, bool lenient = false) =>
+            Replace(expression, lenient ? lenientRollRegex : rollRegex, s => CreateTotalOfRolls(s));
+
+        public string ReplaceExpressionWithTotal(string expression, bool lenient = false)
         {
-            expression = Replace(expression, rollRegex, s => CreateTotalOfRolls(s));
+            expression = ReplaceDiceExpression(expression, lenient);
             expression = Replace(expression, expressionRegex, Evaluate);
 
             return expression;
