@@ -35,8 +35,8 @@ namespace RollGen.Domain
             foreach (Match match in regex.Matches(str))
             {
                 var m = match.Groups[1].Value;
-                T evaluated_match = Evaluate<T>(ReplaceDiceExpression(m, true));
-                str = ReplaceFirst(str, openexpr+m+closeexpr, evaluated_match.ToString());
+                var unevaluated_match = Evaluate(ReplaceDiceExpression(m, true));
+                str = ReplaceFirst(str, openexpr+m+closeexpr, BooleanOrType<T>(unevaluated_match).ToString());
             }
             return openexprescape == null ? str : str.Replace(openexprescape+openexpr, openexpr);
         }
@@ -61,14 +61,14 @@ namespace RollGen.Domain
         }
 
         public T Evaluate<T>(string expression)
-        {
-            var rawEvaluatedExpression = Evaluate(expression);
+            => ChangeType<T>(Evaluate(expression));
 
-            if (rawEvaluatedExpression is T)
-                return (T)rawEvaluatedExpression;
+        public T ChangeType<T>(object rawEvaluatedExpression)
+            => (T)(rawEvaluatedExpression is T ? rawEvaluatedExpression : Convert.ChangeType(rawEvaluatedExpression, typeof(T)));
 
-            return (T)Convert.ChangeType(rawEvaluatedExpression, typeof(T));
-        }
+        /// <summary>Returns a string of the provided object as boolean, if it is one, otherwise of Type T.</summary>
+        public string BooleanOrType<T>(object rawEvaluatedExpression)
+            => (rawEvaluatedExpression is bool ? rawEvaluatedExpression : ChangeType<T>(rawEvaluatedExpression)).ToString();
 
         public string ReplaceRollsWithSum(string expression)
         {
