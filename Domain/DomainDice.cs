@@ -106,18 +106,23 @@ namespace RollGen.Domain
             return rolls.Sum();
         }
 
+        private string ReplaceFirst(string input, string to_replace, string replacement)
+        {
+            var index = input.IndexOf(to_replace);
+            input = input.Remove(index, to_replace.Length);
+            input = input.Insert(index, replacement);
+            return input;
+        }
+
         private string Replace(string expression, Regex regex, Func<string, object> createReplacement)
         {
             var matches = regex.Matches(expression);
 
-            foreach (var match in matches)
+            foreach (Match match in matches)
             {
-                var matchValue = match.ToString().Trim();
-                var matchIndex = expression.IndexOf(matchValue);
+                var matchValue = match.Value.Trim();
                 var replacement = createReplacement(matchValue);
-
-                expression = expression.Remove(matchIndex, matchValue.Length);
-                expression = expression.Insert(matchIndex, replacement.ToString());
+                expression = ReplaceFirst(expression, matchValue, replacement.ToString());
             }
 
             return expression;
