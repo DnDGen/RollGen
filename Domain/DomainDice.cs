@@ -17,8 +17,8 @@ namespace RollGen.Domain
             this.expressionEvaluator = expressionEvaluator;
             this.partialRollFactory = partialRollFactory;
 
-            rollRegex = new Regex("((\\d* +)|(\\d+ *)|(^))d *\\d+");
-            expressionRegex = new Regex("([-+]?[0-9]*\\.?[0-9]+[%\\/\\+\\-\\*])+([-+]?[0-9]*\\.?[0-9]+)");
+            rollRegex = new Regex("(?:(?:\\d* +)|(?:\\d+ *)|^)d *\\d+");
+            expressionRegex = new Regex("(?:[-+]?\\d*\\.?\\d+[%/\\+\\-\\*])+(?:[-+]?\\d*\\.?\\d+)");
         }
 
         public PartialRoll Roll(int quantity = 1)
