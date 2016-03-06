@@ -95,11 +95,9 @@ namespace RollGen.Domain
             return Roll(quantity).IndividualRolls(die);
         }
 
-        public bool ContainsRoll(string expression)
-        {
-            var match = rollRegex.Match(expression);
-            return match.Success;
-        }
+
+        public bool ContainsRoll(string expression, bool lenient = false) =>
+            (lenient ? lenientRollRegex : rollRegex).IsMatch(expression);
 
         private string ReplaceDiceExpression(string expression, bool lenient = false) =>
             Replace(expression, lenient ? lenientRollRegex : rollRegex, s => CreateTotalOfRolls(s));

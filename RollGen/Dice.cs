@@ -14,7 +14,7 @@
         /// <param name="openexprescape">Prefix openexpr with this to have the replacer ignore it. If null, there's no escape.</param>
         string ReplaceWrappedExpressions<T>(string str, string openexpr = "{", string closeexpr = "}", char? openexprescape = '\\');
         string ReplaceRollsWithSum(string expression);
-        bool ContainsRoll(string expression);
+        bool ContainsRoll(string expression, bool lenient = false);
         string ReplaceExpressionWithTotal(string expression, bool lenient = false);
     }
 }
