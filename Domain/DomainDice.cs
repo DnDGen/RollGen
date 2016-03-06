@@ -18,8 +18,9 @@ namespace RollGen.Domain
             this.expressionEvaluator = expressionEvaluator;
             this.partialRollFactory = partialRollFactory;
 
-            rollRegex = new Regex("(?:(?:\\d* +)|(?:\\d+ *)|^)d *\\d+");
-            lenientRollRegex = new Regex("\\d* *d *\\d+");
+            const string roll_common_regex = "d *\\d+(?: *k *\\d+)?";
+            rollRegex = new Regex($"(?:(?:\\d* +)|(?:\\d+ *)|^){roll_common_regex}");
+            lenientRollRegex = new Regex($"\\d* *{roll_common_regex}");
             expressionRegex = new Regex("(?:[-+]?\\d*\\.?\\d+[%/\\+\\-\\*])+(?:[-+]?\\d*\\.?\\d+)");
         }
 
@@ -88,16 +89,21 @@ namespace RollGen.Domain
 
         private IEnumerable<int> GetIndividualRolls(string roll)
         {
-            var sections = roll.Split('d');
+            var sections = roll.Split('d', 'k');
             var die = Convert.ToInt32(sections[1]);
             var quantity = 1;
 
             if (string.IsNullOrEmpty(sections[0]) == false)
                 quantity = Convert.ToInt32(sections[0]);
 
-            return Roll(quantity).IndividualRolls(die);
-        }
+            var pr = Roll(quantity);
+            var dice = pr.IndividualRolls(die);
 
+            if (sections.Length == 3 && !sections[2].Equals(string.Empty))
+                dice = pr.KeepIndividualRolls(dice, Convert.ToInt32(sections[2]));
+
+            return dice;
+        }
 
         public bool ContainsRoll(string expression, bool lenient = false) =>
             (lenient ? lenientRollRegex : rollRegex).IsMatch(expression);
