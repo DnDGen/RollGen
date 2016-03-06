@@ -100,7 +100,7 @@ namespace RollGen.Test.Unit
             mockPartialRollWithQuantity.Setup(r => r.IndividualRolls(66)).Returns(new[] { 90210 });
 
             var expression = dice.ReplaceRollsWithSum("  92    d  66   ");
-            Assert.That(expression, Is.EqualTo("(90210)"));
+            Assert.That(expression, Is.EqualTo("90210"));
         }
 
         [Test]
@@ -236,31 +236,31 @@ namespace RollGen.Test.Unit
             Assert.That(() => dice.Evaluate<DiceTests>("expression"), Throws.InstanceOf<InvalidCastException>());
         }
 
-        [TestCase("1d2", "(2)")]
+        [TestCase("1d2", "2")]
         [TestCase("2d3", "(3 + 2)")]
         [TestCase("1+2d3", "1+(3 + 2)")]
-        [TestCase("1d2+3", "(2)+3")]
-        [TestCase("1d2+3d4", "(2)+(4 + 3 + 2)")]
+        [TestCase("1d2+3", "2+3")]
+        [TestCase("1d2+3d4", "2+(4 + 3 + 2)")]
         [TestCase("1+2d3-4d6*5", "1+(3 + 2)-(6 + 5 + 4 + 3)*5")]
         [TestCase("1+2d3-4d5*6", "1+(3 + 2)-(5 + 4 + 3 + 2)*6")]
         [TestCase("1+2d3-2d3/4", "1+(3 + 2)-(3 + 2)/4")]
         [TestCase("1+2d3-2d3*4/5", "1+(3 + 2)-(3 + 2)*4/5")]
-        [TestCase("d2", "(2)")]
-        [TestCase("I want to roll a d2.", "I want to roll a (2).")]
-        [TestCase("I want to roll 1 d2.", "I want to roll (2).")]
+        [TestCase("d2", "2")]
+        [TestCase("I want to roll a d2.", "I want to roll a 2.")]
+        [TestCase("I want to roll 1 d2.", "I want to roll 2.")]
         [TestCase("1+2", "1+2")]
-        [TestCase("  1  d     2    ", "(2)")]
+        [TestCase("  1  d     2    ", "2")]
         [TestCase("one d two", "one d two")]
         [TestCase("other things", "other things")]
-        [TestCase("Contains 1d6+2 ghouls and 2d4 zombies", "Contains (6)+2 ghouls and (4 + 3) zombies")]
-        [TestCase("Contains 1d6+2 ghouls, 1d4+1 skeletons, and 2d4 zombies", "Contains (6)+2 ghouls, (4)+1 skeletons, and (4 + 3) zombies")]
-        [TestCase("Hydra (1d4+4 heads)", "Hydra ((4)+4 heads)")]
+        [TestCase("Contains 1d6+2 ghouls and 2d4 zombies", "Contains 6+2 ghouls and (4 + 3) zombies")]
+        [TestCase("Contains 1d6+2 ghouls, 1d4+1 skeletons, and 2d4 zombies", "Contains 6+2 ghouls, 4+1 skeletons, and (4 + 3) zombies")]
+        [TestCase("Hydra (1d4+4 heads)", "Hydra (4+4 heads)")]
         [TestCase("Hydra (10+2 heads)", "Hydra (10+2 heads)")]
         [TestCase("6d6 fire damage", "(6 + 5 + 4 + 3 + 2 + 1) fire damage")]
-        [TestCase("I hit for 1d4", "I hit for (4)")]
+        [TestCase("I hit for 1d4", "I hit for 4")]
         [TestCase("I found 5 golden rings, 4 calling birds, 3 french hens, 2 turtle doves, and 1 partridge in a pear tree",
             "I found 5 golden rings, 4 calling birds, 3 french hens, 2 turtle doves, and 1 partridge in a pear tree")]
-        [TestCase("I am 1d100% confident", "I am (100)% confident")]
+        [TestCase("I am 1d100% confident", "I am 100% confident")]
         [TestCase("Fred2 has 4d16 health.", "Fred2 has (16 + 15 + 14 + 13) health.")]
         [TestCase("Fred2", "Fred2")]
         public void ReplaceRollsInExpressionWithSums(string roll, string rolled)
