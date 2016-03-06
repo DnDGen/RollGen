@@ -44,6 +44,10 @@ namespace RollGen.Test.Unit
             throw new ArgumentException("This expression was not set up to be parsed");
         }
 
+        private void SetupToEval() =>
+            mockExpressionEvaluator.Setup(e => e.Evaluate(It.IsAny<string>()))
+                .Returns((string e) => Albatross.Expression.Parser.GetParser().Compile(e).EvalValue(null));
+
         [Test]
         public void ReturnPartialRoll()
         {
@@ -295,6 +299,72 @@ namespace RollGen.Test.Unit
         public void ExpressionContainsRoll(string expression, bool containsRoll)
         {
             Assert.That(dice.ContainsRoll(expression), Is.EqualTo(containsRoll));
+        }
+
+        [TestCase("{1+2d3}-{2d3}", "6-5")]
+        [TestCase("{1+2d3-2d3*4/5}", "2")]
+        [TestCase("{d2}", "2")]
+        [TestCase("I want to roll a {d2}.", "I want to roll a 2.")]
+        [TestCase("I want to roll {1 d2}.", "I want to roll 2.")]
+        [TestCase("1+2", "1+2")]
+        [TestCase("{1+2}", "3")]
+        [TestCase(" { 1  d     2   } ", " 2 ")]
+        [TestCase("{  1  d     2    }", "2")]
+        [TestCase("one d two", "one d two")]
+        [TestCase("other things", "other things")]
+        [TestCase("Contains {1d6+2} ghouls and {2d4} zombies", "Contains 8 ghouls and 7 zombies")]
+        [TestCase("Contains {1d6+2} ghouls, {1d4+1} skeletons, and {2d4} zombies", "Contains 8 ghouls, 5 skeletons, and 7 zombies")]
+        [TestCase("Hydra ({1d4+4} heads)", "Hydra (8 heads)")]
+        [TestCase("Hydra ({10+2} heads)", "Hydra (12 heads)")]
+        [TestCase("{6d6} fire damage", "21 fire damage")]
+        [TestCase("I hit for {1d4}", "I hit for 4")]
+        [TestCase("I found 5 golden rings, 4 calling birds, 3 french hens, 2 turtle doves, and 1 partridge in a pear tree",
+            "I found 5 golden rings, 4 calling birds, 3 french hens, 2 turtle doves, and 1 partridge in a pear tree")]
+        [TestCase("I am {1d100}% confident", "I am 100% confident")]
+        [TestCase("Fred2 has {4d16} health.", "Fred2 has 58 health.")]
+        [TestCase("Fred2", "Fred2")]
+        [TestCase("Bark \\{", "Bark {")]
+        [TestCase("The druid attacks with his Flame Blade, dealing {1d8+min(4/2, 10)} damage.", "The druid attacks with his Flame Blade, dealing 10 damage.")]
+        [TestCase("{d5+d2}", "7")]
+        public void ReplaceWrappedExpressions(string roll, string rolled)
+        {
+            mockPartialRoll.Setup(r => r.IndividualRolls(It.IsAny<int>())).Returns((int d) => BuildIndividualRolls(d));
+            SetupToEval();
+
+            var result = dice.ReplaceWrappedExpressions<int>(roll);
+            Assert.That(result, Is.EqualTo(rolled));
+        }
+
+        [TestCase("Bark {1d1/2}", "Bark 0.5")]
+        public void ReplaceWrappedExpressionsDouble(string roll, string rolled)
+        {
+            mockPartialRoll.Setup(r => r.IndividualRolls(It.IsAny<int>())).Returns((int d) => BuildIndividualRolls(d));
+            SetupToEval();
+
+            var result = dice.ReplaceWrappedExpressions<double>(roll);
+            Assert.That(result, Is.EqualTo(rolled));
+        }
+
+        [TestCase("Bark <1d4+4>", "Bark 8", "<", ">")]
+        [TestCase("Bark [[1d4+4]]", "Bark 8", "[[", "]]")]
+        [TestCase("Bark {1d4+4}", "Bark {1d4+4}", "[[", "]]")]
+        public void ReplaceWrappedExpressionsAlternateWrap(string roll, string rolled, string openexpr, string closeexpr)
+        {
+            mockPartialRoll.Setup(r => r.IndividualRolls(It.IsAny<int>())).Returns((int d) => BuildIndividualRolls(d));
+            SetupToEval();
+
+            var result = dice.ReplaceWrappedExpressions<double>(roll, openexpr, closeexpr);
+            Assert.That(result, Is.EqualTo(rolled));
+        }
+
+        [TestCase("Bark \\{1d4+4}", "Bark \\8")]
+        public void ReplaceWrappedExpressionsNoEscape(string roll, string rolled)
+        {
+            mockPartialRoll.Setup(r => r.IndividualRolls(It.IsAny<int>())).Returns((int d) => BuildIndividualRolls(d));
+            SetupToEval();
+
+            var result = dice.ReplaceWrappedExpressions<int>(roll, openexprescape: null);
+            Assert.That(result, Is.EqualTo(rolled));
         }
 
         private IEnumerable<int> BuildIndividualRolls(int die)

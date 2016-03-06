@@ -28,6 +28,18 @@ namespace RollGen.Domain
             return partialRollFactory.Build(quantity);
         }
 
+        public string ReplaceWrappedExpressions<T>(string str, string openexpr = "{", string closeexpr = "}", char? openexprescape = '\\')
+        {
+            var regex = new Regex($"{(openexprescape != null ? $"(?:[^{Regex.Escape(openexprescape.ToString())}]|^)" : "")}{Regex.Escape(openexpr)}(.*?){Regex.Escape(closeexpr)}");
+            foreach (Match match in regex.Matches(str))
+            {
+                var m = match.Groups[1].Value;
+                T evaluated_match = Evaluate<T>(ReplaceDiceExpression(m, true));
+                str = ReplaceFirst(str, openexpr+m+closeexpr, evaluated_match.ToString());
+            }
+            return openexprescape == null ? str : str.Replace(openexprescape+openexpr, openexpr);
+        }
+
         public object Evaluate(string expression)
         {
             var match = rollRegex.Match(expression);
