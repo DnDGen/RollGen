@@ -29,16 +29,30 @@ namespace RollGen.Domain
             return partialRollFactory.Build(quantity);
         }
 
-        public string ReplaceWrappedExpressions<T>(string str, string openexpr = "{", string closeexpr = "}", char? openexprescape = '\\')
+        public string ReplaceWrappedExpressions<T>(string source, string expressionOpen = "{", string expressionClose = "}", char? expressionOpenEscape = '\\')
         {
-            var regex = new Regex($"{(openexprescape != null ? $"(?:[^{Regex.Escape(openexprescape.ToString())}]|^)" : "")}{Regex.Escape(openexpr)}(.*?){Regex.Escape(closeexpr)}");
-            foreach (Match match in regex.Matches(str))
+            var pattern = $"{Regex.Escape(expressionOpen)}(.*?){Regex.Escape(expressionClose)}";
+
+            if (expressionOpenEscape != null)
+                pattern = $"(?:[^{Regex.Escape(expressionOpenEscape.ToString())}]|^)" + pattern;
+
+            var regex = new Regex(pattern);
+
+            foreach (Match match in regex.Matches(source))
             {
-                var m = match.Groups[1].Value;
-                var unevaluated_match = Evaluate(ReplaceDiceExpression(m, true));
-                str = ReplaceFirst(str, openexpr+m+closeexpr, BooleanOrType<T>(unevaluated_match).ToString());
+                var matchGroupValue = match.Groups[1].Value;
+                var lenientReplacedDice = ReplaceDiceExpression(matchGroupValue, true);
+                var unevaluatedMatch = Evaluate(lenientReplacedDice);
+                var target = expressionOpen + matchGroupValue + expressionClose;
+                var replacement = BooleanOrType<T>(unevaluatedMatch).ToString();
+
+                source = ReplaceFirst(source, target, replacement);
             }
-            return openexprescape == null ? str : str.Replace(openexprescape+openexpr, openexpr);
+
+            if (expressionOpenEscape == null)
+                return source;
+
+            return source.Replace(expressionOpenEscape + expressionOpen, expressionOpen);
         }
 
         public object Evaluate(string expression)
@@ -61,14 +75,27 @@ namespace RollGen.Domain
         }
 
         public T Evaluate<T>(string expression)
-            => ChangeType<T>(Evaluate(expression));
+        {
+            var evaluation = Evaluate(expression);
+            return ChangeType<T>(evaluation);
+        }
 
         public T ChangeType<T>(object rawEvaluatedExpression)
-            => (T)(rawEvaluatedExpression is T ? rawEvaluatedExpression : Convert.ChangeType(rawEvaluatedExpression, typeof(T)));
+        {
+            if (rawEvaluatedExpression is T)
+                return (T)rawEvaluatedExpression;
+
+            return (T)Convert.ChangeType(rawEvaluatedExpression, typeof(T));
+        }
 
         /// <summary>Returns a string of the provided object as boolean, if it is one, otherwise of Type T.</summary>
         public string BooleanOrType<T>(object rawEvaluatedExpression)
-            => (rawEvaluatedExpression is bool ? rawEvaluatedExpression : ChangeType<T>(rawEvaluatedExpression)).ToString();
+        {
+            if (rawEvaluatedExpression is bool)
+                return rawEvaluatedExpression.ToString();
+
+            return ChangeType<T>(rawEvaluatedExpression).ToString();
+        }
 
         public string ReplaceRollsWithSum(string expression)
         {
@@ -80,9 +107,15 @@ namespace RollGen.Domain
         private string CreateSumOfRolls(string roll)
         {
             var rolls = GetIndividualRolls(roll);
+
+            if (rolls.Any() == false)
+                return "0";
+
             var count = rolls.Count();
-            if (count <= 1)
-                return count == 1 ? rolls.ElementAt(0).ToString() : "0";
+
+            if (count == 1)
+                return rolls.First().ToString();
+
             var sumOfRolls = string.Join(" + ", rolls);
             return string.Format("({0})", sumOfRolls);
         }
@@ -96,20 +129,30 @@ namespace RollGen.Domain
             if (string.IsNullOrEmpty(sections[0]) == false)
                 quantity = Convert.ToInt32(sections[0]);
 
-            var pr = Roll(quantity);
-            var dice = pr.IndividualRolls(die);
+            var partialRoll = Roll(quantity);
+            var dice = partialRoll.IndividualRolls(die);
 
             if (sections.Length == 3 && !sections[2].Equals(string.Empty))
-                dice = pr.KeepIndividualRolls(dice, Convert.ToInt32(sections[2]));
+                dice = partialRoll.KeepIndividualRolls(dice, Convert.ToInt32(sections[2]));
 
             return dice;
         }
 
-        public bool ContainsRoll(string expression, bool lenient = false) =>
-            (lenient ? lenientRollRegex : rollRegex).IsMatch(expression);
+        public bool ContainsRoll(string expression, bool lenient = false)
+        {
+            if (lenient)
+                return lenientRollRegex.IsMatch(expression);
 
-        private string ReplaceDiceExpression(string expression, bool lenient = false) =>
-            Replace(expression, lenient ? lenientRollRegex : rollRegex, s => CreateTotalOfRolls(s));
+            return rollRegex.IsMatch(expression);
+        }
+
+        private string ReplaceDiceExpression(string expression, bool lenient = false)
+        {
+            if (lenient)
+                return Replace(expression, lenientRollRegex, s => CreateTotalOfRolls(s));
+
+            return Replace(expression, rollRegex, s => CreateTotalOfRolls(s));
+        }
 
         public string ReplaceExpressionWithTotal(string expression, bool lenient = false)
         {
@@ -125,12 +168,12 @@ namespace RollGen.Domain
             return rolls.Sum();
         }
 
-        private string ReplaceFirst(string input, string to_replace, string replacement)
+        private string ReplaceFirst(string source, string target, string replacement)
         {
-            var index = input.IndexOf(to_replace);
-            input = input.Remove(index, to_replace.Length);
-            input = input.Insert(index, replacement);
-            return input;
+            var index = source.IndexOf(target);
+            source = source.Remove(index, target.Length);
+            source = source.Insert(index, replacement);
+            return source;
         }
 
         private string Replace(string expression, Regex regex, Func<string, object> createReplacement)
