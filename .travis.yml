@@ -4,7 +4,7 @@ install:
   - nuget restore RollGen.sln
   - nuget install NUnit.Runners -OutputDirectory testrunner
 script:
-  - xbuild RollGen.sln /p:TargetFrameworkVersion="v4.5" /p:Configuration=Release
-  - mono ./testrunner/NUnit.Console.*/tools/nunit3-console.exe ./Tests/Unit/bin/Release/RollGen.Test.Unit.dll
-  - mono ./testrunner/NUnit.Console.*/tools/nunit3-console.exe ./Tests/Integration/Bootstrap/bin/Release/RollGen.Tests.Integration.Bootstrap.dll
-  - mono ./testrunner/NUnit.Console.*/tools/nunit3-console.exe ./Tests/Integration/Dice/bin/Release/RollGen.Tests.Integration.Rolls.dll
+  - xbuild RollGen.sln /p:TargetFrameworkVersion="v4.5" /p:Configuration=Stress
+  - mono ./testrunner/NUnit.ConsoleRunner.*/tools/nunit3-console.exe ./Tests/Unit/bin/Stress/RollGen.Test.Unit.dll
+  - mono ./testrunner/NUnit.ConsoleRunner.*/tools/nunit3-console.exe ./Tests/Integration/Bootstrap/bin/Stress/RollGen.Tests.Integration.Bootstrap.dll
+  - mono ./testrunner/NUnit.ConsoleRunner.*/tools/nunit3-console.exe ./Tests/Integration/Stress/bin/Stress/RollGen.Tests.Integration.Stress.dll

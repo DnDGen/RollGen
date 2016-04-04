@@ -3,26 +3,29 @@ using NUnit.Framework;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace RollGen.Tests.Integration.Rolls
+namespace RollGen.Tests.Integration.Stress
 {
     [TestFixture]
-    public class dTests : DiceTests
+    public abstract class ProvidedDiceTests : StressTests
     {
         [Inject]
         public Dice Dice { get; set; }
 
-        [TestCase(9266)]
-        [TestCase(42)]
-        [TestCase(7)]
-        public void FullRangeHit(int maximum)
+        protected abstract int maximum { get; }
+
+        public abstract void FullRangeHit();
+
+        protected void AssertFullRangeHit()
         {
             var rolls = new HashSet<int>();
-            while (LoopShouldKeepRunning() && rolls.Count < maximum)
-                rolls.Add(Dice.Roll().d(maximum));
+            while (TestShouldKeepRunning() && rolls.Count < maximum)
+                rolls.Add(GetRoll());
 
             Assert.That(rolls.Min(), Is.EqualTo(1));
             Assert.That(rolls.Max(), Is.EqualTo(maximum));
             Assert.That(rolls.Count, Is.EqualTo(maximum));
         }
+
+        protected abstract int GetRoll();
     }
 }

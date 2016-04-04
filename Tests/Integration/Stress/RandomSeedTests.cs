@@ -3,10 +3,10 @@ using NUnit.Framework;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace RollGen.Tests.Integration.Rolls
+namespace RollGen.Tests.Integration.Stress
 {
     [TestFixture]
-    public class RandomSeedTests : DiceTests
+    public class RandomSeedTests : StressTests
     {
         [Inject]
         public Dice Dice1 { get; set; }

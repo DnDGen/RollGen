@@ -2,10 +2,10 @@
 using NUnit.Framework;
 using System;
 
-namespace RollGen.Tests.Integration.Rolls
+namespace RollGen.Tests.Integration.Stress
 {
     [TestFixture]
-    public class ExpressionTests : DiceTests
+    public class ExpressionTests : StressTests
     {
         [Inject]
         public Dice Dice { get; set; }

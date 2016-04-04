@@ -7,8 +7,8 @@
     <ProjectGuid>{41D20EC2-8B21-422F-AAFA-3EBC4CDCF792}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>RollGen.Tests.Integration.Rolls</RootNamespace>
-    <AssemblyName>RollGen.Tests.Integration.Rolls</AssemblyName>
+    <RootNamespace>RollGen.Tests.Integration.Stress</RootNamespace>
+    <AssemblyName>RollGen.Tests.Integration.Stress</AssemblyName>
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -29,6 +29,15 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Stress|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Stress\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;STRESS</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Ninject">
@@ -55,7 +64,7 @@
     <Compile Include="d4Tests.cs" />
     <Compile Include="d6Tests.cs" />
     <Compile Include="d8Tests.cs" />
-    <Compile Include="DiceTests.cs" />
+    <Compile Include="StressTests.cs" />
     <Compile Include="ExpressionTests.cs" />
     <Compile Include="PercentileTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -1,14 +1,10 @@
-﻿using Ninject;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 
-namespace RollGen.Tests.Integration.Rolls
+namespace RollGen.Tests.Integration.Stress
 {
     [TestFixture]
     public class d12Tests : ProvidedDiceTests
     {
-        [Inject]
-        public Dice Dice { get; set; }
-
         protected override int maximum
         {
             get { return 12; }
@@ -17,6 +13,12 @@ namespace RollGen.Tests.Integration.Rolls
         protected override int GetRoll()
         {
             return Dice.Roll().d12();
+        }
+
+        [Test]
+        public override void FullRangeHit()
+        {
+            AssertFullRangeHit();
         }
     }
 }
