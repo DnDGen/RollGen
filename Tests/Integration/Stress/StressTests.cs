@@ -52,12 +52,6 @@ namespace RollGen.Tests.Integration.Stress
             Stopwatch.Reset();
         }
 
-        protected bool TestShouldKeepRunning()
-        {
-            iterations++;
-            return iterations < ConfidentIterations && Stopwatch.Elapsed.TotalSeconds < timeLimitInSeconds;
-        }
-
         protected void Stress(Action makeAssertions)
         {
             do makeAssertions();
@@ -67,6 +61,23 @@ namespace RollGen.Tests.Integration.Stress
 
             if (Stopwatch.Elapsed.TotalSeconds > timeLimitInSeconds + 1)
                 Assert.Fail("Something took way too long");
+        }
+
+        private bool TestShouldKeepRunning()
+        {
+            iterations++;
+            return iterations < ConfidentIterations && Stopwatch.Elapsed.TotalSeconds < timeLimitInSeconds;
+        }
+
+        protected void GenerateOrFail(Action generate, Func<bool> isValid)
+        {
+            do generate();
+            while (TestShouldKeepRunning() && !isValid());
+
+            Console.WriteLine($"Generation complete after {Stopwatch.Elapsed} and {iterations} iterations");
+
+            if (TestShouldKeepRunning() == false && !isValid())
+                Assert.Fail("Stress test timed out.");
         }
     }
 }

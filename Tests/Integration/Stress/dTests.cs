@@ -17,8 +17,7 @@ namespace RollGen.Tests.Integration.Stress
         public void FullRangeHit(int maximum)
         {
             var rolls = new HashSet<int>();
-            while (TestShouldKeepRunning() && rolls.Count < maximum)
-                rolls.Add(Dice.Roll().d(maximum));
+            GenerateOrFail(() => rolls.Add(Dice.Roll().d(maximum)), () => rolls.Count == maximum);
 
             Assert.That(rolls.Min(), Is.EqualTo(1));
             Assert.That(rolls.Max(), Is.EqualTo(maximum));

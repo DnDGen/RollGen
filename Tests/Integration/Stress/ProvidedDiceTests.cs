@@ -18,8 +18,7 @@ namespace RollGen.Tests.Integration.Stress
         protected void AssertFullRangeHit()
         {
             var rolls = new HashSet<int>();
-            while (TestShouldKeepRunning() && rolls.Count < maximum)
-                rolls.Add(GetRoll());
+            GenerateOrFail(() => rolls.Add(GetRoll()), () => rolls.Count == maximum);
 
             Assert.That(rolls.Min(), Is.EqualTo(1));
             Assert.That(rolls.Max(), Is.EqualTo(maximum));
