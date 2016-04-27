@@ -14,14 +14,14 @@ namespace RollGen.Tests.Integration.Stress
         [TestCase(9266)]
         [TestCase(42)]
         [TestCase(7)]
-        public void FullRangeHit(int maximum)
+        public void FullRangeHit(int die)
         {
             var rolls = new HashSet<int>();
-            GenerateOrFail(() => rolls.Add(Dice.Roll().d(maximum)), () => rolls.Count == maximum);
+            GenerateOrFail(() => rolls.Add(Dice.Roll().d(die)), () => rolls.Count == die);
 
             Assert.That(rolls.Min(), Is.EqualTo(1));
-            Assert.That(rolls.Max(), Is.EqualTo(maximum));
-            Assert.That(rolls.Count, Is.EqualTo(maximum));
+            Assert.That(rolls.Max(), Is.EqualTo(die));
+            Assert.That(rolls.Count, Is.EqualTo(die));
         }
     }
 }
