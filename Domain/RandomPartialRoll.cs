@@ -16,8 +16,15 @@ namespace RollGen.Domain
 
         public override IEnumerable<int> IndividualRolls(int die)
         {
+            var rolls = new List<int>();
+
             while (quantity-- > 0)
-                yield return random.Next(die) + 1;
+            {
+                var roll = random.Next(die) + 1;
+                rolls.Add(roll);
+            }
+
+            return rolls;
         }
     }
 }

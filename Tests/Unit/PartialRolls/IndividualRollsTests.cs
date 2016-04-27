@@ -64,5 +64,18 @@ namespace RollGen.Test.Unit.PartialRolls
             var rolls = partialRoll.IndividualRolls(9266);
             Assert.That(rolls, Is.Empty);
         }
+
+        [Test]
+        public void CanIterativeOverRollsMultipleTimes()
+        {
+            var count = 0;
+            mockRandom.Setup(r => r.Next(90210)).Returns(() => count++);
+            partialRoll = new RandomPartialRoll(9266, mockRandom.Object);
+
+            var rolls = partialRoll.IndividualRolls(90210);
+            Assert.That(rolls.Count(), Is.EqualTo(9266));
+            Assert.That(rolls.First(), Is.EqualTo(1));
+            Assert.That(rolls.Last(), Is.EqualTo(9266));
+        }
     }
 }
