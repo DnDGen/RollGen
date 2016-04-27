@@ -15,7 +15,11 @@ namespace RollGen.Tests.Integration.Common
 
             var rollGenModuleLoader = new RollGenModuleLoader();
             rollGenModuleLoader.LoadModules(kernel);
+        }
 
+        [SetUp]
+        public void IntegrationTestsSetup()
+        {
             kernel.Inject(this);
         }
 
