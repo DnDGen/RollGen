@@ -5,7 +5,7 @@ namespace RollGen.Tests.Integration.Stress
     [TestFixture]
     public class d6Tests : ProvidedDiceTests
     {
-        protected override int maximum
+        protected override int die
         {
             get { return 6; }
         }
