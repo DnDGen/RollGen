@@ -26,26 +26,33 @@ namespace RollGen.Tests.Integration.Stress
         [Test]
         public void RollsAreDifferentBetweenDice()
         {
-            for (var i = 0; i < ConfidenceIterations; i++)
-            {
-                dice1Rolls.Add(Dice1.Roll().Percentile());
-                dice2Rolls.Add(Dice2.Roll().Percentile());
-            }
+            Stress(PopulateDieRolls);
 
             var different = false;
-            for (var i = 0; i < ConfidenceIterations; i++)
+            for (var i = 0; i < dice1Rolls.Count; i++)
                 different |= dice1Rolls[i] != dice2Rolls[i];
 
             Assert.That(different, Is.True);
         }
 
+        private void PopulateDieRolls()
+        {
+            var firstRoll = Dice1.Roll().Percentile();
+            dice1Rolls.Add(firstRoll);
+
+            var secondRoll = Dice2.Roll().Percentile();
+            dice2Rolls.Add(secondRoll);
+        }
+
         [Test]
         public void RollsAreDifferentBetweenRolls()
         {
-            for (var i = 0; i < ConfidenceIterations; i++)
-                dice1Rolls.Add(Dice1.Roll().Percentile());
+            Stress(PopulateDieRolls);
 
             var distinctRolls = dice1Rolls.Distinct();
+            Assert.That(distinctRolls.Count(), Is.EqualTo(100));
+
+            distinctRolls = dice2Rolls.Distinct();
             Assert.That(distinctRolls.Count(), Is.EqualTo(100));
         }
     }
