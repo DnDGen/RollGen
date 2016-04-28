@@ -3,6 +3,8 @@ using NUnit.Framework;
 using RollGen.Tests.Integration.Common;
 using System;
 using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
 
 namespace RollGen.Tests.Integration.Stress
 {
@@ -12,8 +14,9 @@ namespace RollGen.Tests.Integration.Stress
         [Inject]
         public Stopwatch Stopwatch { get; set; }
 
-        protected const int ConfidenceIterations = 1000000;
+        private const int ConfidentIterations = 1000000;
         private const int TenMinutesInSeconds = 600;
+        private const int TwoHoursInSeconds = 3600 * 2;
 
         private readonly int timeLimitInSeconds;
 
@@ -21,8 +24,16 @@ namespace RollGen.Tests.Integration.Stress
 
         public StressTests()
         {
+            var assembly = Assembly.GetExecutingAssembly();
+            var types = assembly.GetTypes();
+            var methods = types.SelectMany(t => t.GetMethods());
+            var stressTestsCount = methods.Sum(m => m.GetCustomAttributes<TestAttribute>(true).Count());
+            var stressTestCasesCount = methods.Sum(m => m.GetCustomAttributes<TestCaseAttribute>().Count());
+            var stressTestsTotal = stressTestsCount + stressTestCasesCount;
+
+            var twoHourTimeLimitPerTest = TwoHoursInSeconds / stressTestsTotal;
 #if STRESS
-            timeLimitInSeconds = TenMinutesInSeconds - 10;
+            timeLimitInSeconds = Math.Min(twoHourTimeLimitPerTest, TenMinutesInSeconds - 10);
 #else
             timeLimitInSeconds = 1;
 #endif
@@ -41,12 +52,6 @@ namespace RollGen.Tests.Integration.Stress
             Stopwatch.Reset();
         }
 
-        protected bool TestShouldKeepRunning()
-        {
-            iterations++;
-            return iterations < ConfidenceIterations && Stopwatch.Elapsed.TotalSeconds < timeLimitInSeconds;
-        }
-
         protected void Stress(Action makeAssertions)
         {
             do makeAssertions();
@@ -56,6 +61,23 @@ namespace RollGen.Tests.Integration.Stress
 
             if (Stopwatch.Elapsed.TotalSeconds > timeLimitInSeconds + 1)
                 Assert.Fail("Something took way too long");
+        }
+
+        private bool TestShouldKeepRunning()
+        {
+            iterations++;
+            return iterations < ConfidentIterations && Stopwatch.Elapsed.TotalSeconds < timeLimitInSeconds;
+        }
+
+        protected void GenerateOrFail(Action generate, Func<bool> isValid)
+        {
+            do generate();
+            while (TestShouldKeepRunning() && !isValid());
+
+            Console.WriteLine($"Generation complete after {Stopwatch.Elapsed} and {iterations} iterations");
+
+            if (TestShouldKeepRunning() == false && !isValid())
+                Assert.Fail("Stress test timed out.");
         }
     }
 }

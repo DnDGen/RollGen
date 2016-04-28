@@ -48,16 +48,12 @@ namespace RollGen.Tests.Integration.Stress
         [TestCase(10000, 1)]
         [TestCase(100000, 1)]
         [TestCase(1000000, 1)]
-        [TestCase(10000000, 1)] //INFO: Any more than this causes the test to time out, so this is the inclusive upper limit of supported rolls
         [TestCase(1, 10)]
         [TestCase(1, 100)]
         [TestCase(1, 1000)]
         [TestCase(1, 10000)]
         [TestCase(1, 100000)]
         [TestCase(1, 1000000)]
-        [TestCase(1, 10000000)]
-        [TestCase(1, 100000000)]
-        [TestCase(1, 1000000000)] //INFO: Any more than this is a long, not an int, so this is the inclusive upper limit of supported rolls
         [TestCase(10, 10)]
         [TestCase(100, 100)]
         [TestCase(1000, 1000)]
