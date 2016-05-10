@@ -5,20 +5,25 @@ namespace RollGen.Tests.Integration.Stress
     [TestFixture]
     public class d6Tests : ProvidedDiceTests
     {
-        protected override int maximum
+        protected override int die
         {
             get { return 6; }
         }
 
-        protected override int GetRoll()
+        protected override int GetRoll(int quantity)
         {
-            return Dice.Roll().d6();
+            return Dice.Roll(quantity).d6();
         }
 
-        [Test]
-        public override void FullRangeHit()
+        [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(3)]
+        [TestCase(4)]
+        [TestCase(5)]
+        [TestCase(6)]
+        public override void FullRangeHit(int quantity)
         {
-            AssertFullRangeHit();
+            AssertFullRangeHit(quantity);
         }
     }
 }

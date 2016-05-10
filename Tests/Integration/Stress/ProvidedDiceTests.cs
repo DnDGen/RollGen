@@ -11,21 +11,20 @@ namespace RollGen.Tests.Integration.Stress
         [Inject]
         public Dice Dice { get; set; }
 
-        protected abstract int maximum { get; }
+        protected abstract int die { get; }
 
-        public abstract void FullRangeHit();
+        public abstract void FullRangeHit(int quantity);
 
-        protected void AssertFullRangeHit()
+        protected void AssertFullRangeHit(int quantity)
         {
-            var rolls = new HashSet<int>();
-            while (TestShouldKeepRunning() && rolls.Count < maximum)
-                rolls.Add(GetRoll());
+            var expectedCount = die * quantity - (quantity - 1);
+            var rolls = Populate(new HashSet<int>(), () => GetRoll(quantity), expectedCount);
 
-            Assert.That(rolls.Min(), Is.EqualTo(1));
-            Assert.That(rolls.Max(), Is.EqualTo(maximum));
-            Assert.That(rolls.Count, Is.EqualTo(maximum));
+            Assert.That(rolls.Min(), Is.EqualTo(quantity));
+            Assert.That(rolls.Max(), Is.EqualTo(die * quantity));
+            Assert.That(rolls.Count, Is.EqualTo(expectedCount));
         }
 
-        protected abstract int GetRoll();
+        protected abstract int GetRoll(int quantity);
     }
 }

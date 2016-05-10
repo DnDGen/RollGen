@@ -1,6 +1,8 @@
 ﻿using Ninject;
 using NUnit.Framework;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace RollGen.Tests.Integration.Stress
 {
@@ -77,8 +79,46 @@ namespace RollGen.Tests.Integration.Stress
         [TestCase(100000, 100000)]
         public void CauseArithmeticOverflow(int quantity, int die)
         {
+            Stress(() => AssertArithmeticOverflow(quantity, die));
+        }
+
+        private void AssertArithmeticOverflow(int quantity, int die)
+        {
             var rollExpression = string.Format("{0}d{1}", quantity, die);
             Assert.That(() => Dice.Roll(rollExpression), Throws.InstanceOf<OverflowException>());
+        }
+
+        [TestCase("3d6+2", 5, 20)]
+        [TestCase("9d2+66", 75, 84)]
+        [TestCase("1d600 - 4d2", -7, 596)]
+        [TestCase("1337d1", 1337, 1337)]
+        [TestCase("   1d2   +   1d3   -   1d4  ", -2, 4)]
+        [TestCase("1d8 +min(1d4/1d2, 3)", 2, 11)]
+        [TestCase("3 d 3-1 d 2", 1, 8)]
+        [TestCase("1d3*5-(1d5-1)", 1, 15)]
+        [TestCase("1d2*3-(1d3-1)", 1, 6)]
+        [TestCase("1d2*3-1d4", -1, 5)]
+        public void FullRangeHit(string expression, int minimum, int maximum)
+        {
+            var expectedCount = maximum - (minimum - 1);
+            var rolls = Populate(new HashSet<int>(), () => Dice.Roll(expression), expectedCount);
+
+            Assert.That(rolls.Min(), Is.EqualTo(minimum));
+            Assert.That(rolls.Max(), Is.EqualTo(maximum));
+            Assert.That(rolls.Count, Is.EqualTo(expectedCount));
+        }
+
+        [TestCase("1d2*3d4", 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24)]
+        [TestCase("2d3*4", 8, 12, 16, 20, 24)]
+        [TestCase("1d3*5", 5, 10, 15)]
+        [TestCase("1d2*3", 3, 6)]
+        [TestCase("1d3*5-1d4", 1, 2, 3, 4, 6, 7, 8, 9, 11, 12, 13, 14)]
+        public void NonContiguousRangeHit(string expression, params int[] expectedRolls)
+        {
+            var rolls = Populate(new HashSet<int>(), () => Dice.Roll(expression), expectedRolls.Length);
+
+            Assert.That(rolls, Is.EquivalentTo(expectedRolls));
+            Assert.That(expectedRolls, Is.EquivalentTo(rolls));
         }
     }
 }
