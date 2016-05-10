@@ -106,13 +106,13 @@ namespace RollGen.Domain
 
         private string CreateSumOfRolls(string roll)
         {
-            var rolls = GetIndividualRolls(roll).ToArray();
+            var rolls = GetIndividualRolls(roll);
 
-            if (rolls.Length == 0)
+            if (rolls.Any() == false)
                 return "0";
 
-            if (rolls.Length == 1)
-                return rolls[0].ToString();
+            if (rolls.Count() == 1)
+                return rolls.First().ToString();
 
             var sumOfRolls = string.Join(" + ", rolls);
             return $"({sumOfRolls})";

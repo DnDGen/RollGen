@@ -19,11 +19,7 @@ namespace RollGen
 
         public IEnumerable<int> KeepIndividualRolls(IEnumerable<int> rolls, int keep)
         {
-            var _rolls = rolls.ToArray();
-            if (_rolls.Length <= keep)
-                return _rolls;
-
-            return _rolls.OrderByDescending(r => r).Take(keep);
+            return rolls.OrderByDescending(r => r).Take(keep);
         }
     }
 }
