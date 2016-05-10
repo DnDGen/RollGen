@@ -74,7 +74,7 @@ namespace RollGen.Test.Unit.PartialRolls
 
             var rolls = partialRoll.IndividualRolls(90210);
             Assert.That(rolls.Count(), Is.EqualTo(9266));
-            Assert.That(rolls.First(), Is.EqualTo(0));
+            Assert.That(rolls.First(), Is.EqualTo(1));
             Assert.That(rolls.Last(), Is.EqualTo(9266));
         }
     }
