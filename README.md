@@ -31,9 +31,9 @@ Your particular syntax for how the Ninject injection should work will depend on 
 
 ### Installing RollGen
 
-The project is on [Nuget](https://www.nuget.org/packages/D20Dice). Install via the NuGet Package Manager.
+The project is on [Nuget](https://www.nuget.org/packages/DnDGen.RollGen). Install via the NuGet Package Manager.
 
-    PM > Install-Package D20Dice
+    PM > Install-Package DnDGen.RollGen
 
 #### There's RollGen and RollGen.Domain - which do I install?
 
