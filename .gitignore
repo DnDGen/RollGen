@@ -59,6 +59,7 @@ local.properties
 *.tli
 *.tlh
 *.tmp
+*.dll
 *.vspscc
 .builds
 *.dotCover
@@ -99,6 +100,7 @@ publish
 # Others
 [Bb]in
 [Oo]bj
+[Pp]ackages
 sql
 TestResults
 *.Cache
