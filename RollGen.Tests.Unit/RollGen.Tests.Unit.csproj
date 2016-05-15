@@ -70,6 +70,7 @@
   <ItemGroup>
     <Compile Include="AlbatrossExpressionEvaluatorTests.cs" />
     <Compile Include="DiceTests.cs" />
+    <Compile Include="LimitsTests.cs" />
     <Compile Include="PartialRolls\IndividualRollsTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PartialRolls\PercentileTests.cs" />

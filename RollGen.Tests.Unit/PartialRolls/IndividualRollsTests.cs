@@ -1,5 +1,6 @@
 ﻿using Moq;
 using NUnit.Framework;
+using RollGen.Domain;
 using RollGen.Domain.PartialRolls;
 using System;
 using System.Linq;
@@ -24,9 +25,9 @@ namespace RollGen.Tests.Unit.PartialRolls
             partialRoll = new RandomPartialRoll(1, mockRandom.Object);
             mockRandom.Setup(r => r.Next(9266)).Returns(42);
 
-            var rolls = partialRoll.IndividualRolls(9266).ToList();
+            var rolls = partialRoll.IndividualRolls(9266);
             Assert.That(rolls, Contains.Item(43));
-            Assert.That(rolls.Count, Is.EqualTo(1));
+            Assert.That(rolls.Count(), Is.EqualTo(1));
         }
 
         [Test]
@@ -35,10 +36,10 @@ namespace RollGen.Tests.Unit.PartialRolls
             partialRoll = new RandomPartialRoll(2, mockRandom.Object);
             mockRandom.SetupSequence(r => r.Next(7)).Returns(4).Returns(2);
 
-            var rolls = partialRoll.IndividualRolls(7).ToList();
+            var rolls = partialRoll.IndividualRolls(7);
             Assert.That(rolls, Contains.Item(5));
             Assert.That(rolls, Contains.Item(3));
-            Assert.That(rolls.Count, Is.EqualTo(2));
+            Assert.That(rolls.Count(), Is.EqualTo(2));
         }
 
         [Test]
@@ -69,13 +70,31 @@ namespace RollGen.Tests.Unit.PartialRolls
         public void CanIterateOverRollsMultipleTimes()
         {
             var count = 0;
-            mockRandom.Setup(r => r.Next(90210)).Returns(() => count++);
+            mockRandom.Setup(r => r.Next(42)).Returns(() => count++);
             partialRoll = new RandomPartialRoll(9266, mockRandom.Object);
 
-            var rolls = partialRoll.IndividualRolls(90210);
+            var rolls = partialRoll.IndividualRolls(42);
             Assert.That(rolls.Count(), Is.EqualTo(9266));
             Assert.That(rolls.First(), Is.EqualTo(1));
             Assert.That(rolls.Last(), Is.EqualTo(9266));
+        }
+
+        [Test]
+        public void IfDieGreaterThanLimit_ThrowArgumentException()
+        {
+            partialRoll = new RandomPartialRoll(1, mockRandom.Object);
+            Assert.That(() => partialRoll.IndividualRolls(Limits.Die + 1), Throws.InstanceOf<ArgumentException>().With.Message.EqualTo("Cannot roll a die larger than 46,340"));
+        }
+
+        [Test]
+        public void IfDieEqualToLimit_Roll()
+        {
+            partialRoll = new RandomPartialRoll(1, mockRandom.Object);
+            mockRandom.Setup(r => r.Next(Limits.Die)).Returns(9266);
+
+            var rolls = partialRoll.IndividualRolls(Limits.Die);
+            Assert.That(rolls, Contains.Item(9267));
+            Assert.That(rolls.Count(), Is.EqualTo(1));
         }
     }
 }

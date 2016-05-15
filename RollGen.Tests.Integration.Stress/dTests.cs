@@ -1,6 +1,5 @@
 ﻿using Ninject;
 using NUnit.Framework;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -22,6 +21,8 @@ namespace RollGen.Tests.Integration.Stress
         [TestCase(4, 7)]
         [TestCase(5, 7)]
         [TestCase(6, 7)]
+        [TestCase(1, Limits.Die)]
+        [TestCase(Limits.Quantity, 1)]
         public void FullRangeHit(int quantity, int die)
         {
             var expectedCount = die * quantity - (quantity - 1);
@@ -32,47 +33,16 @@ namespace RollGen.Tests.Integration.Stress
             Assert.That(rolls.Count, Is.EqualTo(expectedCount));
         }
 
-        [TestCase(1, 1)]
-        [TestCase(10, 1)]
-        [TestCase(100, 1)]
-        [TestCase(1000, 1)]
-        [TestCase(10000, 1)]
-        [TestCase(100000, 1)]
-        [TestCase(1000000, 1)]
-        [TestCase(10000000, 1)] //INFO: Any more than this causes the list of rolls to throw an OutOfMemoryException, so this is the inclusive upper limit of supported rolls
-        [TestCase(1, 10)]
-        [TestCase(1, 100)]
-        [TestCase(1, 1000)]
-        [TestCase(1, 10000)]
-        [TestCase(1, 100000)]
-        [TestCase(1, 1000000)]
-        [TestCase(1, 10000000)]
-        [TestCase(1, 100000000)]
-        [TestCase(1, 1000000000)] //INFO: Any more than this is a long, not an int, so this is the inclusive upper limit of supported rolls
-        [TestCase(10, 10)]
-        [TestCase(100, 100)]
-        [TestCase(1000, 1000)]
-        [TestCase(10000, 10000)]
-        public void RollWithALargeDieRoll(int quantity, int die)
+        [Test]
+        public void RollWithLargestDieRollPossible()
         {
-            Stress(() => AssertRollWithALargeDieRoll(quantity, die));
+            Stress(AssertRollWithLargestDieRollPossible);
         }
 
-        private void AssertRollWithALargeDieRoll(int quantity, int die)
+        private void AssertRollWithLargestDieRollPossible()
         {
-            var roll = Dice.Roll(quantity).d(die);
-            Assert.That(roll, Is.InRange(quantity, quantity * die));
-        }
-
-        [TestCase(100000, 100000)]
-        public void CauseArithmeticOverflow(int quantity, int die)
-        {
-            Stress(() => AssertArithmeticOverflow(quantity, die));
-        }
-
-        private void AssertArithmeticOverflow(int quantity, int die)
-        {
-            Assert.That(() => Dice.Roll(quantity).d(die), Throws.InstanceOf<OverflowException>());
+            var roll = Dice.Roll(Limits.Quantity).d(Limits.Die);
+            Assert.That(roll, Is.InRange(Limits.Quantity, Limits.Quantity * Limits.Die));
         }
     }
 }

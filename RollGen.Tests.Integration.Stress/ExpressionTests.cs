@@ -1,6 +1,5 @@
 ﻿using Ninject;
 using NUnit.Framework;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -43,49 +42,17 @@ namespace RollGen.Tests.Integration.Stress
             Assert.That(roll, Is.InRange(4, 14));
         }
 
-        [TestCase(1, 1)]
-        [TestCase(10, 1)]
-        [TestCase(100, 1)]
-        [TestCase(1000, 1)]
-        [TestCase(10000, 1)]
-        [TestCase(100000, 1)]
-        [TestCase(1000000, 1)]
-        [TestCase(10000000, 1)] //INFO: Any more than this causes the test to time out, so this is the inclusive upper limit of supported rolls
-        [TestCase(1, 10)]
-        [TestCase(1, 100)]
-        [TestCase(1, 1000)]
-        [TestCase(1, 10000)]
-        [TestCase(1, 100000)]
-        [TestCase(1, 1000000)]
-        [TestCase(1, 10000000)]
-        [TestCase(1, 100000000)]
-        [TestCase(1, 1000000000)] //INFO: Any more than this is a long, not an int, so this is the inclusive upper limit of supported rolls
-        [TestCase(10, 10)]
-        [TestCase(100, 100)]
-        [TestCase(1000, 1000)]
-        [TestCase(10000, 10000)]
-        public void RollExpressionWithALargeDieRoll(int quantity, int die)
+        [Test]
+        public void RollExpressionWithLargestDieRollPossible()
         {
-            Stress(() => AssertExpressionWithALargeDieRoll(quantity, die));
+            Stress(AssertExpressionWithLargestDieRollPossible);
         }
 
-        private void AssertExpressionWithALargeDieRoll(int quantity, int die)
+        private void AssertExpressionWithLargestDieRollPossible()
         {
-            var rollExpression = string.Format("{0}d{1}", quantity, die);
+            var rollExpression = string.Format("{0}d{1}", Limits.Quantity, Limits.Die);
             var roll = Dice.Roll(rollExpression);
-            Assert.That(roll, Is.InRange(quantity, quantity * die));
-        }
-
-        [TestCase(100000, 100000)]
-        public void CauseArithmeticOverflow(int quantity, int die)
-        {
-            Stress(() => AssertArithmeticOverflow(quantity, die));
-        }
-
-        private void AssertArithmeticOverflow(int quantity, int die)
-        {
-            var rollExpression = string.Format("{0}d{1}", quantity, die);
-            Assert.That(() => Dice.Roll(rollExpression), Throws.InstanceOf<OverflowException>());
+            Assert.That(roll, Is.InRange(Limits.Quantity, Limits.Quantity * Limits.Die));
         }
 
         [TestCase("3d6+2", 5, 20)]

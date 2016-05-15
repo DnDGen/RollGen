@@ -28,6 +28,9 @@ namespace RollGen.Domain
 
         public PartialRoll Roll(int quantity = 1)
         {
+            if (quantity > Limits.Quantity)
+                throw new ArgumentException("Cannot roll more than 46,340 die rolls in a single roll");
+
             return partialRollFactory.Build(quantity);
         }
 
@@ -126,16 +129,16 @@ namespace RollGen.Domain
             var die = Convert.ToInt32(sections[1]);
             var quantity = 1;
 
-            if (string.IsNullOrEmpty(sections[0]) == false)
+            if (!string.IsNullOrEmpty(sections[0]))
                 quantity = Convert.ToInt32(sections[0]);
 
             var partialRoll = Roll(quantity);
-            var dice = partialRoll.IndividualRolls(die);
+            var individualRolls = partialRoll.IndividualRolls(die);
 
-            if (sections.Length == 3 && !sections[2].Equals(string.Empty))
-                dice = partialRoll.KeepIndividualRolls(dice, Convert.ToInt32(sections[2]));
+            if (sections.Length == 3 && !string.IsNullOrEmpty(sections[2]))
+                individualRolls = partialRoll.KeepIndividualRolls(individualRolls, Convert.ToInt32(sections[2]));
 
-            return dice;
+            return individualRolls;
         }
 
         public bool ContainsRoll(string expression, bool lenient = false)

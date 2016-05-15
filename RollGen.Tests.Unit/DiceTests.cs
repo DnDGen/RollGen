@@ -5,6 +5,7 @@ using RollGen.Domain.Expressions;
 using RollGen.Domain.PartialRolls;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace RollGen.Tests.Unit
 {
@@ -44,7 +45,7 @@ namespace RollGen.Tests.Unit
             if (int.TryParse(expression, out value))
                 return value;
 
-            throw new ArgumentException("This expression was not set up to be parsed");
+            throw new ArgumentException($"This expression was not set up to be parsed: {expression}");
         }
 
         private IEnumerable<int> BuildIndividualRolls(int die)
@@ -53,7 +54,10 @@ namespace RollGen.Tests.Unit
             var quantity = quantities.Dequeue();
 
             while (quantity-- > 0)
-                rolls.Add(die--);
+            {
+                var roll = Math.Max(1, die--);
+                rolls.Add(roll);
+            }
 
             return rolls;
         }
@@ -461,6 +465,113 @@ namespace RollGen.Tests.Unit
 
             var newExpression = dice.ReplaceExpressionWithTotal(expression);
             Assert.That(newExpression, Is.EqualTo(expectedExpression));
+        }
+
+        [Test]
+        public void IfQuantityGreaterThanLimit_ThrowArgumentException()
+        {
+            Assert.That(() => dice.Roll(Limits.Quantity + 1), Throws.InstanceOf<ArgumentException>().With.Message.EqualTo("Cannot roll more than 46,340 die rolls in a single roll"));
+        }
+
+        [Test]
+        public void IfQuantityEqualToLimit_Roll()
+        {
+            var mockPartialRollWithQuantity = new Mock<PartialRoll>();
+            mockPartialRollFactory.Setup(f => f.Build(Limits.Quantity)).Returns(mockPartialRollWithQuantity.Object);
+
+            var partialRoll = dice.Roll(Limits.Quantity);
+            Assert.That(partialRoll, Is.InstanceOf<PartialRoll>());
+            Assert.That(partialRoll, Is.EqualTo(mockPartialRollWithQuantity.Object));
+        }
+
+        [Test]
+        public void IfExpressionQuantityGreaterThanLimit_ThrowArgumentException()
+        {
+            Assert.That(() => dice.Roll($"{Limits.Quantity + 1}d9266"), Throws.InstanceOf<ArgumentException>().With.Message.EqualTo("Cannot roll more than 46,340 die rolls in a single roll"));
+        }
+
+        [Test]
+        public void IfAnyExpressionQuantityGreaterThanLimit_ThrowArgumentException()
+        {
+            Assert.That(() => dice.Roll($"{Limits.Quantity - 1}d4-{Limits.Quantity + 1}d9266"), Throws.InstanceOf<ArgumentException>().With.Message.EqualTo("Cannot roll more than 46,340 die rolls in a single roll"));
+        }
+
+        [Test]
+        public void IfExpressionQuantityEqualToLimit_Roll()
+        {
+            var mockFirstPartialRoll = new Mock<PartialRoll>();
+            var mockSecondPartialRoll = new Mock<PartialRoll>();
+            mockPartialRollFactory.Setup(f => f.Build(Limits.Quantity)).Returns(mockFirstPartialRoll.Object);
+            mockPartialRollFactory.Setup(f => f.Build(Limits.Quantity - 1)).Returns(mockSecondPartialRoll.Object);
+
+            mockFirstPartialRoll.Setup(r => r.IndividualRolls(9266)).Returns(new[] { 42, 600 });
+            mockSecondPartialRoll.Setup(r => r.IndividualRolls(90210)).Returns(new[] { 1337, 1234 });
+
+            mockExpressionEvaluator.Setup(e => e.Evaluate($"642-4633990210")).Returns(2345);
+
+            var roll = dice.Roll($"{Limits.Quantity}d9266-{Limits.Quantity - 1}90210");
+            Assert.That(roll, Is.EqualTo(2345));
+        }
+
+        [Test]
+        public void IfExpressionQuantityForTotalsGreaterThanLimit_ThrowArgumentException()
+        {
+            Assert.That(() => dice.ReplaceExpressionWithTotal($"I wanna roll {Limits.Quantity + 1}d9266"), Throws.InstanceOf<ArgumentException>().With.Message.EqualTo("Cannot roll more than 46,340 die rolls in a single roll"));
+        }
+
+        [Test]
+        public void IfExpressionQuantityForTotalsEqualToLimit_ReturnTotals()
+        {
+            var newExpression = dice.ReplaceExpressionWithTotal($"I wanna roll {Limits.Quantity}d9266");
+            Assert.That(newExpression, Is.EqualTo("I wanna roll 42971085"));
+        }
+
+        [Test]
+        public void IfExpressionQuantityForSumsGreaterThanLimit_ThrowArgumentException()
+        {
+            Assert.That(() => dice.ReplaceRollsWithSum($"I wanna roll {Limits.Quantity + 1}d9266"), Throws.InstanceOf<ArgumentException>().With.Message.EqualTo("Cannot roll more than 46,340 die rolls in a single roll"));
+        }
+
+        [Test]
+        public void IfAnyExpressionQuantityForSumsGreaterThanLimit_ThrowArgumentException()
+        {
+            Assert.That(() => dice.ReplaceRollsWithSum($"I wanna roll {Limits.Quantity - 1}d9266 - {Limits.Quantity + 1}d9266"), Throws.InstanceOf<ArgumentException>().With.Message.EqualTo("Cannot roll more than 46,340 die rolls in a single roll"));
+        }
+
+        [Test]
+        public void IfExpressionQuantityForSumsEqualToLimit_ReturnSum()
+        {
+            var rolls = Enumerable.Repeat(1, Limits.Quantity);
+            var sum = string.Join(" + ", rolls);
+            var expectedExpression = $"I wanna roll ({sum})";
+
+            var newExpression = dice.ReplaceRollsWithSum($"I wanna roll {Limits.Quantity}d1");
+            Assert.That(newExpression, Is.EqualTo(expectedExpression));
+        }
+
+        [Test]
+        public void IfWrappedExpressionQuantityGreaterThanLimit_ThrowArgumentException()
+        {
+            var expression = string.Format("I wanna roll {{{0}d9266}}", Limits.Quantity + 1);
+            Assert.That(() => dice.ReplaceWrappedExpressions<int>(expression), Throws.InstanceOf<ArgumentException>().With.Message.EqualTo("Cannot roll more than 46,340 die rolls in a single roll"));
+        }
+
+        [Test]
+        public void IfAnyWrappedExpressionQuantityGreaterThanLimit_ThrowArgumentException()
+        {
+            var expression = string.Format("I wanna roll {{{0}d9266-{1}d9266}}", Limits.Quantity - 1, Limits.Quantity + 1);
+            Assert.That(() => dice.ReplaceWrappedExpressions<int>(expression), Throws.InstanceOf<ArgumentException>().With.Message.EqualTo("Cannot roll more than 46,340 die rolls in a single roll"));
+        }
+
+        [Test]
+        public void IfWrappedExpressionQuantityEqualToLimit_ReturnNewExpression()
+        {
+            var expression = string.Format("I wanna roll {{{0}d9266}}", Limits.Quantity);
+
+            mockExpressionEvaluator.Setup(e => e.Evaluate("90210")).Returns(90210);
+
+            var newExpression = dice.ReplaceWrappedExpressions<int>(expression);
+            Assert.That(newExpression, Is.EqualTo("I wanna roll 42971085"));
         }
     }
 }

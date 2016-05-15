@@ -1,5 +1,6 @@
 ﻿using Moq;
 using NUnit.Framework;
+using RollGen.Domain;
 using RollGen.Domain.PartialRolls;
 using System;
 
@@ -57,6 +58,23 @@ namespace RollGen.Tests.Unit.PartialRolls
             partialRoll.Percentile();
             var roll = partialRoll.d(9266);
             Assert.That(roll, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void IfDieGreaterThanLimit_ThrowArgumentException()
+        {
+            partialRoll = new RandomPartialRoll(1, mockRandom.Object);
+            Assert.That(() => partialRoll.d(Limits.Die + 1), Throws.InstanceOf<ArgumentException>().With.Message.EqualTo("Cannot roll a die larger than 46,340"));
+        }
+
+        [Test]
+        public void IfDieEqualToLimit_Roll()
+        {
+            partialRoll = new RandomPartialRoll(1, mockRandom.Object);
+            mockRandom.Setup(r => r.Next(Limits.Die)).Returns(9266);
+
+            var roll = partialRoll.d(Limits.Die);
+            Assert.That(roll, Is.EqualTo(9267));
         }
     }
 }
