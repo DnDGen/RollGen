@@ -18,7 +18,7 @@ var parsedRoll = dice.Roll("5+3d4*2");
 
 ### Getting `Dice` Objects
 
-You can obtain dice from the bootstrapper project. Because the dice are very complex and are decorated in various ways, there is not a (recommended) way to build these objects manually. Please use the Bootstrapper package.
+You can obtain dice from the domain project. Because the dice are very complex and are decorated in various ways, there is not a (recommended) way to build these objects manually. Please use the ModuleLoader for Ninject.
 
 ```C#
 var kernel = new StandardKernel();
@@ -35,6 +35,6 @@ The project is on [Nuget](https://www.nuget.org/packages/D20Dice). Install via t
 
     PM > Install-Package D20Dice
 
-#### There's RollGen and RollGen.Bootstrap - which do I install?
+#### There's RollGen and RollGen.Domain - which do I install?
 
-That depends on your project.  If you are making a library that will only **reference** RollGen, but does not expressly implement it (such as the TreasureGen project), then you only need the RollGen package.  If you actually want to run and implement the dice (such as on the DnDGenSite or in the tests for TreasureGen), then you need RollGen.Bootstrap, which will install RollGen as a dependency.
+That depends on your project.  If you are making a library that will only **reference** RollGen, but does not expressly implement it (such as the TreasureGen project), then you only need the RollGen package.  If you actually want to run and implement the dice (such as on the DnDGenSite or in the tests for TreasureGen), then you need RollGen.Domain, which will install RollGen as a dependency.

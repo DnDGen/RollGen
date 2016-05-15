@@ -3,23 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Clients", "Clients", "{7CE9CEFF-CC75-42A9-97EB-55A3751A15D8}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{141C8C2F-2497-4ABA-BD2B-7A298E27CFA4}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RollGen.Bootstrap", "Bootstrap\RollGen.Bootstrap.csproj", "{92CCBDBA-6F70-49D6-BF06-E49F47F7FB13}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RollGen.Domain", "Domain\RollGen.Domain.csproj", "{A04A2392-A66D-4FEE-A931-4A17991AF64C}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RollGen", "RollGen\RollGen.csproj", "{1E946755-ACA8-4C4A-8116-82B6E11E5F8A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RollGen.Tests.Integration.Bootstrap", "Tests\Integration\Bootstrap\RollGen.Tests.Integration.Bootstrap.csproj", "{EA914488-C037-458E-BFCE-D679502EF537}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RollGen.Domain", "RollGen.Domain\RollGen.Domain.csproj", "{A04A2392-A66D-4FEE-A931-4A17991AF64C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RollGen.Tests.Integration.Common", "Tests\Integration\Common\RollGen.Tests.Integration.Common.csproj", "{50A4CA5A-8F54-4261-B742-0F8537C253A8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RollGen.Tests.Integration.Common", "RollGen.Tests.Integration.Common\RollGen.Tests.Integration.Common.csproj", "{50A4CA5A-8F54-4261-B742-0F8537C253A8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RollGen.Tests.Unit", "Tests\Unit\RollGen.Tests.Unit.csproj", "{515B1863-22B5-43D2-B178-13BE556BB948}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RollGen.Tests.Unit", "RollGen.Tests.Unit\RollGen.Tests.Unit.csproj", "{515B1863-22B5-43D2-B178-13BE556BB948}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RollGen.Tests.Integration.Stress", "Tests\Integration\Stress\RollGen.Tests.Integration.Stress.csproj", "{41D20EC2-8B21-422F-AAFA-3EBC4CDCF792}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RollGen.Tests.Integration.IoC", "RollGen.Tests.Integration.IoC\RollGen.Tests.Integration.IoC.csproj", "{EA914488-C037-458E-BFCE-D679502EF537}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RollGen.Tests.Integration.Stress", "RollGen.Tests.Integration.Stress\RollGen.Tests.Integration.Stress.csproj", "{41D20EC2-8B21-422F-AAFA-3EBC4CDCF792}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -28,30 +22,18 @@ Global
 		Stress|Any CPU = Stress|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{92CCBDBA-6F70-49D6-BF06-E49F47F7FB13}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{92CCBDBA-6F70-49D6-BF06-E49F47F7FB13}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{92CCBDBA-6F70-49D6-BF06-E49F47F7FB13}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{92CCBDBA-6F70-49D6-BF06-E49F47F7FB13}.Release|Any CPU.Build.0 = Release|Any CPU
-		{92CCBDBA-6F70-49D6-BF06-E49F47F7FB13}.Stress|Any CPU.ActiveCfg = Stress|Any CPU
-		{92CCBDBA-6F70-49D6-BF06-E49F47F7FB13}.Stress|Any CPU.Build.0 = Stress|Any CPU
-		{A04A2392-A66D-4FEE-A931-4A17991AF64C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A04A2392-A66D-4FEE-A931-4A17991AF64C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A04A2392-A66D-4FEE-A931-4A17991AF64C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A04A2392-A66D-4FEE-A931-4A17991AF64C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A04A2392-A66D-4FEE-A931-4A17991AF64C}.Stress|Any CPU.ActiveCfg = Stress|Any CPU
-		{A04A2392-A66D-4FEE-A931-4A17991AF64C}.Stress|Any CPU.Build.0 = Stress|Any CPU
 		{1E946755-ACA8-4C4A-8116-82B6E11E5F8A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1E946755-ACA8-4C4A-8116-82B6E11E5F8A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1E946755-ACA8-4C4A-8116-82B6E11E5F8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1E946755-ACA8-4C4A-8116-82B6E11E5F8A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1E946755-ACA8-4C4A-8116-82B6E11E5F8A}.Stress|Any CPU.ActiveCfg = Stress|Any CPU
 		{1E946755-ACA8-4C4A-8116-82B6E11E5F8A}.Stress|Any CPU.Build.0 = Stress|Any CPU
-		{EA914488-C037-458E-BFCE-D679502EF537}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EA914488-C037-458E-BFCE-D679502EF537}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EA914488-C037-458E-BFCE-D679502EF537}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EA914488-C037-458E-BFCE-D679502EF537}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EA914488-C037-458E-BFCE-D679502EF537}.Stress|Any CPU.ActiveCfg = Stress|Any CPU
-		{EA914488-C037-458E-BFCE-D679502EF537}.Stress|Any CPU.Build.0 = Stress|Any CPU
+		{A04A2392-A66D-4FEE-A931-4A17991AF64C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A04A2392-A66D-4FEE-A931-4A17991AF64C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A04A2392-A66D-4FEE-A931-4A17991AF64C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A04A2392-A66D-4FEE-A931-4A17991AF64C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A04A2392-A66D-4FEE-A931-4A17991AF64C}.Stress|Any CPU.ActiveCfg = Stress|Any CPU
+		{A04A2392-A66D-4FEE-A931-4A17991AF64C}.Stress|Any CPU.Build.0 = Stress|Any CPU
 		{50A4CA5A-8F54-4261-B742-0F8537C253A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{50A4CA5A-8F54-4261-B742-0F8537C253A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{50A4CA5A-8F54-4261-B742-0F8537C253A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -64,6 +46,12 @@ Global
 		{515B1863-22B5-43D2-B178-13BE556BB948}.Release|Any CPU.Build.0 = Release|Any CPU
 		{515B1863-22B5-43D2-B178-13BE556BB948}.Stress|Any CPU.ActiveCfg = Stress|Any CPU
 		{515B1863-22B5-43D2-B178-13BE556BB948}.Stress|Any CPU.Build.0 = Stress|Any CPU
+		{EA914488-C037-458E-BFCE-D679502EF537}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA914488-C037-458E-BFCE-D679502EF537}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA914488-C037-458E-BFCE-D679502EF537}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA914488-C037-458E-BFCE-D679502EF537}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA914488-C037-458E-BFCE-D679502EF537}.Stress|Any CPU.ActiveCfg = Stress|Any CPU
+		{EA914488-C037-458E-BFCE-D679502EF537}.Stress|Any CPU.Build.0 = Stress|Any CPU
 		{41D20EC2-8B21-422F-AAFA-3EBC4CDCF792}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{41D20EC2-8B21-422F-AAFA-3EBC4CDCF792}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{41D20EC2-8B21-422F-AAFA-3EBC4CDCF792}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -73,12 +61,5 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{92CCBDBA-6F70-49D6-BF06-E49F47F7FB13} = {7CE9CEFF-CC75-42A9-97EB-55A3751A15D8}
-		{EA914488-C037-458E-BFCE-D679502EF537} = {141C8C2F-2497-4ABA-BD2B-7A298E27CFA4}
-		{50A4CA5A-8F54-4261-B742-0F8537C253A8} = {141C8C2F-2497-4ABA-BD2B-7A298E27CFA4}
-		{515B1863-22B5-43D2-B178-13BE556BB948} = {141C8C2F-2497-4ABA-BD2B-7A298E27CFA4}
-		{41D20EC2-8B21-422F-AAFA-3EBC4CDCF792} = {141C8C2F-2497-4ABA-BD2B-7A298E27CFA4}
 	EndGlobalSection
 EndGlobal

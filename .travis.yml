@@ -5,6 +5,6 @@ install:
   - nuget install NUnit.Runners -OutputDirectory testrunner
 script:
   - xbuild RollGen.sln /p:TargetFrameworkVersion="v4.5.1" /p:Configuration=Stress
-  - mono ./testrunner/NUnit.ConsoleRunner.*/tools/nunit3-console.exe ./Tests/Unit/bin/Stress/RollGen.Test.Unit.dll
-  - mono ./testrunner/NUnit.ConsoleRunner.*/tools/nunit3-console.exe ./Tests/Integration/Bootstrap/bin/Stress/RollGen.Tests.Integration.Bootstrap.dll
-  - mono ./testrunner/NUnit.ConsoleRunner.*/tools/nunit3-console.exe ./Tests/Integration/Stress/bin/Stress/RollGen.Tests.Integration.Stress.dll
+  - mono ./testrunner/NUnit.ConsoleRunner.*/tools/nunit3-console.exe ./RollGen.Tests.Unit/bin/Stress/RollGen.Tests.Unit.dll
+  - mono ./testrunner/NUnit.ConsoleRunner.*/tools/nunit3-console.exe ./RollGen.Tests.Integration.IoC/bin/Stress/RollGen.Tests.Integration.IoC.dll
+  - mono ./testrunner/NUnit.ConsoleRunner.*/tools/nunit3-console.exe ./RollGen.Tests.Integration.Stress/bin/Stress/RollGen.Tests.Integration.Stress.dll
