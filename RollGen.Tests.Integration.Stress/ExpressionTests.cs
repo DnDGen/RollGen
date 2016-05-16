@@ -1,5 +1,6 @@
 ﻿using Ninject;
 using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -42,17 +43,24 @@ namespace RollGen.Tests.Integration.Stress
             Assert.That(roll, Is.InRange(4, 14));
         }
 
-        [Test]
-        public void RollExpressionWithLargestDieRollPossible()
+        [TestCase(1, Limits.Die)]
+        [TestCase(Limits.Quantity, 1)]
+        public void RollWithLargestDieRollPossible(int quantity, int die)
         {
-            Stress(AssertExpressionWithLargestDieRollPossible);
+            Stress(() => AssertRollWithLargestDieRollPossible(quantity, die));
         }
 
-        private void AssertExpressionWithLargestDieRollPossible()
+        [Test]
+        public void RollWithLargestDieRollPossible()
         {
-            var rollExpression = string.Format("{0}d{1}", Limits.Quantity, Limits.Die);
-            var roll = Dice.Roll(rollExpression);
-            Assert.That(roll, Is.InRange(Limits.Quantity, Limits.Quantity * Limits.Die));
+            var rootOfLimit = Convert.ToInt32(Math.Floor(Math.Sqrt(Limits.ProductOfQuantityAndDie)));
+            Stress(() => AssertRollWithLargestDieRollPossible(rootOfLimit, rootOfLimit));
+        }
+
+        private void AssertRollWithLargestDieRollPossible(int quantity, int die)
+        {
+            var roll = Dice.Roll($"{quantity}d{die}");
+            Assert.That(roll, Is.InRange(quantity, quantity * die));
         }
 
         [TestCase("3d6+2", 5, 20)]

@@ -23,5 +23,17 @@ namespace RollGen.Tests.Integration.Stress
         {
             AssertFullRangeHit(quantity);
         }
+
+        [Test]
+        public void RollWithLargestDieRollPossible()
+        {
+            Stress(AssertRollWithLargestDieRollPossible);
+        }
+
+        private void AssertRollWithLargestDieRollPossible()
+        {
+            var roll = Dice.Roll(Limits.Quantity).d20();
+            Assert.That(roll, Is.InRange(Limits.Quantity, Limits.Quantity * 20));
+        }
     }
 }

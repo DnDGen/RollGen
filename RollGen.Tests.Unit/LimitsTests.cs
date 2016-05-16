@@ -5,11 +5,22 @@ namespace RollGen.Tests.Unit
     [TestFixture]
     public class LimitsTests
     {
-        [TestCase(Limits.Quantity, 46340)]
-        [TestCase(Limits.Die, 46340)]
-        public void Constant(int constant, int value)
+        [Test]
+        public void ProductLimit()
         {
-            Assert.That(constant, Is.EqualTo(value));
+            Assert.That(Limits.ProductOfQuantityAndDie, Is.EqualTo(int.MaxValue));
+        }
+
+        [Test]
+        public void QuantityLimit()
+        {
+            Assert.That(Limits.Quantity, Is.EqualTo(1000000));
+        }
+
+        [Test]
+        public void DieLimit()
+        {
+            Assert.That(Limits.Die, Is.EqualTo(1000000));
         }
     }
 }

@@ -16,8 +16,8 @@ namespace RollGen.Domain.PartialRolls
 
         public override IEnumerable<int> IndividualRolls(int die)
         {
-            if (die > Limits.Die)
-                throw new ArgumentException("Cannot roll a die larger than 46,340");
+            if (quantity > Limits.Quantity || die > Limits.Die || die * (long)quantity > Limits.ProductOfQuantityAndDie)
+                throw new ArgumentException($"Die roll of {quantity}d{die} is too large for RollGen");
 
             var rolls = new List<int>();
 

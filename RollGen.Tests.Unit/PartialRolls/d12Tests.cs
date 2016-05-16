@@ -58,5 +58,22 @@ namespace RollGen.Tests.Unit.PartialRolls
             var roll = partialRoll.d12();
             Assert.That(roll, Is.EqualTo(0));
         }
+
+        [Test]
+        public void IfQuantityOverLimit_ThrowArgumentException()
+        {
+            partialRoll = new RandomPartialRoll(Limits.Quantity + 1, mockRandom.Object);
+            Assert.That(() => partialRoll.d12(), Throws.InstanceOf<ArgumentException>().With.Message.EqualTo("Die roll of 1000001d12 is too large for RollGen"));
+        }
+
+        [Test]
+        public void IfAllInputsEqualToLimits_Roll()
+        {
+            partialRoll = new RandomPartialRoll(Limits.Quantity, mockRandom.Object);
+            mockRandom.Setup(r => r.Next(12)).Returns(11);
+
+            var roll = partialRoll.d12();
+            Assert.That(roll, Is.EqualTo(Limits.Quantity * 12));
+        }
     }
 }

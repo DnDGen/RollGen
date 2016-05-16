@@ -1,5 +1,6 @@
 ﻿using Ninject;
 using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -21,7 +22,7 @@ namespace RollGen.Tests.Integration.Stress
         [TestCase(4, 7)]
         [TestCase(5, 7)]
         [TestCase(6, 7)]
-        [TestCase(1, Limits.Die)]
+        [TestCase(1, 70000)]
         [TestCase(Limits.Quantity, 1)]
         public void FullRangeHit(int quantity, int die)
         {
@@ -33,16 +34,24 @@ namespace RollGen.Tests.Integration.Stress
             Assert.That(rolls.Count, Is.EqualTo(expectedCount));
         }
 
+        [TestCase(1, Limits.Die)]
+        [TestCase(Limits.Quantity, 1)]
+        public void RollWithLargestDieRollPossible(int quantity, int die)
+        {
+            Stress(() => AssertRollWithLargestDieRollPossible(quantity, die));
+        }
+
         [Test]
         public void RollWithLargestDieRollPossible()
         {
-            Stress(AssertRollWithLargestDieRollPossible);
+            var rootOfLimit = Convert.ToInt32(Math.Floor(Math.Sqrt(Limits.ProductOfQuantityAndDie)));
+            Stress(() => AssertRollWithLargestDieRollPossible(rootOfLimit, rootOfLimit));
         }
 
-        private void AssertRollWithLargestDieRollPossible()
+        private void AssertRollWithLargestDieRollPossible(int quantity, int die)
         {
-            var roll = Dice.Roll(Limits.Quantity).d(Limits.Die);
-            Assert.That(roll, Is.InRange(Limits.Quantity, Limits.Quantity * Limits.Die));
+            var roll = Dice.Roll(quantity).d(die);
+            Assert.That(roll, Is.InRange(quantity, quantity * die));
         }
     }
 }
