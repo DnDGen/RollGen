@@ -38,42 +38,10 @@ namespace RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void AfterRoll_AlwaysReturnZero()
-        {
-            partialRoll = new RandomPartialRoll(1, mockRandom.Object);
-            mockRandom.Setup(r => r.Next(100)).Returns(42);
-
-            partialRoll.Percentile();
-            var roll = partialRoll.Percentile();
-            Assert.That(roll, Is.EqualTo(0));
-        }
-
-        [Test]
-        public void AfterOtherRoll_AlwaysReturnZero()
-        {
-            partialRoll = new RandomPartialRoll(1, mockRandom.Object);
-            mockRandom.Setup(r => r.Next(100)).Returns(42);
-
-            partialRoll.d(21);
-            var roll = partialRoll.Percentile();
-            Assert.That(roll, Is.EqualTo(0));
-        }
-
-        [Test]
         public void IfQuantityOverLimit_ThrowArgumentException()
         {
             partialRoll = new RandomPartialRoll(Limits.Quantity + 1, mockRandom.Object);
-            Assert.That(() => partialRoll.Percentile(), Throws.InstanceOf<ArgumentException>().With.Message.EqualTo("Die roll of 1000001d100 is too large for RollGen"));
-        }
-
-        [Test]
-        public void IfAllInputsEqualToLimits_Roll()
-        {
-            partialRoll = new RandomPartialRoll(Limits.Quantity, mockRandom.Object);
-            mockRandom.Setup(r => r.Next(100)).Returns(99);
-
-            var roll = partialRoll.Percentile();
-            Assert.That(roll, Is.EqualTo(Limits.Quantity * 100));
+            Assert.That(() => partialRoll.Percentile(), Throws.InstanceOf<ArgumentException>().With.Message.EqualTo("Die roll of 16500001d100 is too large for RollGen"));
         }
     }
 }

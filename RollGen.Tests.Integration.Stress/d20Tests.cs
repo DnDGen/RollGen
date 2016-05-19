@@ -25,15 +25,9 @@ namespace RollGen.Tests.Integration.Stress
         }
 
         [Test]
-        public void RollWithLargestDieRollPossible()
+        public override void RollWithLargestDieRollPossible()
         {
             Stress(AssertRollWithLargestDieRollPossible);
-        }
-
-        private void AssertRollWithLargestDieRollPossible()
-        {
-            var roll = Dice.Roll(Limits.Quantity).d20();
-            Assert.That(roll, Is.InRange(Limits.Quantity, Limits.Quantity * 20));
         }
     }
 }

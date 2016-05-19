@@ -21,8 +21,7 @@ namespace RollGen.Tests.Integration.Stress
         [TestCase(3, 7)]
         [TestCase(4, 7)]
         [TestCase(5, 7)]
-        [TestCase(6, 7)]
-        [TestCase(1, 70000)]
+        [TestCase(1, 60000)]
         [TestCase(Limits.Quantity, 1)]
         public void FullRangeHit(int quantity, int die)
         {

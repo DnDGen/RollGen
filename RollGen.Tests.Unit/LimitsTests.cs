@@ -14,13 +14,13 @@ namespace RollGen.Tests.Unit
         [Test]
         public void QuantityLimit()
         {
-            Assert.That(Limits.Quantity, Is.EqualTo(1000000));
+            Assert.That(Limits.Quantity, Is.EqualTo(16500000));
         }
 
         [Test]
         public void DieLimit()
         {
-            Assert.That(Limits.Die, Is.EqualTo(1000000));
+            Assert.That(Limits.Die, Is.EqualTo(int.MaxValue));
         }
     }
 }
