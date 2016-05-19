@@ -49,7 +49,7 @@ namespace RollGen.Domain
                 var lenientReplacedDice = ReplaceDiceExpression(matchGroupValue, true);
                 var unevaluatedMatch = Evaluate(lenientReplacedDice);
                 var target = expressionOpen + matchGroupValue + expressionClose;
-                var replacement = BooleanOrType<T>(unevaluatedMatch).ToString();
+                var replacement = Utils.BooleanOrType<T>(unevaluatedMatch).ToString();
 
                 source = ReplaceFirst(source, target, replacement);
             }
@@ -82,24 +82,7 @@ namespace RollGen.Domain
         public T Evaluate<T>(string expression)
         {
             var evaluation = Evaluate(expression);
-            return ChangeType<T>(evaluation);
-        }
-
-        public T ChangeType<T>(object rawEvaluatedExpression)
-        {
-            if (rawEvaluatedExpression is T)
-                return (T)rawEvaluatedExpression;
-
-            return (T)Convert.ChangeType(rawEvaluatedExpression, typeof(T));
-        }
-
-        /// <summary>Returns a string of the provided object as boolean, if it is one, otherwise of Type T.</summary>
-        public string BooleanOrType<T>(object rawEvaluatedExpression)
-        {
-            if (rawEvaluatedExpression is bool)
-                return rawEvaluatedExpression.ToString();
-
-            return ChangeType<T>(rawEvaluatedExpression).ToString();
+            return Utils.ChangeType<T>(evaluation);
         }
 
         public string ReplaceRollsWithSum(string expression)
