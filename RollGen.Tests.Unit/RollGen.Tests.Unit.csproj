@@ -84,6 +84,7 @@
     <Compile Include="PartialRolls\d3Tests.cs" />
     <Compile Include="PartialRolls\dTests.cs" />
     <Compile Include="RandomPartialRollFactoryTests.cs" />
+    <Compile Include="UtilsTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\RollGen.Domain\RollGen.Domain.csproj">
