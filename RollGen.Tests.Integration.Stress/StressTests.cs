@@ -80,7 +80,7 @@ namespace RollGen.Tests.Integration.Stress
                 Assert.Fail("Something took way too long");
         }
 
-        protected IEnumerable<int> Populate(ICollection<int> target, Func<int> generate, int expectedTotal)
+        protected IEnumerable<T> Populate<T>(ICollection<T> target, Func<T> generate, int expectedTotal)
         {
             do
             {

@@ -83,6 +83,33 @@ namespace RollGen.Tests.Integration.Stress
             Assert.That(rolls.Count, Is.EqualTo(expectedCount));
         }
 
+        [TestCase("1d20 > 10", true, false)]
+        [TestCase("1d20 < 2d10", true, false)]
+        [TestCase("3d2 >= 2d3", true, false)]
+        [TestCase("2d6 <= 3d4", true, false)]
+        [TestCase("1d2 = 2", true, false)]
+        [TestCase("1d100 > 0", true)]
+        [TestCase("100 < 1d20", false)]
+        [TestCase("1d1 = 1", true)]
+        [TestCase("9266 = 9266", true)]
+        [TestCase("9266 = 90210", false)]
+        [TestCase("1d2 = 3", false)]
+        public void FullRangeTruth(string expression, params bool[] expectedRolls)
+        {
+            var rolls = Populate(new HashSet<bool>(), () => GenerateBoolean(expression), expectedRolls.Length);
+
+            Assert.That(rolls, Is.EquivalentTo(expectedRolls));
+            Assert.That(expectedRolls, Is.EquivalentTo(rolls));
+        }
+
+        private bool GenerateBoolean(string expression)
+        {
+            var totaledExpression = Dice.ReplaceExpressionWithTotal(expression);
+            var evaluatedExpression = Dice.Evaluate<bool>(totaledExpression);
+
+            return evaluatedExpression;
+        }
+
         [TestCase("1d2*3d4", 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24)]
         [TestCase("2d3*4", 8, 12, 16, 20, 24)]
         [TestCase("1d3*5", 5, 10, 15)]
