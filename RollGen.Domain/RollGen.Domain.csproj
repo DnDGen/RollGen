@@ -60,13 +60,16 @@
   <ItemGroup>
     <Compile Include="Expressions\AlbatrossExpressionEvaluator.cs" />
     <Compile Include="Expressions\ExpressionEvaluator.cs" />
+    <Compile Include="Expressions\RegexConstants.cs" />
+    <Compile Include="PartialRolls\ExpressionPartialRoll.cs" />
     <Compile Include="PartialRolls\PartialRollFactory.cs" />
     <Compile Include="DomainDice.cs" />
     <Compile Include="IoC\Modules\CoreModule.cs" />
     <Compile Include="IoC\RollGenModuleLoader.cs" />
-    <Compile Include="PartialRolls\RandomPartialRoll.cs" />
+    <Compile Include="PartialRolls\NumericPartialRoll.cs" />
+    <Compile Include="PartialRolls\Roll.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PartialRolls\RandomPartialRollFactory.cs" />
+    <Compile Include="PartialRolls\DomainPartialRollFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\RollGen\RollGen.csproj">

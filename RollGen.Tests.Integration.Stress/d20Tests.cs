@@ -12,7 +12,7 @@ namespace RollGen.Tests.Integration.Stress
 
         protected override int GetRoll(int quantity)
         {
-            return Dice.Roll(quantity).d20();
+            return Dice.Roll(quantity).d20().AsSum();
         }
 
         [TestCase(1)]

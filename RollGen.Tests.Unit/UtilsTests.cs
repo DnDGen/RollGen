@@ -4,11 +4,17 @@ using System;
 namespace RollGen.Tests.Unit
 {
     [TestFixture]
-    class UtilsTests
+    public class UtilsTests
     {
         // Work around NUnit not supporting Generics, by using this function.
-        object GenericTester(string function_name, Type T, object[] parameters)
-            => typeof(Utils).GetMethod(function_name).MakeGenericMethod(T).Invoke(null, parameters);
+        private object GenericTester(string methodName, Type T, object[] parameters)
+        {
+            var utilsType = typeof(Utils);
+            var method = utilsType.GetMethod(methodName);
+            var genericMethod = method.MakeGenericMethod(T);
+
+            return genericMethod.Invoke(null, parameters);
+        }
 
         [TestCase(typeof(double), 8)]
         [TestCase(typeof(int), true)]

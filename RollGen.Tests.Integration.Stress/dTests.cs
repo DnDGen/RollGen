@@ -26,7 +26,7 @@ namespace RollGen.Tests.Integration.Stress
         public void FullRangeHit(int quantity, int die)
         {
             var expectedCount = die * quantity - (quantity - 1);
-            var rolls = Populate(new HashSet<int>(), () => Dice.Roll(quantity).d(die), expectedCount);
+            var rolls = Populate(new HashSet<int>(), () => Dice.Roll(quantity).d(die).AsSum(), expectedCount);
 
             Assert.That(rolls.Min(), Is.EqualTo(quantity));
             Assert.That(rolls.Max(), Is.EqualTo(die * quantity));
@@ -49,7 +49,7 @@ namespace RollGen.Tests.Integration.Stress
 
         private void AssertRollWithLargestDieRollPossible(int quantity, int die)
         {
-            var roll = Dice.Roll(quantity).d(die);
+            var roll = Dice.Roll(quantity).d(die).AsSum();
             Assert.That(roll, Is.InRange(quantity, quantity * die));
         }
     }

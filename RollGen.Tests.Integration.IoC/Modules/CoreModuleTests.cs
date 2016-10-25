@@ -46,7 +46,7 @@ namespace RollGen.Tests.Bootstrap.Modules
         {
             var factory = GetNewInstanceOf<PartialRollFactory>();
             Assert.That(factory, Is.Not.Null);
-            Assert.That(factory, Is.InstanceOf<RandomPartialRollFactory>());
+            Assert.That(factory, Is.InstanceOf<DomainPartialRollFactory>());
         }
 
         [Test]

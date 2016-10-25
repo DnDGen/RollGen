@@ -9,29 +9,33 @@ namespace RollGen.Domain
 {
     internal class DomainDice : Dice
     {
-        private Regex rollRegex;
-        private Regex lenientRollRegex;
-        private Regex expressionRegex;
-        private ExpressionEvaluator expressionEvaluator;
-        private PartialRollFactory partialRollFactory;
+        private const string CommonRollRegexPattern = "d *\\d+(?: *k *\\d+)?";
 
-        public DomainDice(ExpressionEvaluator expressionEvaluator, PartialRollFactory partialRollFactory)
+        private PartialRollFactory partialRollFactory;
+        private Regex expressionRegex;
+        private Regex strictRollRegex;
+        private Regex lenientRollRegex;
+
+        public DomainDice(PartialRollFactory partialRollFactory)
         {
-            this.expressionEvaluator = expressionEvaluator;
             this.partialRollFactory = partialRollFactory;
 
-            const string roll_common_regex = "d *\\d+(?: *k *\\d+)?";
-            rollRegex = new Regex($"(?:(?:\\d* +)|(?:\\d+ *)|^){roll_common_regex}");
-            lenientRollRegex = new Regex($"\\d* *{roll_common_regex}");
-            expressionRegex = new Regex("(?:[-+]?\\d*\\.?\\d+[%/\\+\\-\\*])+(?:[-+]?\\d*\\.?\\d+)");
+            expressionRegex = new Regex(RegexConstants.ExpressionWithoutDieRollsPattern);
+            strictRollRegex = new Regex(RegexConstants.StrictRollPattern);
+            lenientRollRegex = new Regex(RegexConstants.LenientRollPattern);
         }
 
         public PartialRoll Roll(int quantity = 1)
         {
             if (quantity > Limits.Quantity)
-                throw new ArgumentException("Cannot roll more than 46,340 die rolls in a single roll");
+                throw new ArgumentException($"Cannot roll more than {Limits.Quantity} die rolls at a time");
 
             return partialRollFactory.Build(quantity);
+        }
+
+        public PartialRoll Roll(string rollExpression)
+        {
+            return partialRollFactory.Build(rollExpression);
         }
 
         public string ReplaceWrappedExpressions<T>(string source, string expressionOpen = "{", string expressionClose = "}", char? expressionOpenEscape = '\\')
@@ -46,11 +50,9 @@ namespace RollGen.Domain
             foreach (Match match in regex.Matches(source))
             {
                 var matchGroupValue = match.Groups[1].Value;
-                var lenientReplacedDice = ReplaceDiceExpression(matchGroupValue, true);
-                var unevaluatedMatch = Evaluate(lenientReplacedDice);
-                var target = expressionOpen + matchGroupValue + expressionClose;
-                var replacement = Utils.BooleanOrType<T>(unevaluatedMatch).ToString();
+                var replacement = Evaluate<T>(matchGroupValue);
 
+                var target = expressionOpen + matchGroupValue + expressionClose;
                 source = ReplaceFirst(source, target, replacement);
             }
 
@@ -60,39 +62,30 @@ namespace RollGen.Domain
             return source.Replace(expressionOpenEscape + expressionOpen, expressionOpen);
         }
 
-        public object Evaluate(string expression)
+        public string Evaluate<T>(string expression)
         {
-            var match = rollRegex.Match(expression);
+            var partialRoll = partialRollFactory.Build(expression);
 
-            if (match.Success)
-            {
-                var message = string.Format("Cannot evaluate unrolled die roll {0}", match.Value);
-                throw new ArgumentException(message);
-            }
+            if (typeof(T) == typeof(bool))
+                return partialRoll.AsTrueOrFalse().ToString();
 
-            return expressionEvaluator.Evaluate(expression);
+            return partialRoll.AsSum().ToString();
         }
 
-        public int Roll(string roll)
+        public string ReplaceRollsWithSumExpression(string expression, bool lenient = false)
         {
-            var expression = ReplaceExpressionWithTotal(roll, true);
-            return Evaluate<int>(expression);
-        }
-
-        public T Evaluate<T>(string expression)
-        {
-            var evaluation = Evaluate(expression);
-            return Utils.ChangeType<T>(evaluation);
-        }
-
-        public string ReplaceRollsWithSum(string expression)
-        {
-            expression = Replace(expression, rollRegex, s => CreateSumOfRolls(s));
+            var rollRegex = GetRollRegex(lenient);
+            expression = Replace(expression, rollRegex, s => GetBooleanRoll(s));
 
             return expression.Trim();
         }
 
-        private string CreateSumOfRolls(string roll)
+        private Regex GetRollRegex(bool lenient)
+        {
+            return lenient ? lenientRollRegex : strictRollRegex;
+        }
+
+        private string GetBooleanRoll(string roll)
         {
             var rolls = GetIndividualRolls(roll);
 
@@ -108,50 +101,34 @@ namespace RollGen.Domain
 
         private IEnumerable<int> GetIndividualRolls(string roll)
         {
-            var sections = roll.Split('d', 'k');
-            var die = Convert.ToInt32(sections[1]);
-            var quantity = 1;
-
-            if (!string.IsNullOrEmpty(sections[0]))
-                quantity = Convert.ToInt32(sections[0]);
-
-            var partialRoll = Roll(quantity);
-            var individualRolls = partialRoll.IndividualRolls(die);
-
-            if (sections.Length == 3 && !string.IsNullOrEmpty(sections[2]))
-                individualRolls = partialRoll.KeepIndividualRolls(individualRolls, Convert.ToInt32(sections[2]));
-
-            return individualRolls;
+            var partialRoll = partialRollFactory.Build(roll);
+            return partialRoll.AsIndividualRolls();
         }
 
         public bool ContainsRoll(string expression, bool lenient = false)
         {
-            if (lenient)
-                return lenientRollRegex.IsMatch(expression);
-
-            return rollRegex.IsMatch(expression);
+            var regex = GetRollRegex(lenient);
+            return regex.IsMatch(expression);
         }
 
         private string ReplaceDiceExpression(string expression, bool lenient = false)
         {
-            if (lenient)
-                return Replace(expression, lenientRollRegex, s => CreateTotalOfRolls(s));
-
-            return Replace(expression, rollRegex, s => CreateTotalOfRolls(s));
+            var regex = GetRollRegex(lenient);
+            return Replace(expression, regex, s => CreateTotalOfRolls(s));
         }
 
         public string ReplaceExpressionWithTotal(string expression, bool lenient = false)
         {
             expression = ReplaceDiceExpression(expression, lenient);
-            expression = Replace(expression, expressionRegex, Evaluate);
+            expression = Replace(expression, expressionRegex, s => Evaluate<int>(s));
 
             return expression;
         }
 
         private int CreateTotalOfRolls(string roll)
         {
-            var rolls = GetIndividualRolls(roll);
-            return rolls.Sum();
+            var partialRoll = partialRollFactory.Build(roll);
+            return partialRoll.AsSum();
         }
 
         private string ReplaceFirst(string source, string target, string replacement)
@@ -164,16 +141,27 @@ namespace RollGen.Domain
 
         private string Replace(string expression, Regex regex, Func<string, object> createReplacement)
         {
-            var matches = regex.Matches(expression);
+            var expressionWithReplacedRolls = expression;
+            var match = regex.Match(expressionWithReplacedRolls);
 
-            foreach (Match match in matches)
+            while (match.Success)
             {
                 var matchValue = match.Value.Trim();
                 var replacement = createReplacement(matchValue);
-                expression = ReplaceFirst(expression, matchValue, replacement.ToString());
+
+                expressionWithReplacedRolls = ReplaceFirst(expressionWithReplacedRolls, matchValue, replacement.ToString());
+                match = regex.Match(expressionWithReplacedRolls);
             }
 
-            return expression;
+            return expressionWithReplacedRolls;
+        }
+
+        public bool RollBoolean(string expression)
+        {
+            var partialRoll = partialRollFactory.Build(expression);
+            var evaluatedExpression = partialRoll.AsTrueOrFalse();
+
+            return evaluatedExpression;
         }
     }
 }

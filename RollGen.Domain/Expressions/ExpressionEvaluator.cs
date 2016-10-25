@@ -2,6 +2,6 @@
 {
     internal interface ExpressionEvaluator
     {
-        object Evaluate(string expression);
+        T Evaluate<T>(string expression);
     }
 }

@@ -15,7 +15,7 @@ namespace RollGen.Tests.Integration.Stress
         [Test]
         public void RollExpressionWithNoDieRolls()
         {
-            var roll = Dice.Roll("1+2-(3*4/5)%6");
+            var roll = Dice.Roll("1+2-(3*4/5)%6").AsSum();
             Assert.That(roll, Is.EqualTo(1));
         }
 
@@ -27,7 +27,7 @@ namespace RollGen.Tests.Integration.Stress
 
         private void AssertExpressionWithADieRoll()
         {
-            var roll = Dice.Roll("1d2+3");
+            var roll = Dice.Roll("1d2+3").AsSum();
             Assert.That(roll, Is.InRange(4, 5));
         }
 
@@ -39,7 +39,7 @@ namespace RollGen.Tests.Integration.Stress
 
         private void AssertExpressionWithMultipleDieRolls()
         {
-            var roll = Dice.Roll("1d2+3d4");
+            var roll = Dice.Roll("1d2+3d4").AsSum();
             Assert.That(roll, Is.InRange(4, 14));
         }
 
@@ -59,7 +59,7 @@ namespace RollGen.Tests.Integration.Stress
 
         private void AssertRollWithLargestDieRollPossible(int quantity, int die)
         {
-            var roll = Dice.Roll($"{quantity}d{die}");
+            var roll = Dice.Roll($"{quantity}d{die}").AsSum();
             Assert.That(roll, Is.InRange(quantity, quantity * die));
         }
 
@@ -76,7 +76,7 @@ namespace RollGen.Tests.Integration.Stress
         public void FullRangeHit(string expression, int minimum, int maximum)
         {
             var expectedCount = maximum - (minimum - 1);
-            var rolls = Populate(new HashSet<int>(), () => Dice.Roll(expression), expectedCount);
+            var rolls = Populate(new HashSet<int>(), () => Dice.Roll(expression).AsSum(), expectedCount);
 
             Assert.That(rolls.Min(), Is.EqualTo(minimum));
             Assert.That(rolls.Max(), Is.EqualTo(maximum));
@@ -89,10 +89,12 @@ namespace RollGen.Tests.Integration.Stress
         [TestCase("2d6 <= 3d4", true, false)]
         [TestCase("1d2 = 2", true, false)]
         [TestCase("1d100 > 0", true)]
-        [TestCase("100 < 1d20", false)]
+        [TestCase("100 < 1 d 20", false)]
+        [TestCase("100<1d20", false)]
         [TestCase("1d1 = 1", true)]
         [TestCase("9266 = 9266", true)]
         [TestCase("9266 = 90210", false)]
+        [TestCase("9266=90210", false)]
         [TestCase("1d2 = 3", false)]
         public void FullRangeTruth(string expression, params bool[] expectedRolls)
         {
@@ -105,7 +107,7 @@ namespace RollGen.Tests.Integration.Stress
         private bool GenerateBoolean(string expression)
         {
             var totaledExpression = Dice.ReplaceExpressionWithTotal(expression);
-            var evaluatedExpression = Dice.Evaluate<bool>(totaledExpression);
+            var evaluatedExpression = Dice.RollBoolean(totaledExpression);
 
             return evaluatedExpression;
         }
@@ -117,7 +119,7 @@ namespace RollGen.Tests.Integration.Stress
         [TestCase("1d3*5-1d4", 1, 2, 3, 4, 6, 7, 8, 9, 11, 12, 13, 14)]
         public void NonContiguousRangeHit(string expression, params int[] expectedRolls)
         {
-            var rolls = Populate(new HashSet<int>(), () => Dice.Roll(expression), expectedRolls.Length);
+            var rolls = Populate(new HashSet<int>(), () => Dice.Roll(expression).AsSum(), expectedRolls.Length);
 
             Assert.That(rolls, Is.EquivalentTo(expectedRolls));
             Assert.That(expectedRolls, Is.EquivalentTo(rolls));

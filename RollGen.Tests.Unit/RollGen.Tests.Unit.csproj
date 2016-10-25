@@ -53,8 +53,8 @@
       <HintPath>..\packages\Moq.4.2.1510.2205\lib\net40\Moq.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="nunit.framework, Version=3.2.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
-      <HintPath>..\packages\NUnit.3.2.1\lib\net45\nunit.framework.dll</HintPath>
+    <Reference Include="nunit.framework, Version=3.5.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
+      <HintPath>..\packages\NUnit.3.5.0\lib\net45\nunit.framework.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -68,22 +68,15 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
-    <Compile Include="AlbatrossExpressionEvaluatorTests.cs" />
-    <Compile Include="DiceTests.cs" />
+    <Compile Include="Expressions\AlbatrossExpressionEvaluatorTests.cs" />
+    <Compile Include="DomainDiceTests.cs" />
+    <Compile Include="Expressions\RegexConstantsTests.cs" />
     <Compile Include="LimitsTests.cs" />
-    <Compile Include="PartialRolls\IndividualRollsTests.cs" />
+    <Compile Include="PartialRolls\ExpressionPartialRollTests.cs" />
+    <Compile Include="PartialRolls\NumericPartialRollTests.cs" />
+    <Compile Include="PartialRolls\RollTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PartialRolls\PercentileTests.cs" />
-    <Compile Include="PartialRolls\d20Tests.cs" />
-    <Compile Include="PartialRolls\d12Tests.cs" />
-    <Compile Include="PartialRolls\d10Tests.cs" />
-    <Compile Include="PartialRolls\d8Tests.cs" />
-    <Compile Include="PartialRolls\d6Tests.cs" />
-    <Compile Include="PartialRolls\d4Tests.cs" />
-    <Compile Include="PartialRolls\d2Tests.cs" />
-    <Compile Include="PartialRolls\d3Tests.cs" />
-    <Compile Include="PartialRolls\dTests.cs" />
-    <Compile Include="RandomPartialRollFactoryTests.cs" />
+    <Compile Include="PartialRolls\DomainPartialRollFactoryTests.cs" />
     <Compile Include="UtilsTests.cs" />
   </ItemGroup>
   <ItemGroup>

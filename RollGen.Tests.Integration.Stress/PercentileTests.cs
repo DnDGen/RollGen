@@ -12,7 +12,7 @@ namespace RollGen.Tests.Integration.Stress
 
         protected override int GetRoll(int quantity)
         {
-            return Dice.Roll(quantity).Percentile();
+            return Dice.Roll(quantity).Percentile().AsSum();
         }
 
         [TestCase(1)]

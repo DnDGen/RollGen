@@ -37,10 +37,10 @@ namespace RollGen.Tests.Integration.Stress
 
         private void PopulateRolls()
         {
-            var firstRoll = Dice1.Roll().Percentile();
+            var firstRoll = Dice1.Roll().Percentile().AsSum();
             dice1Rolls.Add(firstRoll);
 
-            var secondRoll = Dice2.Roll().Percentile();
+            var secondRoll = Dice2.Roll().Percentile().AsSum();
             dice2Rolls.Add(secondRoll);
         }
 
