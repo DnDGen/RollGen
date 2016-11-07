@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RollGen", "RollGen\RollGen.csproj", "{1E946755-ACA8-4C4A-8116-82B6E11E5F8A}"
 EndProject
@@ -14,6 +14,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RollGen.Tests.Integration.IoC", "RollGen.Tests.Integration.IoC\RollGen.Tests.Integration.IoC.csproj", "{EA914488-C037-458E-BFCE-D679502EF537}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RollGen.Tests.Integration.Stress", "RollGen.Tests.Integration.Stress\RollGen.Tests.Integration.Stress.csproj", "{41D20EC2-8B21-422F-AAFA-3EBC4CDCF792}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RollGen.NuGet", "RollGen.NuGet\RollGen.NuGet.csproj", "{0451BAEF-DF2E-4B98-8644-94EE9415E389}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RollGen.Domain.NuGet", "RollGen.Domain.NuGet\RollGen.Domain.NuGet.csproj", "{D3F6DC4C-F5FA-4F26-A17A-22CA778F1387}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -58,6 +62,18 @@ Global
 		{41D20EC2-8B21-422F-AAFA-3EBC4CDCF792}.Release|Any CPU.Build.0 = Release|Any CPU
 		{41D20EC2-8B21-422F-AAFA-3EBC4CDCF792}.Stress|Any CPU.ActiveCfg = Stress|Any CPU
 		{41D20EC2-8B21-422F-AAFA-3EBC4CDCF792}.Stress|Any CPU.Build.0 = Stress|Any CPU
+		{0451BAEF-DF2E-4B98-8644-94EE9415E389}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0451BAEF-DF2E-4B98-8644-94EE9415E389}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0451BAEF-DF2E-4B98-8644-94EE9415E389}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0451BAEF-DF2E-4B98-8644-94EE9415E389}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0451BAEF-DF2E-4B98-8644-94EE9415E389}.Stress|Any CPU.ActiveCfg = Release|Any CPU
+		{0451BAEF-DF2E-4B98-8644-94EE9415E389}.Stress|Any CPU.Build.0 = Release|Any CPU
+		{D3F6DC4C-F5FA-4F26-A17A-22CA778F1387}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D3F6DC4C-F5FA-4F26-A17A-22CA778F1387}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D3F6DC4C-F5FA-4F26-A17A-22CA778F1387}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D3F6DC4C-F5FA-4F26-A17A-22CA778F1387}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D3F6DC4C-F5FA-4F26-A17A-22CA778F1387}.Stress|Any CPU.ActiveCfg = Release|Any CPU
+		{D3F6DC4C-F5FA-4F26-A17A-22CA778F1387}.Stress|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

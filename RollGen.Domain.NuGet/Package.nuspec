@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>DnDGen.RollGen.Domain</id>
+    <version>13.0.0</version>
+    <title>RollGen.Domain</title>
+    <authors>Karl M. Speer</authors>
+    <owners></owners>
+    <description>
+      This provides the Ninject module loader for the RollGen package.
+    </description>
+    <releaseNotes>
+    </releaseNotes>
+    <summary>
+      This provides the Ninject module loader for the RollGen package.
+    </summary>
+    <language>en-US</language>
+    <projectUrl>https://github.com/DnDGen/RollGen</projectUrl>
+    <iconUrl>http://www.downloadclipart.net/thumb/18531-twenty-sided-dice-vector-thumb.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <licenseUrl>http://opensource.org/licenses/Apache-2.0</licenseUrl>
+    <copyright>Copyright  2016</copyright>
+    <dependencies>
+      <dependency id="DnDGen.RollGen" version="13.0.0" />
+      <dependency id="Ninject" version="3.2.2.0" />
+      <dependency id="Albatross.Expression" version="1.2.1.100" />
+    </dependencies>
+    <references></references>
+    <tags> dice dungeons dragons d20 dnd adnd ioc ninject dependency inject injection </tags>
+  </metadata>
+  <files>
+    <file src="..\RollGen.Domain\bin\Debug\RollGen.Domain.dll" target="lib" />
+  </files>
+</package>
