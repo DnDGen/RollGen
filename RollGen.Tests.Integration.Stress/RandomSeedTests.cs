@@ -1,5 +1,6 @@
 ﻿using Ninject;
 using NUnit.Framework;
+using RollGen.Domain.IoC;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -26,7 +27,7 @@ namespace RollGen.Tests.Integration.Stress
         [Test]
         public void RollsAreDifferentBetweenDice()
         {
-            Stress(PopulateRolls);
+            Stress(() => PopulateRolls(Dice1, Dice2));
 
             var different = false;
             for (var i = 0; i < dice1Rolls.Count; i++)
@@ -35,21 +36,54 @@ namespace RollGen.Tests.Integration.Stress
             Assert.That(different, Is.True);
         }
 
-        private void PopulateRolls()
+        private void PopulateRolls(Dice dice1, Dice dice2)
         {
-            var firstRoll = Dice1.Roll().Percentile().AsSum();
+            var firstRoll = dice1.Roll().Percentile().AsSum();
             dice1Rolls.Add(firstRoll);
 
-            var secondRoll = Dice2.Roll().Percentile().AsSum();
+            var secondRoll = dice2.Roll().Percentile().AsSum();
             dice2Rolls.Add(secondRoll);
         }
 
         [Test]
         public void RollsAreDifferentBetweenRolls()
         {
-            Stress(PopulateRolls);
+            Stress(() => PopulateRolls(Dice1, Dice2));
 
             var distinctRolls = dice1Rolls.Distinct();
+            Assert.That(distinctRolls.Count(), Is.EqualTo(100));
+
+            distinctRolls = dice2Rolls.Distinct();
+            Assert.That(distinctRolls.Count(), Is.EqualTo(100));
+        }
+
+        [Test]
+        public void RollsAreDifferentBetweenDiceFromFactory()
+        {
+            var dice1 = DiceFactory.Create();
+            var dice2 = DiceFactory.Create();
+
+            Stress(() => PopulateRolls(dice1, dice2));
+
+            var different = false;
+            for (var i = 0; i < dice1Rolls.Count; i++)
+                different |= dice1Rolls[i] != dice2Rolls[i];
+
+            Assert.That(different, Is.True);
+        }
+
+        [Test]
+        public void RollsAreDifferentBetweenRollsForDiceFromFactory()
+        {
+            var dice1 = DiceFactory.Create();
+            var dice2 = DiceFactory.Create();
+
+            Stress(() => PopulateRolls(dice1, dice2));
+
+            var distinctRolls = dice1Rolls.Distinct();
+            Assert.That(distinctRolls.Count(), Is.EqualTo(100));
+
+            distinctRolls = dice2Rolls.Distinct();
             Assert.That(distinctRolls.Count(), Is.EqualTo(100));
         }
     }

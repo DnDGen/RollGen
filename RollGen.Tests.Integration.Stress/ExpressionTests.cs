@@ -98,18 +98,10 @@ namespace RollGen.Tests.Integration.Stress
         [TestCase("1d2 = 3", false)]
         public void FullRangeTruth(string expression, params bool[] expectedRolls)
         {
-            var rolls = Populate(new HashSet<bool>(), () => GenerateBoolean(expression), expectedRolls.Length);
+            var rolls = Populate(new HashSet<bool>(), () => Dice.Roll(expression).AsTrueOrFalse(), expectedRolls.Length);
 
             Assert.That(rolls, Is.EquivalentTo(expectedRolls));
             Assert.That(expectedRolls, Is.EquivalentTo(rolls));
-        }
-
-        private bool GenerateBoolean(string expression)
-        {
-            var totaledExpression = Dice.ReplaceExpressionWithTotal(expression);
-            var evaluatedExpression = Dice.RollBoolean(totaledExpression);
-
-            return evaluatedExpression;
         }
 
         [TestCase("1d2*3d4", 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24)]

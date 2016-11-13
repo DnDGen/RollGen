@@ -14,6 +14,5 @@
         string ReplaceExpressionWithTotal(string expression, bool lenient = false);
         string ReplaceRollsWithSumExpression(string expression, bool lenient = false);
         bool ContainsRoll(string expression, bool lenient = false);
-        bool RollBoolean(string expression);
     }
 }

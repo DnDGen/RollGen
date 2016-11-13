@@ -9,8 +9,6 @@ namespace RollGen.Domain
 {
     internal class DomainDice : Dice
     {
-        private const string CommonRollRegexPattern = "d *\\d+(?: *k *\\d+)?";
-
         private PartialRollFactory partialRollFactory;
         private Regex expressionRegex;
         private Regex strictRollRegex;
@@ -62,7 +60,7 @@ namespace RollGen.Domain
             return source.Replace(expressionOpenEscape + expressionOpen, expressionOpen);
         }
 
-        public string Evaluate<T>(string expression)
+        private string Evaluate<T>(string expression)
         {
             var partialRoll = partialRollFactory.Build(expression);
 
@@ -75,7 +73,7 @@ namespace RollGen.Domain
         public string ReplaceRollsWithSumExpression(string expression, bool lenient = false)
         {
             var rollRegex = GetRollRegex(lenient);
-            expression = Replace(expression, rollRegex, s => GetBooleanRoll(s));
+            expression = Replace(expression, rollRegex, s => GetRollAsSumExpression(s));
 
             return expression.Trim();
         }
@@ -85,7 +83,7 @@ namespace RollGen.Domain
             return lenient ? lenientRollRegex : strictRollRegex;
         }
 
-        private string GetBooleanRoll(string roll)
+        private string GetRollAsSumExpression(string roll)
         {
             var rolls = GetIndividualRolls(roll);
 
@@ -154,14 +152,6 @@ namespace RollGen.Domain
             }
 
             return expressionWithReplacedRolls;
-        }
-
-        public bool RollBoolean(string expression)
-        {
-            var partialRoll = partialRollFactory.Build(expression);
-            var evaluatedExpression = partialRoll.AsTrueOrFalse();
-
-            return evaluatedExpression;
         }
     }
 }

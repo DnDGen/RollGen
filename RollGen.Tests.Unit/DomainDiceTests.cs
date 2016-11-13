@@ -478,7 +478,7 @@ namespace RollGen.Tests.Unit
 
             mockPartialRollWithQuantity.Setup(r => r.AsTrueOrFalse()).Returns(result);
 
-            var evaluatedResult = dice.RollBoolean(expression);
+            var evaluatedResult = dice.Roll(expression).AsTrueOrFalse();
             Assert.That(evaluatedResult, Is.EqualTo(result));
         }
     }
