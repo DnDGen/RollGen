@@ -18,7 +18,7 @@ var parsedRoll = dice.Roll("5+3d4*2").AsSum();
 var chainedRolls = dice.Roll().d2().d(5).Keeping(1).d6().AsSum(); //Evaluated left to right
 
 var individualRolls = dice.Roll(4).d6().AsIndividualRolls();
-var parsedRolls = dice.Roll("5+3d4*2).AsIndividualRolls(); //NOTE: This will only return 1 roll, the same as AsSum()
+var parsedRolls = dice.Roll("5+3d4*2").AsIndividualRolls(); //NOTE: This will only return 1 roll, the same as AsSum()
 
 var keptRolls = dice.Roll(4).d6().Keeping(3).AsSum();
 
