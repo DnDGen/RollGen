@@ -11,9 +11,18 @@ Rolls a set of dice, as determined by the D20 die system.
 To use RollGen, simple adhere to the verbose, fluid syntax:
 
 ```C#
-var standardRoll = dice.Roll(3).d6();
-var customRoll = dice.Roll(92).d(66);
-var parsedRoll = dice.Roll("5+3d4*2");
+var standardRoll = dice.Roll(4).d6().AsSum();
+var customRoll = dice.Roll(92).d(66).AsSum();
+var parsedRoll = dice.Roll("5+3d4*2").AsSum();
+
+var chainedRolls = dice.Roll().d2().d(5).Keeping(1).d6().AsSum(); //Evaluated left to right
+
+var individualRolls = dice.Roll(4).d6().AsIndividualRolls();
+var parsedRolls = dice.Roll("5+3d4*2).AsIndividualRolls(); //NOTE: This will only return 1 roll, the same as AsSum()
+
+var keptRolls = dice.Roll(4).d6().Keeping(3).AsSum();
+
+var averageRoll = dice.Roll(4).d6().AsPotentialAverage();
 ```
 
 ### Getting `Dice` Objects
