@@ -183,6 +183,74 @@ namespace RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
+        public void ReturnAsMinimumFromExpressionOfJustRoll()
+        {
+            BuildPartialRoll("42d600");
+            Assert.That(expressionPartialRoll.CurrentRollExpression, Is.EqualTo("42d600"));
+
+            var average = expressionPartialRoll.AsPotentialMinimum();
+            Assert.That(average, Is.EqualTo(42));
+        }
+
+        [Test]
+        public void ReturnAsMinimumFromExpression()
+        {
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>("9266+42")).Returns(600);
+
+            BuildPartialRoll("9266d90210+42");
+            Assert.That(expressionPartialRoll.CurrentRollExpression, Is.EqualTo("9266d90210+42"));
+
+            var average = expressionPartialRoll.AsPotentialMinimum();
+            Assert.That(average, Is.EqualTo(600));
+        }
+
+        [Test]
+        public void ReturnAsMinimumFromExpressionWithMultipleRolls()
+        {
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>("9266+42")).Returns(1337);
+
+            BuildPartialRoll("9266d90210+42d600");
+            Assert.That(expressionPartialRoll.CurrentRollExpression, Is.EqualTo("9266d90210+42d600"));
+
+            var average = expressionPartialRoll.AsPotentialMinimum();
+            Assert.That(average, Is.EqualTo(1337));
+        }
+
+        [Test]
+        public void ReturnAsMaximumFromExpressionOfJustRoll()
+        {
+            BuildPartialRoll("42d600");
+            Assert.That(expressionPartialRoll.CurrentRollExpression, Is.EqualTo("42d600"));
+
+            var average = expressionPartialRoll.AsPotentialMaximum();
+            Assert.That(average, Is.EqualTo(42 * 600));
+        }
+
+        [Test]
+        public void ReturnAsMaximumFromExpression()
+        {
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>("835885860+42")).Returns(600);
+
+            BuildPartialRoll("9266d90210+42");
+            Assert.That(expressionPartialRoll.CurrentRollExpression, Is.EqualTo("9266d90210+42"));
+
+            var average = expressionPartialRoll.AsPotentialMaximum();
+            Assert.That(average, Is.EqualTo(600));
+        }
+
+        [Test]
+        public void ReturnAsMaximumFromExpressionWithMultipleRolls()
+        {
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>("835885860+25200")).Returns(1337);
+
+            BuildPartialRoll("9266d90210+42d600");
+            Assert.That(expressionPartialRoll.CurrentRollExpression, Is.EqualTo("9266d90210+42d600"));
+
+            var average = expressionPartialRoll.AsPotentialMaximum();
+            Assert.That(average, Is.EqualTo(1337));
+        }
+
+        [Test]
         public void ReturnAsAverageUnroundedFromExpressionOfJustRoll()
         {
             BuildPartialRoll("1d2");

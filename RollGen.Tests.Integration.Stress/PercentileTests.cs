@@ -15,13 +15,6 @@ namespace RollGen.Tests.Integration.Stress
             return Dice.Roll(quantity).Percentile().AsSum();
         }
 
-        [TestCase(1)]
-        [TestCase(2)]
-        public override void FullRangeHit(int quantity)
-        {
-            AssertFullRangeHit(quantity);
-        }
-
         [Test]
         public override void RollWithLargestDieRollPossible()
         {

@@ -46,6 +46,18 @@ namespace RollGen.Domain.PartialRolls
             return average;
         }
 
+        public override int AsPotentialMinimum()
+        {
+            var minimum = GetMinimumRoll(CurrentRollExpression);
+            return minimum;
+        }
+
+        public override int AsPotentialMaximum()
+        {
+            var maximum = GetMaximumRoll(CurrentRollExpression);
+            return maximum;
+        }
+
         public override bool AsTrueOrFalse()
         {
             if (booleanExpressionRegex.IsMatch(CurrentRollExpression))
@@ -58,7 +70,7 @@ namespace RollGen.Domain.PartialRolls
 
         private bool EvaluateExpressionWithRollsAsTrueOrFalse(string rollExpression)
         {
-            var expression = ReplaceRollsInExpressionWithTotal(rollExpression);
+            var expression = ReplaceRollsInExpression(rollExpression, GetTotalOfRolls);
             var evaluatedExpression = expressionEvaluator.Evaluate<bool>(expression);
             return evaluatedExpression;
         }
@@ -78,7 +90,7 @@ namespace RollGen.Domain.PartialRolls
             //INFO: Not sure how to evaluate individual rolls from genuine expressions (1d6+5 or 2d3+4d5), so will compute those as 1 roll
             if (Roll.CanParse(rollExpression) == false)
             {
-                var evaluatedExpression = EvaluateExpressionWithRollsAsTotals(rollExpression);
+                var evaluatedExpression = EvaluateExpression(rollExpression, GetTotalOfRolls);
                 return new[] { evaluatedExpression };
             }
 
@@ -88,21 +100,14 @@ namespace RollGen.Domain.PartialRolls
             return rolls;
         }
 
-        private int EvaluateExpressionWithRollsAsTotals(string rollExpression)
+        private T EvaluateExpression<T>(string rollExpression, Func<string, T> getRoll)
         {
-            var expression = ReplaceRollsInExpressionWithTotal(rollExpression);
-            var evaluatedExpression = expressionEvaluator.Evaluate<int>(expression);
+            var expression = ReplaceRollsInExpression(rollExpression, getRoll);
+            var evaluatedExpression = expressionEvaluator.Evaluate<T>(expression);
             return evaluatedExpression;
         }
 
-        private double EvaluateExpressionWithRollsAsAverage(string rollExpression)
-        {
-            var expression = ReplaceRollsInExpressionWithAverage(rollExpression);
-            var evaluatedExpression = expressionEvaluator.Evaluate<double>(expression);
-            return evaluatedExpression;
-        }
-
-        private string ReplaceRollsInExpressionWithTotal(string rollExpression)
+        private string ReplaceRollsInExpression<T>(string rollExpression, Func<string, T> getRoll)
         {
             var expressionWithReplacedRolls = rollExpression;
             var match = strictRollRegex.Match(expressionWithReplacedRolls);
@@ -110,7 +115,7 @@ namespace RollGen.Domain.PartialRolls
             while (match.Success)
             {
                 var matchValue = match.Value.Trim();
-                var replacement = CreateTotalOfRolls(matchValue);
+                var replacement = getRoll(matchValue);
 
                 expressionWithReplacedRolls = ReplaceFirst(expressionWithReplacedRolls, matchValue, replacement.ToString());
                 match = strictRollRegex.Match(expressionWithReplacedRolls);
@@ -119,24 +124,7 @@ namespace RollGen.Domain.PartialRolls
             return expressionWithReplacedRolls;
         }
 
-        private string ReplaceRollsInExpressionWithAverage(string rollExpression)
-        {
-            var expressionWithReplacedRolls = rollExpression;
-            var match = strictRollRegex.Match(expressionWithReplacedRolls);
-
-            while (match.Success)
-            {
-                var matchValue = match.Value.Trim();
-                var replacement = GetAverageRoll(matchValue);
-
-                expressionWithReplacedRolls = ReplaceFirst(expressionWithReplacedRolls, matchValue, replacement.ToString());
-                match = strictRollRegex.Match(expressionWithReplacedRolls);
-            }
-
-            return expressionWithReplacedRolls;
-        }
-
-        private int CreateTotalOfRolls(string rollExpression)
+        private int GetTotalOfRolls(string rollExpression)
         {
             var rolls = GetIndividualRolls(rollExpression);
             return rolls.Sum();
@@ -145,12 +133,34 @@ namespace RollGen.Domain.PartialRolls
         private double GetAverageRoll(string rollExpression)
         {
             if (Roll.CanParse(rollExpression) == false)
-                return EvaluateExpressionWithRollsAsAverage(rollExpression);
+                return EvaluateExpression(rollExpression, GetAverageRoll);
 
             var roll = new Roll(rollExpression);
             var average = roll.GetPotentialAverage();
 
             return average;
+        }
+
+        private int GetMinimumRoll(string rollExpression)
+        {
+            if (Roll.CanParse(rollExpression) == false)
+                return EvaluateExpression(rollExpression, GetMinimumRoll);
+
+            var roll = new Roll(rollExpression);
+            var minimum = roll.GetPotentialMinimum();
+
+            return minimum;
+        }
+
+        private int GetMaximumRoll(string rollExpression)
+        {
+            if (Roll.CanParse(rollExpression) == false)
+                return EvaluateExpression(rollExpression, GetMaximumRoll);
+
+            var roll = new Roll(rollExpression);
+            var maximum = roll.GetPotentialMaximum();
+
+            return maximum;
         }
 
         private string ReplaceFirst(string source, string target, string replacement)

@@ -212,6 +212,36 @@ namespace RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
+        public void GetPotentialMinimumRoll()
+        {
+            roll.AmountToKeep = 0;
+            var minimum = roll.GetPotentialMinimum();
+            Assert.That(minimum, Is.EqualTo(92));
+        }
+
+        [Test]
+        public void GetPotentialMinimumRollAndKeep()
+        {
+            var minimum = roll.GetPotentialMinimum();
+            Assert.That(minimum, Is.EqualTo(42));
+        }
+
+        [Test]
+        public void GetPotentialMaximumRoll()
+        {
+            roll.AmountToKeep = 0;
+            var maximum = roll.GetPotentialMaximum();
+            Assert.That(maximum, Is.EqualTo(92 * 66));
+        }
+
+        [Test]
+        public void GetPotentialMaximumRollAndKeep()
+        {
+            var maximum = roll.GetPotentialMaximum();
+            Assert.That(maximum, Is.EqualTo(42 * 66));
+        }
+
+        [Test]
         public void GetUnroundedPotentialAverageRoll()
         {
             roll.Quantity = 3;

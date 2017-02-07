@@ -95,6 +95,22 @@ namespace RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
+        public void ReturnAsMinimumFromQuantity()
+        {
+            BuildPartialRoll(9266);
+            var average = numericPartialRoll.d(90210).AsPotentialMinimum();
+            Assert.That(average, Is.EqualTo(9266));
+        }
+
+        [Test]
+        public void ReturnAsMaximumFromQuantity()
+        {
+            BuildPartialRoll(9266);
+            var average = numericPartialRoll.d(90210).AsPotentialMaximum();
+            Assert.That(average, Is.EqualTo(9266 * 90210));
+        }
+
+        [Test]
         public void ReturnAsTrueIfHigh()
         {
             BuildPartialRoll(1);

@@ -12,6 +12,8 @@ namespace RollGen
         public abstract int AsSum();
         public abstract IEnumerable<int> AsIndividualRolls();
         public abstract double AsPotentialAverage();
+        public abstract int AsPotentialMinimum();
+        public abstract int AsPotentialMaximum();
         public abstract bool AsTrueOrFalse();
 
         public PartialRoll d2() => d(2);

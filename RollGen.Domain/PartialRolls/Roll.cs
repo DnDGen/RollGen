@@ -88,13 +88,35 @@ namespace RollGen.Domain.PartialRolls
         {
             ValidateRoll();
 
-            var low = Quantity;
+            var quantity = GetEffectiveQuantity();
+            var average = quantity * (Die + 1) / 2.0d;
 
-            if (AmountToKeep > 0)
-                low = Math.Min(Quantity, AmountToKeep);
-
-            var average = low * (Die + 1) / 2.0d;
             return average;
+        }
+
+        public int GetPotentialMinimum()
+        {
+            ValidateRoll();
+
+            var quantity = GetEffectiveQuantity();
+
+            return quantity;
+        }
+
+        private int GetEffectiveQuantity()
+        {
+            if (AmountToKeep > 0)
+                return Math.Min(Quantity, AmountToKeep);
+
+            return Quantity;
+        }
+
+        public int GetPotentialMaximum()
+        {
+            ValidateRoll();
+
+            var quantity = GetEffectiveQuantity();
+            return quantity * Die;
         }
 
         public bool GetTrueOrFalse(Random random)

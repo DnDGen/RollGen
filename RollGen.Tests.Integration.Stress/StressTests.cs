@@ -2,7 +2,6 @@
 using NUnit.Framework;
 using RollGen.Tests.Integration.Common;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -16,8 +15,8 @@ namespace RollGen.Tests.Integration.Stress
         public Stopwatch Stopwatch { get; set; }
 
         private const int ConfidentIterations = 1000000;
-        private const int TenMinutesInSeconds = 600;
-        private const int TwoHoursInSeconds = 3600 * 2;
+        private const int TravisOutputTimeLimit = 60 * 10;
+        private const int TravisBuildTimeLimit = 50 * 60;
 
         private readonly TimeSpan timeLimit;
 
@@ -32,9 +31,9 @@ namespace RollGen.Tests.Integration.Stress
             var stressTestCasesCount = methods.Sum(m => m.GetCustomAttributes<TestCaseAttribute>().Count());
             var stressTestsTotal = stressTestsCount + stressTestCasesCount;
 
-            var twoHourTimeLimitPerTest = TwoHoursInSeconds / stressTestsTotal;
+            var perTestTimeLimit = TravisBuildTimeLimit / stressTestsTotal;
 #if STRESS
-            var timeLimitInSeconds = Math.Min(twoHourTimeLimitPerTest, TenMinutesInSeconds - 10);
+            var timeLimitInSeconds = Math.Min(perTestTimeLimit, TravisOutputTimeLimit - 10);
 #else
             var timeLimitInSeconds = 1;
 #endif
@@ -74,31 +73,11 @@ namespace RollGen.Tests.Integration.Stress
             do makeAssertions();
             while (TestShouldKeepRunning());
 
-            Log($"Stress test complete after {Stopwatch.Elapsed} and {iterations} iterations");
+            var iterationsPerSecond = Math.Round(iterations / Stopwatch.Elapsed.TotalSeconds, 2);
+            Log($"Stress test complete after {Stopwatch.Elapsed} and {iterations} iterations, or {iterationsPerSecond} iterations per second");
 
             if (Stopwatch.Elapsed.TotalSeconds > timeLimit.TotalSeconds + 1)
                 Assert.Fail("Something took way too long");
-        }
-
-        protected IEnumerable<T> Populate<T>(ICollection<T> target, Func<T> generate, int expectedTotal)
-        {
-            do
-            {
-                var generatedNumber = generate();
-                target.Add(generatedNumber);
-            }
-            while (TestShouldKeepRunning() && target.Count < expectedTotal);
-
-            Log($"Population complete after {Stopwatch.Elapsed} and {iterations} iterations");
-
-            if (TestShouldKeepRunning() == false && target.Count < expectedTotal)
-            {
-                var message = $"Stress test timed out after {Stopwatch.Elapsed}, {iterations} iterations, and {target.Count} of {expectedTotal} populated:";
-                message += $"\n{string.Join(", ", target.OrderBy(x => x))}";
-                Assert.Fail(message);
-            }
-
-            return target;
         }
     }
 }
