@@ -14,14 +14,14 @@ namespace RollGen.Tests.Integration.Stress
         [TestCase(Limits.Quantity, 1)]
         public void RollWithLargestDieRollPossible(int quantity, int die)
         {
-            Stress(() => AssertRoll(quantity, die));
+            stressor.Stress(() => AssertRoll(quantity, die));
         }
 
         [Test]
         public void RollWithLargestDieRollPossible()
         {
             var rootOfLimit = Convert.ToInt32(Math.Floor(Math.Sqrt(Limits.ProductOfQuantityAndDie)));
-            Stress(() => AssertRoll(rootOfLimit, rootOfLimit));
+            stressor.Stress(() => AssertRoll(rootOfLimit, rootOfLimit));
         }
 
         private void AssertRoll(int quantity, int die)

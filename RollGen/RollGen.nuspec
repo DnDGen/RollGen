@@ -2,15 +2,15 @@
 <package >
   <metadata>
     <id>DnDGen.RollGen</id>
-    <version>13.3.0</version>
-    <title>RollGen</title>
+    <version>13.4.1</version>
+    <title>DnDGen.RollGen</title>
     <authors>Karl M. Speer</authors>
     <owners></owners>
     <description>
       This gives a basic, fluid interface for rolling dice from the D20 system - commonly known to work with Dungeons and Dragons.  Die included are d2, d3, d4, d6, d8, d10, d12, d20, Percentile (d100), and custom die rolls.
     </description>
     <releaseNotes>
-      #33
+      Feature #34, #35
     </releaseNotes>
     <summary>
       This gives a basic, fluid interface for rolling dice from the D20 system.
@@ -27,6 +27,6 @@
     <tags> dice dungeons dragons d20 dnd adnd ioc ninject dependency inject injection </tags>
   </metadata>
   <files>
-    <file src="..\RollGen\bin\Debug\RollGen.dll" target="lib" />
+    <file src="bin/Stress/RollGen.dll" target="lib" />
   </files>
 </package>

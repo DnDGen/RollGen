@@ -313,7 +313,7 @@ namespace RollGen.Tests.Unit
 
             var mockPartialRoll = new Mock<PartialRoll>();
             mockPartialRollFactory.Setup(f => f.Build("1d1 > 2")).Returns(mockPartialRoll.Object);
-            mockPartialRoll.Setup(r => r.AsTrueOrFalse()).Returns(true);
+            mockPartialRoll.Setup(r => r.AsTrueOrFalse(.5)).Returns(true);
 
             var result = dice.ReplaceWrappedExpressions<bool>(expression);
             Assert.That(result, Is.EqualTo("Bark True"));
@@ -326,7 +326,7 @@ namespace RollGen.Tests.Unit
 
             var mockPartialRoll = new Mock<PartialRoll>();
             mockPartialRollFactory.Setup(f => f.Build("1d1 > 2")).Returns(mockPartialRoll.Object);
-            mockPartialRoll.Setup(r => r.AsTrueOrFalse()).Returns(false);
+            mockPartialRoll.Setup(r => r.AsTrueOrFalse(.5)).Returns(false);
 
             var result = dice.ReplaceWrappedExpressions<bool>(expression);
             Assert.That(result, Is.EqualTo("Bark False"));
@@ -476,7 +476,7 @@ namespace RollGen.Tests.Unit
             var mockPartialRollWithQuantity = new Mock<PartialRoll>();
             mockPartialRollFactory.Setup(f => f.Build(expression)).Returns(mockPartialRollWithQuantity.Object);
 
-            mockPartialRollWithQuantity.Setup(r => r.AsTrueOrFalse()).Returns(result);
+            mockPartialRollWithQuantity.Setup(r => r.AsTrueOrFalse(.5)).Returns(result);
 
             var evaluatedResult = dice.Roll(expression).AsTrueOrFalse();
             Assert.That(evaluatedResult, Is.EqualTo(result));

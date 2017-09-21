@@ -16,9 +16,15 @@ namespace RollGen.Tests.Integration.Stress
         }
 
         [Test]
-        public override void RollWithLargestDieRollPossible()
+        public void StressD3WithMaxQuantity()
         {
-            Stress(AssertRollWithLargestDieRollPossible);
+            stressor.Stress(AssertRollWithLargestQuantityPossible);
+        }
+
+        [Test]
+        public void StressD3()
+        {
+            stressor.Stress(AssertRoll);
         }
     }
 }

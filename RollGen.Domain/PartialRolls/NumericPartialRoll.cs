@@ -56,11 +56,15 @@ namespace RollGen.Domain.PartialRolls
             return maximum;
         }
 
-        public override bool AsTrueOrFalse()
+        public override bool AsTrueOrFalse(double threshold = .5)
         {
-            var average = AsPotentialAverage();
+            var minimum = AsPotentialMinimum();
+            var maximum = AsPotentialMaximum();
             var sum = AsSum();
-            return sum >= average;
+            var difference = minimum - 1;
+            var percentage = (sum - difference) / (double)(maximum - difference);
+
+            return percentage <= threshold;
         }
 
         public override PartialRoll d(int die)

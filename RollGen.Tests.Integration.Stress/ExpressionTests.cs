@@ -15,7 +15,7 @@ namespace RollGen.Tests.Integration.Stress
         [TestCase("1d2+3d4", 4, 14)]
         public void RollExpression(string expression, int lower, int upper)
         {
-            Stress(() => AssertExpression(expression, lower, upper));
+            stressor.Stress(() => AssertExpression(expression, lower, upper));
         }
 
         private void AssertExpression(string expression, int lower, int upper)
@@ -29,7 +29,7 @@ namespace RollGen.Tests.Integration.Stress
         public void RollWithLargestDieRollPossible(int quantity, int die)
         {
             var roll = $"{quantity}d{die}";
-            Stress(() => AssertExpression(roll, quantity, die * quantity));
+            stressor.Stress(() => AssertExpression(roll, quantity, die * quantity));
         }
 
         [Test]
@@ -38,7 +38,7 @@ namespace RollGen.Tests.Integration.Stress
             var rootOfLimit = Convert.ToInt32(Math.Floor(Math.Sqrt(Limits.ProductOfQuantityAndDie)));
             var roll = $"{rootOfLimit}d{rootOfLimit}";
 
-            Stress(() => AssertExpression(roll, rootOfLimit, rootOfLimit * rootOfLimit));
+            stressor.Stress(() => AssertExpression(roll, rootOfLimit, rootOfLimit * rootOfLimit));
         }
     }
 }

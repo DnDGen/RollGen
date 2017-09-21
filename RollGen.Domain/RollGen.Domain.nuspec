@@ -2,15 +2,15 @@
 <package >
   <metadata>
     <id>DnDGen.RollGen.Domain</id>
-    <version>13.3.0</version>
-    <title>RollGen.Domain</title>
+    <version>13.4.1</version>
+    <title>DnDGen.RollGen.Domain</title>
     <authors>Karl M. Speer</authors>
     <owners></owners>
     <description>
       This provides the Ninject module loader for the RollGen package.
     </description>
     <releaseNotes>
-      #33
+      Feature #34, #35
     </releaseNotes>
     <summary>
       This provides the Ninject module loader for the RollGen package.
@@ -22,7 +22,7 @@
     <licenseUrl>http://opensource.org/licenses/Apache-2.0</licenseUrl>
     <copyright>Copyright  2016</copyright>
     <dependencies>
-      <dependency id="DnDGen.RollGen" version="13.2.0" />
+      <dependency id="DnDGen.RollGen" version="13.4.0" />
       <dependency id="Ninject" version="3.2.2.0" />
       <dependency id="Albatross.Expression" version="1.3" />
     </dependencies>
@@ -30,6 +30,6 @@
     <tags> dice dungeons dragons d20 dnd adnd ioc ninject dependency inject injection </tags>
   </metadata>
   <files>
-    <file src="..\RollGen.Domain\bin\Debug\RollGen.Domain.dll" target="lib" />
+    <file src="bin/Stress/RollGen.Domain.dll" target="lib" />
   </files>
 </package>

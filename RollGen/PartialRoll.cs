@@ -14,7 +14,7 @@ namespace RollGen
         public abstract double AsPotentialAverage();
         public abstract int AsPotentialMinimum();
         public abstract int AsPotentialMaximum();
-        public abstract bool AsTrueOrFalse();
+        public abstract bool AsTrueOrFalse(double threshold = .5);
 
         public PartialRoll d2() => d(2);
         public PartialRoll d3() => d(3);

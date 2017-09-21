@@ -13,12 +13,16 @@ namespace RollGen.Tests.Integration.Stress
 
         protected abstract int GetRoll(int quantity);
 
-        public abstract void RollWithLargestDieRollPossible();
-
-        protected void AssertRollWithLargestDieRollPossible()
+        protected void AssertRollWithLargestQuantityPossible()
         {
             var roll = GetRoll(Limits.Quantity);
             Assert.That(roll, Is.InRange(Limits.Quantity, Limits.Quantity * die));
+        }
+
+        protected void AssertRoll()
+        {
+            var roll = GetRoll(1);
+            Assert.That(roll, Is.InRange(1, die));
         }
     }
 }

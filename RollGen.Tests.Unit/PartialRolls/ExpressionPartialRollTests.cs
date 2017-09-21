@@ -285,21 +285,9 @@ namespace RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void ReturnAsTrueFromExpressionIfHigh()
+        public void ReturnAsFalseFromExpressionIfHigh()
         {
             mockRandom.Setup(r => r.Next(2)).Returns(1);
-
-            BuildPartialRoll("1d2");
-            Assert.That(expressionPartialRoll.CurrentRollExpression, Is.EqualTo("1d2"));
-
-            var result = expressionPartialRoll.AsTrueOrFalse();
-            Assert.That(result, Is.True);
-        }
-
-        [Test]
-        public void ReturnAsFalseFromExpressionIfLow()
-        {
-            mockRandom.Setup(r => r.Next(2)).Returns(0);
 
             BuildPartialRoll("1d2");
             Assert.That(expressionPartialRoll.CurrentRollExpression, Is.EqualTo("1d2"));
@@ -311,12 +299,60 @@ namespace RollGen.Tests.Unit.PartialRolls
         [Test]
         public void ReturnAsTrueFromExpressionIfExactlyOnAverage()
         {
-            mockRandom.Setup(r => r.Next(3)).Returns(1);
+            mockRandom.Setup(r => r.Next(4)).Returns(1);
 
-            BuildPartialRoll("1d3");
-            Assert.That(expressionPartialRoll.CurrentRollExpression, Is.EqualTo("1d3"));
+            BuildPartialRoll("1d4");
+            Assert.That(expressionPartialRoll.CurrentRollExpression, Is.EqualTo("1d4"));
 
             var result = expressionPartialRoll.AsTrueOrFalse();
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public void ReturnAsTrueFromExpressionIfLow()
+        {
+            mockRandom.Setup(r => r.Next(2)).Returns(0);
+
+            BuildPartialRoll("1d2");
+            Assert.That(expressionPartialRoll.CurrentRollExpression, Is.EqualTo("1d2"));
+
+            var result = expressionPartialRoll.AsTrueOrFalse();
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public void ReturnAsFalseFromExpressionIfHigherThanThreshold()
+        {
+            mockRandom.Setup(r => r.Next(5)).Returns(1);
+
+            BuildPartialRoll("1d5");
+            Assert.That(expressionPartialRoll.CurrentRollExpression, Is.EqualTo("1d5"));
+
+            var result = expressionPartialRoll.AsTrueOrFalse(.35);
+            Assert.That(result, Is.False);
+        }
+
+        [Test]
+        public void ReturnAsTrueFromExpressionIfLowerThanThreshold()
+        {
+            mockRandom.Setup(r => r.Next(5)).Returns(1);
+
+            BuildPartialRoll("1d5");
+            Assert.That(expressionPartialRoll.CurrentRollExpression, Is.EqualTo("1d5"));
+
+            var result = expressionPartialRoll.AsTrueOrFalse(.45);
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public void ReturnAsTrueFromExpressionIfExactlyEqualToThreshold()
+        {
+            mockRandom.Setup(r => r.Next(5)).Returns(1);
+
+            BuildPartialRoll("1d5");
+            Assert.That(expressionPartialRoll.CurrentRollExpression, Is.EqualTo("1d5"));
+
+            var result = expressionPartialRoll.AsTrueOrFalse(.4);
             Assert.That(result, Is.True);
         }
 

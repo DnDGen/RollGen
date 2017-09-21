@@ -27,7 +27,7 @@ namespace RollGen.Tests.Integration.Stress
         [Test]
         public void RollsAreDifferentBetweenDice()
         {
-            Stress(() => PopulateRolls(Dice1, Dice2));
+            stressor.Stress(() => PopulateRolls(Dice1, Dice2));
 
             var different = false;
             for (var i = 0; i < dice1Rolls.Count; i++)
@@ -48,7 +48,7 @@ namespace RollGen.Tests.Integration.Stress
         [Test]
         public void RollsAreDifferentBetweenRolls()
         {
-            Stress(() => PopulateRolls(Dice1, Dice2));
+            stressor.Stress(() => PopulateRolls(Dice1, Dice2));
 
             var distinctRolls = dice1Rolls.Distinct();
             Assert.That(distinctRolls.Count(), Is.EqualTo(100));
@@ -63,7 +63,7 @@ namespace RollGen.Tests.Integration.Stress
             var dice1 = DiceFactory.Create();
             var dice2 = DiceFactory.Create();
 
-            Stress(() => PopulateRolls(dice1, dice2));
+            stressor.Stress(() => PopulateRolls(dice1, dice2));
 
             var different = false;
             for (var i = 0; i < dice1Rolls.Count; i++)
@@ -78,7 +78,7 @@ namespace RollGen.Tests.Integration.Stress
             var dice1 = DiceFactory.Create();
             var dice2 = DiceFactory.Create();
 
-            Stress(() => PopulateRolls(dice1, dice2));
+            stressor.Stress(() => PopulateRolls(dice1, dice2));
 
             var distinctRolls = dice1Rolls.Distinct();
             Assert.That(distinctRolls.Count(), Is.EqualTo(100));

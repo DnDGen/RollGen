@@ -111,41 +111,80 @@ namespace RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void ReturnAsTrueIfHigh()
+        public void ReturnAsFalseIfHigh()
         {
             BuildPartialRoll(1);
-            mockRandom.Setup(r => r.Next(2)).Returns(1);
+            mockRandom.Setup(r => r.Next(4)).Returns(2);
 
-            numericPartialRoll = numericPartialRoll.d2();
-            Assert.That(numericPartialRoll.CurrentRollExpression, Is.EqualTo("1d2"));
+            numericPartialRoll = numericPartialRoll.d4();
+            Assert.That(numericPartialRoll.CurrentRollExpression, Is.EqualTo("1d4"));
 
             var result = numericPartialRoll.AsTrueOrFalse();
-            Assert.That(result, Is.True);
+            Assert.That(result, Is.False);
         }
 
         [Test]
         public void ReturnAsTrueIfOnAverageExactly()
         {
             BuildPartialRoll(1);
-            mockRandom.Setup(r => r.Next(3)).Returns(1);
+            mockRandom.Setup(r => r.Next(4)).Returns(1);
 
-            numericPartialRoll = numericPartialRoll.d3();
-            Assert.That(numericPartialRoll.CurrentRollExpression, Is.EqualTo("1d3"));
+            numericPartialRoll = numericPartialRoll.d4();
+            Assert.That(numericPartialRoll.CurrentRollExpression, Is.EqualTo("1d4"));
 
             var result = numericPartialRoll.AsTrueOrFalse();
             Assert.That(result, Is.True);
         }
 
         [Test]
-        public void ReturnAsFalseIfLow()
+        public void ReturnAsTrueIfLow()
         {
             BuildPartialRoll(1);
-            mockRandom.Setup(r => r.Next(2)).Returns(0);
+            mockRandom.Setup(r => r.Next(4)).Returns(0);
 
-            numericPartialRoll = numericPartialRoll.d2();
-            Assert.That(numericPartialRoll.CurrentRollExpression, Is.EqualTo("1d2"));
+            numericPartialRoll = numericPartialRoll.d4();
+            Assert.That(numericPartialRoll.CurrentRollExpression, Is.EqualTo("1d4"));
 
             var result = numericPartialRoll.AsTrueOrFalse();
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public void ReturnAsTrueIfLowerThanThreshold()
+        {
+            BuildPartialRoll(1);
+            mockRandom.Setup(r => r.Next(10)).Returns(0);
+
+            numericPartialRoll = numericPartialRoll.d10();
+            Assert.That(numericPartialRoll.CurrentRollExpression, Is.EqualTo("1d10"));
+
+            var result = numericPartialRoll.AsTrueOrFalse(.15);
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public void ReturnAsTrueIfOnThresholdExactly()
+        {
+            BuildPartialRoll(1);
+            mockRandom.Setup(r => r.Next(10)).Returns(0);
+
+            numericPartialRoll = numericPartialRoll.d10();
+            Assert.That(numericPartialRoll.CurrentRollExpression, Is.EqualTo("1d10"));
+
+            var result = numericPartialRoll.AsTrueOrFalse(.1);
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public void ReturnAsFalseIfHigherThanThreshold()
+        {
+            BuildPartialRoll(1);
+            mockRandom.Setup(r => r.Next(10)).Returns(0);
+
+            numericPartialRoll = numericPartialRoll.d10();
+            Assert.That(numericPartialRoll.CurrentRollExpression, Is.EqualTo("1d10"));
+
+            var result = numericPartialRoll.AsTrueOrFalse(.05);
             Assert.That(result, Is.False);
         }
 
