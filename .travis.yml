@@ -1,4 +1,6 @@
 language: csharp
+mono:
+  - 5.2.0
 solution: RollGen.sln
 install:
   - nuget restore RollGen.sln
