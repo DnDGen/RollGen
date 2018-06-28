@@ -53,6 +53,9 @@
     <Compile Include="Limits.cs" />
     <Compile Include="PartialRoll.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RollCollection.cs" />
+    <Compile Include="RollHelper.cs" />
+    <Compile Include="RollPrototype.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

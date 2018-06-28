@@ -1,7 +1,9 @@
 ﻿using Albatross.Expression;
+using Albatross.Expression.Tokens;
 using Moq;
 using NUnit.Framework;
 using RollGen.Domain.Expressions;
+using System.Collections.Generic;
 
 namespace RollGen.Tests.Unit.Expressions
 {
@@ -19,7 +21,20 @@ namespace RollGen.Tests.Unit.Expressions
             mockParser = new Mock<IParser>();
             expressionEvaluator = new AlbatrossExpressionEvaluator(mockParser.Object);
 
-            mockParser.Setup(p => p.Compile(Expression).EvalValue(null)).Returns(9266);
+            SetUpExpression(Expression, 9266);
+        }
+
+        private void SetUpExpression(string expression, object result)
+        {
+            var mockToken = new Mock<IToken>();
+            var queue = new Queue<IToken>();
+            var stack = new Stack<IToken>();
+
+            mockParser.Setup(p => p.Tokenize(expression)).Returns(queue);
+            mockParser.Setup(p => p.BuildStack(queue)).Returns(stack);
+            mockParser.Setup(p => p.CreateTree(stack)).Returns(mockToken.Object);
+
+            mockToken.Setup(t => t.EvalValue(null)).Returns(result);
         }
 
         [Test]
@@ -35,7 +50,8 @@ namespace RollGen.Tests.Unit.Expressions
             var result = expressionEvaluator.Evaluate<int>(Expression);
             Assert.That(result, Is.EqualTo(9266));
 
-            mockParser.Setup(p => p.Compile("other expression").EvalValue(null)).Returns(902.1);
+            SetUpExpression("other expression", 902.1);
+
             result = expressionEvaluator.Evaluate<int>("other expression");
             Assert.That(result, Is.EqualTo(902));
         }
@@ -43,7 +59,8 @@ namespace RollGen.Tests.Unit.Expressions
         [Test]
         public void EvaluateDouble()
         {
-            mockParser.Setup(p => p.Compile("other expression").EvalValue(null)).Returns(902.1);
+            SetUpExpression("other expression", 902.1);
+
             var result = expressionEvaluator.Evaluate<double>("other expression");
             Assert.That(result, Is.EqualTo(902.1));
         }
@@ -57,7 +74,8 @@ namespace RollGen.Tests.Unit.Expressions
         [Test]
         public void EvaluateTrueBooleanExpression()
         {
-            mockParser.Setup(p => p.Compile("boolean expression").EvalValue(null)).Returns(bool.TrueString);
+            SetUpExpression("boolean expression", bool.TrueString);
+
             var result = expressionEvaluator.Evaluate<bool>("boolean expression");
             Assert.That(result, Is.True);
         }
@@ -65,7 +83,8 @@ namespace RollGen.Tests.Unit.Expressions
         [Test]
         public void EvaluateFalseBooleanExpression()
         {
-            mockParser.Setup(p => p.Compile("boolean expression").EvalValue(null)).Returns(bool.FalseString);
+            SetUpExpression("boolean expression", bool.FalseString);
+
             var result = expressionEvaluator.Evaluate<bool>("boolean expression");
             Assert.That(result, Is.False);
         }
