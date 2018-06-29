@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>DnDGen.RollGen</id>
-    <version>14.0.1</version>
+    <version>14.0.2</version>
     <title>DnDGen.RollGen</title>
     <authors>Karl M. Speer</authors>
     <owners></owners>
@@ -22,6 +22,8 @@
     <licenseUrl>http://opensource.org/licenses/Apache-2.0</licenseUrl>
     <copyright>Copyright  2016</copyright>
     <dependencies>
+      <dependency id="Albatross.Expression" version="2.0.3" />
+      <dependency id="Ninject" version="3.3.4" />
     </dependencies>
     <references></references>
     <tags> dice dungeons dragons d20 dnd adnd ioc ninject dependency inject injection </tags>
