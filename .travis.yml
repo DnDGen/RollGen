@@ -1,13 +1,14 @@
 language: csharp
-mono:
-  - 5.2.0
+mono: latest
+# mono:
+#   - 5.2.0
 solution: RollGen.sln
 install:
   - curl -O https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
   - mono ./nuget.exe restore RollGen.sln
   - mono ./nuget.exe install NUnit.Runners -OutputDirectory testrunner
 script:
-  - xbuild RollGen.sln /p:TargetFrameworkVersion="v4.5.1" /p:Configuration=Stress
+  - msbuild RollGen.sln /p:TargetFrameworkVersion="v4.5.1" /p:Configuration=Stress
   - set -e
   - mono ./testrunner/NUnit.ConsoleRunner.*/tools/nunit3-console.exe ./RollGen.Tests.Unit/bin/Stress/RollGen.Tests.Unit.dll
   - set -e
