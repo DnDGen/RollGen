@@ -3,8 +3,9 @@ mono:
   - 5.2.0
 solution: RollGen.sln
 install:
-  - nuget restore RollGen.sln
-  - nuget install NUnit.Runners -OutputDirectory testrunner
+  - curl -O https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
+  - mono ./nuget.exe restore RollGen.sln
+  - mono ./nuget.exe install NUnit.Runners -OutputDirectory testrunner
 script:
   - xbuild RollGen.sln /p:TargetFrameworkVersion="v4.5.1" /p:Configuration=Stress
   - set -e
