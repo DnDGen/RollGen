@@ -1,10 +1,10 @@
-﻿using RollGen.Domain.Expressions;
+﻿using RollGen.Expressions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace RollGen.Domain.PartialRolls
+namespace RollGen.PartialRolls
 {
     internal class NumericPartialRoll : PartialRoll
     {

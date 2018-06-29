@@ -83,10 +83,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\RollGen.Domain\RollGen.Domain.csproj">
-      <Project>{a04a2392-a66d-4fee-a931-4a17991af64c}</Project>
-      <Name>RollGen.Domain</Name>
-    </ProjectReference>
     <ProjectReference Include="..\RollGen\RollGen.csproj">
       <Project>{1e946755-aca8-4c4a-8116-82b6e11e5f8a}</Project>
       <Name>RollGen</Name>

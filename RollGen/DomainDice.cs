@@ -1,11 +1,11 @@
-﻿using RollGen.Domain.Expressions;
-using RollGen.Domain.PartialRolls;
+﻿using RollGen.Expressions;
+using RollGen.PartialRolls;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace RollGen.Domain
+namespace RollGen
 {
     internal class DomainDice : Dice
     {

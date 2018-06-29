@@ -1,7 +1,7 @@
 ﻿using Moq;
 using NUnit.Framework;
-using RollGen.Domain.Expressions;
-using RollGen.Domain.PartialRolls;
+using RollGen.Expressions;
+using RollGen.PartialRolls;
 using System;
 using System.Linq;
 

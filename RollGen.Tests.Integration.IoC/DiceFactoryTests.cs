@@ -1,6 +1,5 @@
 ﻿using NUnit.Framework;
-using RollGen.Domain;
-using RollGen.Domain.IoC;
+using RollGen.IoC;
 
 namespace RollGen.Tests.Integration.IoC
 {

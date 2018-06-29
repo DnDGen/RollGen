@@ -1,11 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2035
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RollGen", "RollGen\RollGen.csproj", "{1E946755-ACA8-4C4A-8116-82B6E11E5F8A}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RollGen.Domain", "RollGen.Domain\RollGen.Domain.csproj", "{A04A2392-A66D-4FEE-A931-4A17991AF64C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RollGen.Tests.Integration.Common", "RollGen.Tests.Integration.Common\RollGen.Tests.Integration.Common.csproj", "{50A4CA5A-8F54-4261-B742-0F8537C253A8}"
 EndProject
@@ -28,12 +26,6 @@ Global
 		{1E946755-ACA8-4C4A-8116-82B6E11E5F8A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1E946755-ACA8-4C4A-8116-82B6E11E5F8A}.Stress|Any CPU.ActiveCfg = Stress|Any CPU
 		{1E946755-ACA8-4C4A-8116-82B6E11E5F8A}.Stress|Any CPU.Build.0 = Stress|Any CPU
-		{A04A2392-A66D-4FEE-A931-4A17991AF64C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A04A2392-A66D-4FEE-A931-4A17991AF64C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A04A2392-A66D-4FEE-A931-4A17991AF64C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A04A2392-A66D-4FEE-A931-4A17991AF64C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A04A2392-A66D-4FEE-A931-4A17991AF64C}.Stress|Any CPU.ActiveCfg = Stress|Any CPU
-		{A04A2392-A66D-4FEE-A931-4A17991AF64C}.Stress|Any CPU.Build.0 = Stress|Any CPU
 		{50A4CA5A-8F54-4261-B742-0F8537C253A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{50A4CA5A-8F54-4261-B742-0F8537C253A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{50A4CA5A-8F54-4261-B742-0F8537C253A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -61,5 +53,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {24D1AB46-4A56-476D-9F4D-C72E8E8E8AE2}
 	EndGlobalSection
 EndGlobal

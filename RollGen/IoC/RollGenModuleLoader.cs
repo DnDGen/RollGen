@@ -1,7 +1,7 @@
 ﻿using Ninject;
-using RollGen.Domain.IoC.Modules;
+using RollGen.IoC.Modules;
 
-namespace RollGen.Domain.IoC
+namespace RollGen.IoC
 {
     public class RollGenModuleLoader
     {

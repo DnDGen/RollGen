@@ -1,8 +1,8 @@
 ﻿using Albatross.Expression;
 using Ninject;
 using NUnit.Framework;
-using RollGen.Domain.Expressions;
-using RollGen.Domain.PartialRolls;
+using RollGen.Expressions;
+using RollGen.PartialRolls;
 using RollGen.Tests.Integration.Common;
 using System;
 

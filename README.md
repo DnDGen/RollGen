@@ -35,6 +35,9 @@ var summedSentence = dice.ReplaceRollsWithSumExpression("This contains a roll of
 var rolledSentence = dice.ReplaceRollsWithSumExpression("This contains a roll of 4d6k3 for rolling stats"); //returns "This contains a roll of 10 for rolling stats"
 var rolledComplexSentence = dice.ReplaceWrappedExpression<double>("Fireball does {min(4d6,10) + 0.5} damage"); //returns "Fireball does 15.5 damage"
 
+var optimizedRoll = RollHelper.GetRoll(4, 9); //returns "1d6+3", which is the most evenly-distributed roll possible
+var optimizedRollWithMultipleDice = RollHelper.GetRoll(1, 9); //returns "1d8+1d2-1", because it more evenly-distributed than "4d3-3"
+
 ```
 
 Important things to note:
@@ -93,7 +96,7 @@ public MyClass()
 
 public int Roll()
 {
-    var myDice = DiceFactory.Create(); //Located in RollGen.Domain.IoC, in the RollGen.Domain NuGet package
+    var myDice = DiceFactory.Create(); //Located in RollGen.IoC
     return myDice.Roll(4).d6().Keeping(3).AsSum();
 }
 ```
@@ -104,6 +107,3 @@ The project is on [Nuget](https://www.nuget.org/packages/DnDGen.RollGen). Instal
 
     PM > Install-Package DnDGen.RollGen
 
-#### There's RollGen and RollGen.Domain - which do I install?
-
-That depends on your project.  If you are making a library that will only **reference** RollGen, but does not expressly implement it (such as the TreasureGen project), then you only need the RollGen package.  If you actually want to run and implement the dice (such as on the DnDGenSite or in the tests for TreasureGen), then you need RollGen.Domain, which will install RollGen as a dependency.

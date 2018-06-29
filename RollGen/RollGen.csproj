@@ -40,6 +40,12 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Albatross.Expression, Version=2.0.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Albatross.Expression.2.0.3\lib\net45\Albatross.Expression.dll</HintPath>
+    </Reference>
+    <Reference Include="Ninject, Version=3.3.4.0, Culture=neutral, PublicKeyToken=c7192dc5380945e7, processorArchitecture=MSIL">
+      <HintPath>..\packages\Ninject.3.3.4\lib\net45\Ninject.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -50,13 +56,28 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Dice.cs" />
+    <Compile Include="DomainDice.cs" />
+    <Compile Include="Expressions\AlbatrossExpressionEvaluator.cs" />
+    <Compile Include="Expressions\ExpressionEvaluator.cs" />
+    <Compile Include="Expressions\RegexConstants.cs" />
+    <Compile Include="IoC\DiceFactory.cs" />
+    <Compile Include="IoC\Modules\CoreModule.cs" />
+    <Compile Include="IoC\RollGenModuleLoader.cs" />
     <Compile Include="Limits.cs" />
     <Compile Include="PartialRoll.cs" />
+    <Compile Include="PartialRolls\DomainPartialRollFactory.cs" />
+    <Compile Include="PartialRolls\ExpressionPartialRoll.cs" />
+    <Compile Include="PartialRolls\NumericPartialRoll.cs" />
+    <Compile Include="PartialRolls\PartialRollFactory.cs" />
+    <Compile Include="PartialRolls\Roll.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RollCollection.cs" />
     <Compile Include="RollHelper.cs" />
     <Compile Include="RollPrototype.cs" />
     <Compile Include="Utils.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

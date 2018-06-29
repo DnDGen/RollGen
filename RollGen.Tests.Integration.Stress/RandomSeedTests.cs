@@ -1,6 +1,6 @@
 ﻿using Ninject;
 using NUnit.Framework;
-using RollGen.Domain.IoC;
+using RollGen.IoC;
 using System.Collections.Generic;
 using System.Linq;
 

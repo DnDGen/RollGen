@@ -1,7 +1,6 @@
 ﻿using Moq;
 using NUnit.Framework;
-using RollGen.Domain;
-using RollGen.Domain.PartialRolls;
+using RollGen.PartialRolls;
 using System.Collections.Generic;
 using System.Linq;
 

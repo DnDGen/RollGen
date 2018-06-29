@@ -2,7 +2,7 @@
 using Albatross.Expression.Tokens;
 using Moq;
 using NUnit.Framework;
-using RollGen.Domain.Expressions;
+using RollGen.Expressions;
 using System.Collections.Generic;
 
 namespace RollGen.Tests.Unit.Expressions

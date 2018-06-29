@@ -1,5 +1,5 @@
 ﻿using NUnit.Framework;
-using RollGen.Domain.Expressions;
+using RollGen.Expressions;
 using System.Text.RegularExpressions;
 
 namespace RollGen.Tests.Unit.Expressions

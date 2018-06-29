@@ -1,4 +1,4 @@
-﻿namespace RollGen.Domain.Expressions
+﻿namespace RollGen.Expressions
 {
     internal static class RegexConstants
     {
