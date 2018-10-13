@@ -114,9 +114,11 @@ namespace RollGen
 
         private static RollPrototype GetRollPrototype(int quantity, int die)
         {
-            var prototype = new RollPrototype();
-            prototype.Quantity = quantity;
-            prototype.Die = die;
+            var prototype = new RollPrototype
+            {
+                Quantity = quantity,
+                Die = die
+            };
 
             return prototype;
         }
