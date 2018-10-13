@@ -10,16 +10,13 @@ namespace RollGen.PartialRolls
     {
         private readonly Random random;
         private readonly ExpressionEvaluator expressionEvaluator;
-        private readonly Regex strictRollRegex;
-        private readonly Regex booleanExpressionRegex;
+        private readonly Regex strictRollRegex = new Regex(RegexConstants.StrictRollPattern);
+        private readonly Regex booleanExpressionRegex = new Regex(RegexConstants.BooleanExpressionPattern);
 
         private ExpressionPartialRoll(Random random, ExpressionEvaluator expressionEvaluator)
         {
             this.random = random;
             this.expressionEvaluator = expressionEvaluator;
-
-            strictRollRegex = new Regex(RegexConstants.StrictRollPattern);
-            booleanExpressionRegex = new Regex(RegexConstants.BooleanExpressionPattern);
         }
 
         public ExpressionPartialRoll(string rollExpression, Random random, ExpressionEvaluator expressionEvaluator)
