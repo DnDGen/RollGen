@@ -89,6 +89,11 @@ namespace RollGen.PartialRolls
             throw new NotImplementedException("Cannot yet implement paranthetical expressions");
         }
 
+        public override PartialRoll Explode()
+        {
+            throw new NotImplementedException("Cannot yet implement paranthetical expressions");
+        }
+
         private IEnumerable<int> GetIndividualRolls(string rollExpression)
         {
             //INFO: Not sure how to evaluate individual rolls from genuine expressions (1d6+5 or 2d3+4d5), so will compute those as 1 roll
