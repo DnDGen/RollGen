@@ -6,8 +6,6 @@ namespace RollGen.Expressions
 {
     internal class AlbatrossExpressionEvaluator : ExpressionEvaluator
     {
-        private const string CommonRollRegexPattern = "d *\\d+(?: *k *\\d+)?";
-
         private IParser parser;
         private Regex strictRollRegex;
 
