@@ -1,7 +1,6 @@
 ﻿using Moq;
 using NUnit.Framework;
 using RollGen.PartialRolls;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace RollGen.Tests.Unit
@@ -12,7 +11,6 @@ namespace RollGen.Tests.Unit
         private Dice dice;
         private Mock<PartialRollFactory> mockPartialRollFactory;
         private Mock<PartialRoll> mockPartialRoll;
-        private Queue<int> quantities;
 
         [SetUp]
         public void Setup()
@@ -21,7 +19,6 @@ namespace RollGen.Tests.Unit
             dice = new DomainDice(mockPartialRollFactory.Object);
 
             mockPartialRoll = new Mock<PartialRoll>();
-            quantities = new Queue<int>();
 
             mockPartialRollFactory.Setup(f => f.Build(It.IsAny<int>())).Returns(mockPartialRoll.Object);
             mockPartialRollFactory.Setup(f => f.Build(It.IsAny<string>())).Returns(mockPartialRoll.Object);
