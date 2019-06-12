@@ -440,8 +440,8 @@ namespace RollGen.Tests.Unit
         [TestCase("Fred2k", "Fre1k")]
         [TestCase("I have 2d3k copper pieces.", "I have 1k copper pieces.")]
         [TestCase("I have 7d8k3 copper pieces.", "I have 1 copper pieces.")]
-        [TestCase("Gonna die, roll a 1d2d3d4d5d6.", "Gonna die, roll a 5.")]
-        [TestCase("Gonna die, roll a 1 d 2 d 3 d 4 d 5 d 6.", "Gonna die, roll a 5.")]
+        [TestCase("Gonna die, roll a 1d2d3d4d5d6!!", "Gonna die, roll a 5!")]
+        [TestCase("Gonna die, roll a 1 d 2 d 3 d 4 d 5 d 6!!", "Gonna die, roll a 5!")]
         public void LenientReplaceExpressionWithTotals(string expression, string expectedExpression)
         {
             var mockPartialRoll = new Mock<PartialRoll>();
