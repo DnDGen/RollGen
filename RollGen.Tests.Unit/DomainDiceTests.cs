@@ -391,6 +391,7 @@ namespace RollGen.Tests.Unit
         [TestCase("Fred2k", "Fred2k")]
         [TestCase("I have 2d3k copper pieces.", "I have 1k copper pieces.")]
         [TestCase("I have 7d8k3 copper pieces.", "I have 1 copper pieces.")]
+        [TestCase("I have 2d8! copper pieces.", "I have 1 copper pieces.")]
         public void ReplaceExpressionWithTotals(string expression, string expectedExpression)
         {
             var mockPartialRoll = new Mock<PartialRoll>();
@@ -405,6 +406,7 @@ namespace RollGen.Tests.Unit
 
         [TestCase("1d2", "1")]
         [TestCase("2d3", "1")]
+        [TestCase("2d3!", "1")]
         [TestCase("1+2d3", "2")]
         [TestCase("1d2+3", "2")]
         [TestCase("1d2+3d4", "3")]
