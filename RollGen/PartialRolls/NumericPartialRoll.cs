@@ -10,12 +10,14 @@ namespace RollGen.PartialRolls
     {
         private readonly Random random;
         private readonly ExpressionEvaluator expressionEvaluator;
-        private readonly Regex strictRollRegex = new Regex(RegexConstants.StrictRollPattern);
+        private readonly Regex strictRollRegex;
 
         private NumericPartialRoll(Random random, ExpressionEvaluator expressionEvaluator)
         {
             this.random = random;
             this.expressionEvaluator = expressionEvaluator;
+
+            strictRollRegex = new Regex(RegexConstants.StrictRollPattern);
         }
 
         public NumericPartialRoll(int quantity, Random random, ExpressionEvaluator expressionEvaluator)

@@ -10,13 +10,17 @@ namespace RollGen
     internal class DomainDice : Dice
     {
         private PartialRollFactory partialRollFactory;
-        private readonly Regex expressionRegex = new Regex(RegexConstants.ExpressionWithoutDieRollsPattern);
-        private readonly Regex strictRollRegex = new Regex(RegexConstants.StrictRollPattern);
-        private readonly Regex lenientRollRegex = new Regex(RegexConstants.LenientRollPattern);
+        private readonly Regex expressionRegex;
+        private readonly Regex strictRollRegex;
+        private readonly Regex lenientRollRegex;
 
         public DomainDice(PartialRollFactory partialRollFactory)
         {
             this.partialRollFactory = partialRollFactory;
+
+            expressionRegex = new Regex(RegexConstants.ExpressionWithoutDieRollsPattern);
+            strictRollRegex = new Regex(RegexConstants.StrictRollPattern);
+            lenientRollRegex = new Regex(RegexConstants.LenientRollPattern);
         }
 
         public PartialRoll Roll(int quantity = 1)
