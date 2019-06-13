@@ -10,7 +10,7 @@ namespace RollGen.Tests.Unit.PartialRolls
     public class RollTests
     {
         private Roll roll;
-        private string rollExpression = "92d66k42";
+        private readonly string rollExpression = "92d66k42";
         private Mock<Random> mockRandom;
 
         [SetUp]

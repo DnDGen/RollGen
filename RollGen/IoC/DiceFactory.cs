@@ -4,7 +4,7 @@ namespace RollGen.IoC
 {
     public static class DiceFactory
     {
-        private static IKernel kernel = new StandardKernel();
+        private static readonly IKernel kernel = new StandardKernel();
         private static bool modulesLoaded = false;
 
         public static Dice Create()

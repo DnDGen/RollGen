@@ -606,9 +606,11 @@ namespace RollGen.Tests.Unit
 
             collection.Rolls.Add(prototype);
 
-            var otherPrototype = new RollPrototype();
-            otherPrototype.Quantity = q2;
-            otherPrototype.Die = d2;
+            var otherPrototype = new RollPrototype
+            {
+                Quantity = q2,
+                Die = d2
+            };
 
             collection.Rolls.Add(otherPrototype);
 

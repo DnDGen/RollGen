@@ -5,7 +5,6 @@ namespace RollGen
 {
     public static class RollHelper
     {
-
         public static string GetRoll(int baseQuantity, int lower, int upper)
         {
             var newLower = lower - baseQuantity;
