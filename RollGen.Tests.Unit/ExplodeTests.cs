@@ -1,7 +1,7 @@
-﻿using NUnit.Framework;
+﻿using Albatross.Expression;
+using NUnit.Framework;
 using RollGen.Expressions;
 using RollGen.PartialRolls;
-using RollGen.Tests.Integration.Common;
 using System;
 using System.Collections.Generic;
 
@@ -20,8 +20,10 @@ namespace RollGen.Tests.Unit
     }
 
     [TestFixture]
-    public class ExplodeTests : IntegrationTests
+    public class ExplodeTests
     {
+        readonly ExpressionEvaluator evaluator = new AlbatrossExpressionEvaluator(Factory.Instance.Create());
+
         [TestCase(1, 1, new[]{1, 1}, ExpectedResult = 1)] // 1d1, shouldn't explode
         [TestCase(1, 6, new[]{1}, ExpectedResult = 1)] // Single, no Explode
         [TestCase(1, 6, new[]{6, 1}, ExpectedResult = 7)] // Single, Explode once
@@ -33,7 +35,7 @@ namespace RollGen.Tests.Unit
         public int ExplodeTest(int quantity, int die, int[] rolls)
         {
             var random = new MockRandom(rolls);
-            var partialRoll = new NumericPartialRoll(quantity, random, GetNewInstanceOf<ExpressionEvaluator>());
+            var partialRoll = new NumericPartialRoll(quantity, random, evaluator);
             partialRoll.d(die).Explode();
 
             return partialRoll.AsSum();

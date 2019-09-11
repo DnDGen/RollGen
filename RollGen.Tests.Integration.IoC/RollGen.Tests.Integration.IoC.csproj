@@ -62,7 +62,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DiceFactoryTests.cs" />
-    <Compile Include="ExplodeTests.cs" />
     <Compile Include="Modules\CoreModuleTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
