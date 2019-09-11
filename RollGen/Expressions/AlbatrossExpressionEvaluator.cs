@@ -8,8 +8,8 @@ namespace RollGen.Expressions
     {
         private const string CommonRollRegexPattern = "d *\\d+(?: *k *\\d+)?";
 
-        private IParser parser;
-        private Regex strictRollRegex;
+        private readonly IParser parser;
+        private readonly Regex strictRollRegex;
 
         public AlbatrossExpressionEvaluator(IParser parser)
         {

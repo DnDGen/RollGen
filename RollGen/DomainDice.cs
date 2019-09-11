@@ -9,10 +9,10 @@ namespace RollGen
 {
     internal class DomainDice : Dice
     {
-        private PartialRollFactory partialRollFactory;
-        private Regex expressionRegex;
-        private Regex strictRollRegex;
-        private Regex lenientRollRegex;
+        private readonly PartialRollFactory partialRollFactory;
+        private readonly Regex expressionRegex;
+        private readonly Regex strictRollRegex;
+        private readonly Regex lenientRollRegex;
 
         public DomainDice(PartialRollFactory partialRollFactory)
         {

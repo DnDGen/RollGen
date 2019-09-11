@@ -34,10 +34,11 @@ namespace RollGen.Tests.Unit
         [Test]
         public void BuildRoll()
         {
-            var prototype = new RollPrototype();
-            prototype.Quantity = 9266;
-            prototype.Die = 100;
-
+            var prototype = new RollPrototype
+            {
+                Quantity = 9266,
+                Die = 100
+            };
             collection.Rolls.Add(prototype);
 
             var roll = collection.Build();
@@ -49,9 +50,11 @@ namespace RollGen.Tests.Unit
         [TestCase(42, "9266d100+42")]
         public void BuildRollWithAdjustment(int adjustment, string expectedroll)
         {
-            var prototype = new RollPrototype();
-            prototype.Quantity = 9266;
-            prototype.Die = 100;
+            var prototype = new RollPrototype
+            {
+                Quantity = 9266,
+                Die = 100
+            };
 
             collection.Rolls.Add(prototype);
 
@@ -64,15 +67,19 @@ namespace RollGen.Tests.Unit
         [Test]
         public void BuildMultipleRolls()
         {
-            var prototype = new RollPrototype();
-            prototype.Quantity = 9266;
-            prototype.Die = 100;
+            var prototype = new RollPrototype
+            {
+                Quantity = 9266,
+                Die = 100
+            };
 
             collection.Rolls.Add(prototype);
 
-            var otherPrototype = new RollPrototype();
-            otherPrototype.Quantity = 42;
-            otherPrototype.Die = 20;
+            var otherPrototype = new RollPrototype
+            {
+                Quantity = 42,
+                Die = 20
+            };
 
             collection.Rolls.Add(otherPrototype);
 
@@ -83,15 +90,19 @@ namespace RollGen.Tests.Unit
         [Test]
         public void CollectionDescription()
         {
-            var prototype = new RollPrototype();
-            prototype.Quantity = 9266;
-            prototype.Die = 100;
+            var prototype = new RollPrototype
+            {
+                Quantity = 9266,
+                Die = 100
+            };
 
             collection.Rolls.Add(prototype);
 
-            var otherPrototype = new RollPrototype();
-            otherPrototype.Quantity = 42;
-            otherPrototype.Die = 20;
+            var otherPrototype = new RollPrototype
+            {
+                Quantity = 42,
+                Die = 20
+            };
 
             collection.Rolls.Add(otherPrototype);
 
@@ -105,15 +116,19 @@ namespace RollGen.Tests.Unit
         [TestCase(1336, "9266d100+42d20+1336")]
         public void BuildMultipleRollsWithAdjustment(int adjustment, string expectedRoll)
         {
-            var prototype = new RollPrototype();
-            prototype.Quantity = 9266;
-            prototype.Die = 100;
+            var prototype = new RollPrototype
+            {
+                Quantity = 9266,
+                Die = 100
+            };
 
             collection.Rolls.Add(prototype);
 
-            var otherPrototype = new RollPrototype();
-            otherPrototype.Quantity = 42;
-            otherPrototype.Die = 20;
+            var otherPrototype = new RollPrototype
+            {
+                Quantity = 42,
+                Die = 20
+            };
 
             collection.Rolls.Add(otherPrototype);
 
@@ -126,21 +141,27 @@ namespace RollGen.Tests.Unit
         [Test]
         public void BuildOrdersDicefromLargestToSmallest()
         {
-            var prototype = new RollPrototype();
-            prototype.Quantity = 9266;
-            prototype.Die = 20;
+            var prototype = new RollPrototype
+            {
+                Quantity = 9266,
+                Die = 20
+            };
 
             collection.Rolls.Add(prototype);
 
-            var otherPrototype = new RollPrototype();
-            otherPrototype.Quantity = 42;
-            otherPrototype.Die = 12;
+            var otherPrototype = new RollPrototype
+            {
+                Quantity = 42,
+                Die = 12
+            };
 
             collection.Rolls.Add(otherPrototype);
 
-            var anotherPrototype = new RollPrototype();
-            anotherPrototype.Quantity = 1337;
-            anotherPrototype.Die = 100;
+            var anotherPrototype = new RollPrototype
+            {
+                Quantity = 1337,
+                Die = 100
+            };
 
             collection.Rolls.Add(anotherPrototype);
 
@@ -186,9 +207,11 @@ namespace RollGen.Tests.Unit
         {
             collection.Adjustment = 9266;
 
-            var prototype = new RollPrototype();
-            prototype.Quantity = quantity;
-            prototype.Die = 100;
+            var prototype = new RollPrototype
+            {
+                Quantity = quantity,
+                Die = 100
+            };
 
             collection.Rolls.Add(prototype);
 
@@ -275,9 +298,11 @@ namespace RollGen.Tests.Unit
         {
             collection.Adjustment = 9266;
 
-            var prototype = new RollPrototype();
-            prototype.Quantity = quantity;
-            prototype.Die = 100;
+            var prototype = new RollPrototype
+            {
+                Quantity = quantity,
+                Die = 100
+            };
 
             collection.Rolls.Add(prototype);
 
@@ -298,15 +323,19 @@ namespace RollGen.Tests.Unit
         {
             collection.Adjustment = 9266;
 
-            var prototype = new RollPrototype();
-            prototype.Quantity = quantity1;
-            prototype.Die = 100;
+            var prototype = new RollPrototype
+            {
+                Quantity = quantity1,
+                Die = 100
+            };
 
             collection.Rolls.Add(prototype);
 
-            var otherPrototype = new RollPrototype();
-            otherPrototype.Quantity = quantity2;
-            otherPrototype.Die = 20;
+            var otherPrototype = new RollPrototype
+            {
+                Quantity = quantity2,
+                Die = 20
+            };
 
             collection.Rolls.Add(otherPrototype);
 
@@ -543,15 +572,19 @@ namespace RollGen.Tests.Unit
         {
             collection.Adjustment = 9266;
 
-            var prototype = new RollPrototype();
-            prototype.Quantity = quantity1;
-            prototype.Die = 100;
+            var prototype = new RollPrototype
+            {
+                Quantity = quantity1,
+                Die = 100
+            };
 
             collection.Rolls.Add(prototype);
 
-            var otherPrototype = new RollPrototype();
-            otherPrototype.Quantity = quantity2;
-            otherPrototype.Die = 20;
+            var otherPrototype = new RollPrototype
+            {
+                Quantity = quantity2,
+                Die = 20
+            };
 
             collection.Rolls.Add(otherPrototype);
 
@@ -565,15 +598,19 @@ namespace RollGen.Tests.Unit
         {
             collection.Adjustment = adjustment;
 
-            var prototype = new RollPrototype();
-            prototype.Quantity = q1;
-            prototype.Die = d1;
+            var prototype = new RollPrototype
+            {
+                Quantity = q1,
+                Die = d1
+            };
 
             collection.Rolls.Add(prototype);
 
-            var otherPrototype = new RollPrototype();
-            otherPrototype.Quantity = q2;
-            otherPrototype.Die = d2;
+            var otherPrototype = new RollPrototype
+            {
+                Quantity = q2,
+                Die = d2
+            };
 
             collection.Rolls.Add(otherPrototype);
 
@@ -592,9 +629,11 @@ namespace RollGen.Tests.Unit
         [TestCase(100, 1001)]
         public void RankingForRollInRangeWithMaxDice(int die, int expectedRanking)
         {
-            var prototype = new RollPrototype();
-            prototype.Quantity = 1;
-            prototype.Die = die;
+            var prototype = new RollPrototype
+            {
+                Quantity = 1,
+                Die = die
+            };
 
             collection.Rolls.Add(prototype);
 
@@ -605,20 +644,26 @@ namespace RollGen.Tests.Unit
         [Test]
         public void RollCollectionsEqual()
         {
-            var roll = new RollPrototype();
-            roll.Quantity = 9266;
-            roll.Die = 100;
+            var roll = new RollPrototype
+            {
+                Quantity = 9266,
+                Die = 100
+            };
 
             collection.Rolls.Add(roll);
             collection.Adjustment = 42;
 
-            roll = new RollPrototype();
-            roll.Quantity = 9266;
-            roll.Die = 100;
+            roll = new RollPrototype
+            {
+                Quantity = 9266,
+                Die = 100
+            };
 
-            var otherCollection = new RollCollection();
+            var otherCollection = new RollCollection
+            {
+                Adjustment = 42
+            };
             otherCollection.Rolls.Add(roll);
-            otherCollection.Adjustment = 42;
 
             Assert.That(otherCollection, Is.EqualTo(collection));
         }
@@ -626,20 +671,26 @@ namespace RollGen.Tests.Unit
         [Test]
         public void RollCollectionsNotEqualByAdjustment()
         {
-            var roll = new RollPrototype();
-            roll.Quantity = 9266;
-            roll.Die = 100;
+            var roll = new RollPrototype
+            {
+                Quantity = 9266,
+                Die = 100
+            };
 
             collection.Rolls.Add(roll);
             collection.Adjustment = 42;
 
-            roll = new RollPrototype();
-            roll.Quantity = 9266;
-            roll.Die = 100;
+            roll = new RollPrototype
+            {
+                Quantity = 9266,
+                Die = 100
+            };
 
-            var otherCollection = new RollCollection();
+            var otherCollection = new RollCollection
+            {
+                Adjustment = 600
+            };
             otherCollection.Rolls.Add(roll);
-            otherCollection.Adjustment = 600;
 
             Assert.That(otherCollection, Is.Not.EqualTo(collection));
         }
@@ -647,25 +698,34 @@ namespace RollGen.Tests.Unit
         [Test]
         public void RollCollectionsNotEqualBySingleRoll()
         {
-            var roll = new RollPrototype();
-            roll.Quantity = 9266;
-            roll.Die = 100;
+            var roll = new RollPrototype
+            {
+                Quantity = 9266,
+                Die = 100
+            };
 
             collection.Rolls.Add(roll);
             collection.Adjustment = 42;
 
-            roll = new RollPrototype();
-            roll.Quantity = 600;
-            roll.Die = 100;
+            roll = new RollPrototype
+            {
+                Quantity = 600,
+                Die = 100
+            };
 
-            var otherCollection = new RollCollection();
+            var otherCollection = new RollCollection
+            {
+                Adjustment = 42
+            };
             otherCollection.Rolls.Add(roll);
-            otherCollection.Adjustment = 42;
 
             Assert.That(otherCollection, Is.Not.EqualTo(collection));
 
-            otherCollection.Rolls[0].Quantity = 9266;
-            otherCollection.Rolls[0].Die = 20;
+            otherCollection.Rolls[0] = new RollPrototype
+            {
+                Quantity = 9266,
+                Die = 20
+            };
 
             Assert.That(otherCollection, Is.Not.EqualTo(collection));
         }
@@ -673,37 +733,49 @@ namespace RollGen.Tests.Unit
         [Test]
         public void RollCollectionsNotEqualByMultipleRolls()
         {
-            var roll = new RollPrototype();
-            roll.Quantity = 9266;
-            roll.Die = 100;
+            var roll = new RollPrototype
+            {
+                Quantity = 9266,
+                Die = 100
+            };
 
             collection.Rolls.Add(roll);
 
-            roll = new RollPrototype();
-            roll.Quantity = 1337;
-            roll.Die = 1336;
+            roll = new RollPrototype
+            {
+                Quantity = 1337,
+                Die = 1336
+            };
             collection.Rolls.Add(roll);
 
             collection.Adjustment = 42;
 
-            roll = new RollPrototype();
-            roll.Quantity = 9266;
-            roll.Die = 100;
+            var otherCollection = new RollCollection
+            {
+                Adjustment = 42
+            };
 
-            var otherCollection = new RollCollection();
+            roll = new RollPrototype
+            {
+                Quantity = 9266,
+                Die = 100
+            };
             otherCollection.Rolls.Add(roll);
 
-            roll = new RollPrototype();
-            roll.Quantity = 1337;
-            roll.Die = 20;
+            roll = new RollPrototype
+            {
+                Quantity = 1337,
+                Die = 20
+            };
             otherCollection.Rolls.Add(roll);
-
-            otherCollection.Adjustment = 42;
 
             Assert.That(otherCollection, Is.Not.EqualTo(collection));
 
-            otherCollection.Rolls[1].Quantity = 600;
-            otherCollection.Rolls[1].Die = 100;
+            otherCollection.Rolls[1] = new RollPrototype
+            {
+                Quantity = 600,
+                Die = 100
+            };
 
             Assert.That(otherCollection, Is.Not.EqualTo(collection));
         }
@@ -711,27 +783,35 @@ namespace RollGen.Tests.Unit
         [Test]
         public void RollCollectionsNotEqualByDifferentRolls()
         {
-            var roll = new RollPrototype();
-            roll.Quantity = 9266;
-            roll.Die = 100;
+            var roll = new RollPrototype
+            {
+                Quantity = 9266,
+                Die = 100
+            };
 
             collection.Rolls.Add(roll);
             collection.Adjustment = 42;
 
-            var otherCollection = new RollCollection();
-            otherCollection.Adjustment = 42;
+            var otherCollection = new RollCollection
+            {
+                Adjustment = 42
+            };
 
             Assert.That(otherCollection, Is.Not.EqualTo(collection));
 
-            roll = new RollPrototype();
-            roll.Quantity = 9266;
-            roll.Die = 100;
+            roll = new RollPrototype
+            {
+                Quantity = 9266,
+                Die = 100
+            };
 
             otherCollection.Rolls.Add(roll);
 
-            roll = new RollPrototype();
-            roll.Quantity = 9266;
-            roll.Die = 100;
+            roll = new RollPrototype
+            {
+                Quantity = 9266,
+                Die = 100
+            };
 
             collection.Rolls.Add(roll);
 
