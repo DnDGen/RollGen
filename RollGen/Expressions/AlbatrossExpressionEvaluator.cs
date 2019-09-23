@@ -6,8 +6,8 @@ namespace RollGen.Expressions
 {
     internal class AlbatrossExpressionEvaluator : ExpressionEvaluator
     {
-        private IParser parser;
-        private Regex strictRollRegex;
+        private readonly IParser parser;
+        private readonly Regex strictRollRegex;
 
         public AlbatrossExpressionEvaluator(IParser parser)
         {

@@ -7,7 +7,7 @@ namespace RollGen.Tests.Integration.Common
     [TestFixture]
     public abstract class IntegrationTests
     {
-        private IKernel kernel;
+        private readonly IKernel kernel;
 
         public IntegrationTests()
         {

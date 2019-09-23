@@ -27,8 +27,7 @@ namespace RollGen.Tests.Unit.PartialRolls
 
         private int DefaultValue(string source)
         {
-            var output = 0;
-            if (int.TryParse(source, out output))
+            if (int.TryParse(source, out var output))
                 return output;
 
             throw new ArgumentException($"{source} was not configured to be evaluated");
