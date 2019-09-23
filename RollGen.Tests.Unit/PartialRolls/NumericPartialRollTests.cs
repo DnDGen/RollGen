@@ -330,5 +330,27 @@ namespace RollGen.Tests.Unit.PartialRolls
             numericPartialRoll.Keeping(1);
             Assert.That(() => numericPartialRoll.Explode(), Throws.InstanceOf<InvalidOperationException>());
         }
+
+        [TestCase(1, 1, new[] { 1, 666 }, ExpectedResult = 1)] // 1d1, shouldn't explode
+        [TestCase(1, 6, new[] { 1, 666 }, ExpectedResult = 1)] // Single, no Explode
+        [TestCase(1, 6, new[] { 6, 1, 666 }, ExpectedResult = 7)] // Single, Explode once
+        [TestCase(1, 6, new[] { 6, 6, 1, 666 }, ExpectedResult = 13)] // Single, Explode twice
+        [TestCase(3, 6, new[] { 3, 4, 2, 666 }, ExpectedResult = 9)] // Multiple, no Explode
+        [TestCase(3, 6, new[] { 1, 6, 2, 2, 666 }, ExpectedResult = 11)] // Multiple, Explode once
+        [TestCase(3, 6, new[] { 5, 6, 6, 1, 2, 666 }, ExpectedResult = 20)] // Multiple, Explode twice in a row
+        [TestCase(3, 6, new[] { 6, 1, 6, 4, 2, 666 }, ExpectedResult = 19)] // Multiple, Explode twice not in a row
+        public int ExplodeRoll(int quantity, int die, int[] rolls)
+        {
+            var seq = mockRandom.SetupSequence(r => r.Next(die));
+            foreach (var roll in rolls)
+            {
+                seq.Returns(roll - 1);
+            }
+
+            BuildPartialRoll(quantity);
+            numericPartialRoll.d(die).Explode();
+
+            return numericPartialRoll.AsSum();
+        }
     }
 }
