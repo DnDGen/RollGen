@@ -1,5 +1,4 @@
-﻿using Albatross.Expression;
-using Moq;
+﻿using Moq;
 using NUnit.Framework;
 using RollGen.Expressions;
 using RollGen.PartialRolls;
@@ -10,7 +9,7 @@ namespace RollGen.Tests.Unit
     [TestFixture]
     public class ExplodeTests
     {
-        readonly ExpressionEvaluator evaluator = new AlbatrossExpressionEvaluator(Factory.Instance.Create());
+        readonly Mock<ExpressionEvaluator> evaluator = new Mock<ExpressionEvaluator>();
         readonly Mock<Random> random = new Mock<Random>();
 
         [TestCase(1, 1, new[]{1, 1}, ExpectedResult = 1)] // 1d1, shouldn't explode
@@ -29,7 +28,7 @@ namespace RollGen.Tests.Unit
                 seq.Returns(roll-1);
             }
 
-            var partialRoll = new NumericPartialRoll(quantity, random.Object, evaluator);
+            var partialRoll = new NumericPartialRoll(quantity, random.Object, evaluator.Object);
             partialRoll.d(die).Explode();
 
             return partialRoll.AsSum();
