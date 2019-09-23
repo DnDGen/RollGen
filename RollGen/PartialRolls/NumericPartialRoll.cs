@@ -75,7 +75,21 @@ namespace RollGen.PartialRolls
 
         public override PartialRoll Keeping(int amountToKeep)
         {
+            if (CurrentRollExpression.Contains('!'))
+            {
+                throw new InvalidOperationException("Cannot keep and explode!");
+            }
             CurrentRollExpression += $"k{amountToKeep}";
+            return this;
+        }
+
+        public override PartialRoll Explode()
+        {
+            if (CurrentRollExpression.Contains('k'))
+            {
+                throw new InvalidOperationException("Cannot keep and explode!");
+            }
+            CurrentRollExpression += "!";
             return this;
         }
 

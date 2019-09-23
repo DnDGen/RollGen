@@ -1,7 +1,6 @@
 ﻿using Moq;
 using NUnit.Framework;
 using RollGen.PartialRolls;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace RollGen.Tests.Unit
@@ -12,7 +11,6 @@ namespace RollGen.Tests.Unit
         private Dice dice;
         private Mock<PartialRollFactory> mockPartialRollFactory;
         private Mock<PartialRoll> mockPartialRoll;
-        private Queue<int> quantities;
 
         [SetUp]
         public void Setup()
@@ -21,7 +19,6 @@ namespace RollGen.Tests.Unit
             dice = new DomainDice(mockPartialRollFactory.Object);
 
             mockPartialRoll = new Mock<PartialRoll>();
-            quantities = new Queue<int>();
 
             mockPartialRollFactory.Setup(f => f.Build(It.IsAny<int>())).Returns(mockPartialRoll.Object);
             mockPartialRollFactory.Setup(f => f.Build(It.IsAny<string>())).Returns(mockPartialRoll.Object);
@@ -394,6 +391,7 @@ namespace RollGen.Tests.Unit
         [TestCase("Fred2k", "Fred2k")]
         [TestCase("I have 2d3k copper pieces.", "I have 1k copper pieces.")]
         [TestCase("I have 7d8k3 copper pieces.", "I have 1 copper pieces.")]
+        [TestCase("I have 2d8! copper pieces.", "I have 1 copper pieces.")]
         public void ReplaceExpressionWithTotals(string expression, string expectedExpression)
         {
             var mockPartialRoll = new Mock<PartialRoll>();
@@ -408,6 +406,7 @@ namespace RollGen.Tests.Unit
 
         [TestCase("1d2", "1")]
         [TestCase("2d3", "1")]
+        [TestCase("2d3!", "1")]
         [TestCase("1+2d3", "2")]
         [TestCase("1d2+3", "2")]
         [TestCase("1d2+3d4", "3")]
@@ -443,8 +442,8 @@ namespace RollGen.Tests.Unit
         [TestCase("Fred2k", "Fre1k")]
         [TestCase("I have 2d3k copper pieces.", "I have 1k copper pieces.")]
         [TestCase("I have 7d8k3 copper pieces.", "I have 1 copper pieces.")]
-        [TestCase("Gonna die, roll a 1d2d3d4d5d6!", "Gonna die, roll a 5!")]
-        [TestCase("Gonna die, roll a 1 d 2 d 3 d 4 d 5 d 6!", "Gonna die, roll a 5!")]
+        [TestCase("Gonna die, roll a 1d2d3d4d5d6!!", "Gonna die, roll a 5!")]
+        [TestCase("Gonna die, roll a 1 d 2 d 3 d 4 d 5 d 6!!", "Gonna die, roll a 5!")]
         public void LenientReplaceExpressionWithTotals(string expression, string expectedExpression)
         {
             var mockPartialRoll = new Mock<PartialRoll>();

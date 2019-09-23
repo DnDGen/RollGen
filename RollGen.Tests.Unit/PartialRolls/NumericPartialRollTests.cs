@@ -313,5 +313,22 @@ namespace RollGen.Tests.Unit.PartialRolls
             numericPartialRoll = numericPartialRoll.Percentile();
             Assert.That(numericPartialRoll.CurrentRollExpression, Is.EqualTo("9266d100"));
         }
+
+
+        [Test]
+        public void KeepException()
+        {
+            BuildPartialRoll(2);
+            numericPartialRoll.Explode();
+            Assert.That(() => numericPartialRoll.Keeping(1), Throws.InstanceOf<InvalidOperationException>());
+        }
+
+        [Test]
+        public void ExplodeException()
+        {
+            BuildPartialRoll(2);
+            numericPartialRoll.Keeping(1);
+            Assert.That(() => numericPartialRoll.Explode(), Throws.InstanceOf<InvalidOperationException>());
+        }
     }
 }

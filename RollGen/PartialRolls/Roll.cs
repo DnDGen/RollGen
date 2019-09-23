@@ -11,6 +11,7 @@ namespace RollGen.PartialRolls
         public int Quantity { get; set; }
         public int Die { get; set; }
         public int AmountToKeep { get; set; }
+        public bool Explode { get; set; }
 
         public bool IsValid
         {
@@ -29,8 +30,15 @@ namespace RollGen.PartialRolls
 
         public Roll(string toParse)
         {
-            var sections = toParse.Trim().Split('d', 'k');
+            toParse = toParse.Trim();
+            Explode = toParse.EndsWith("!");
+            if (Explode)
+            {
+                toParse = toParse.Remove(toParse.Length - 1);
+            }
+            var sections = Explode ? toParse.Split('d') : toParse.Split('d', 'k');
             Die = Convert.ToInt32(sections[1]);
+            if (Explode && Die == 1) Explode = false; // Never Explode a D1
             Quantity = 1;
 
             if (!string.IsNullOrEmpty(sections[0]))
@@ -61,6 +69,10 @@ namespace RollGen.PartialRolls
             for (var i = 0; i < Quantity; i++)
             {
                 var roll = random.Next(Die) + 1;
+                if (Explode && roll == Die)
+                {
+                    --i; // We're rerolling this die, so Quantity actually stays the same.
+                }
                 rolls.Add(roll);
             }
 

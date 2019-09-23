@@ -81,6 +81,7 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="ExplodeTests.cs" />
     <Compile Include="Expressions\AlbatrossExpressionEvaluatorTests.cs" />
     <Compile Include="DomainDiceTests.cs" />
     <Compile Include="Expressions\RegexConstantsTests.cs" />

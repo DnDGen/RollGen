@@ -8,6 +8,7 @@ namespace RollGen
 
         public abstract PartialRoll d(int die);
         public abstract PartialRoll Keeping(int amountToKeep);
+        public abstract PartialRoll Explode();
 
         public abstract int AsSum();
         public abstract IEnumerable<int> AsIndividualRolls();
