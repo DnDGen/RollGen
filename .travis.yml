@@ -14,6 +14,8 @@ script:
   - set -e
   - mono ./testrunner/NUnit.ConsoleRunner.*/tools/nunit3-console.exe ./RollGen.Tests.Integration.IoC/bin/Stress/RollGen.Tests.Integration.IoC.dll
   - set -e
+  - mono ./testrunner/NUnit.ConsoleRunner.*/tools/nunit3-console.exe ./RollGen.Tests.Integration.Stress/bin/Stress/RollGen.Tests.Integration.Common.dll
+  - set -e
   - mono ./testrunner/NUnit.ConsoleRunner.*/tools/nunit3-console.exe ./RollGen.Tests.Integration.Stress/bin/Stress/RollGen.Tests.Integration.Stress.dll
 deploy:
   skip_cleanup: true

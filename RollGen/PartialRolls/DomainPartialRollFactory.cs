@@ -16,12 +16,12 @@ namespace RollGen.PartialRolls
 
         public PartialRoll Build(int quantity)
         {
-            return new NumericPartialRoll(quantity, random, expressionEvaluator);
+            return new DomainPartialRoll(quantity, random, expressionEvaluator);
         }
 
-        public PartialRoll Build(string rollExpression)
+        public PartialRoll Build(string quantity)
         {
-            return new ExpressionPartialRoll(rollExpression, random, expressionEvaluator);
+            return new DomainPartialRoll(quantity, random, expressionEvaluator);
         }
     }
 }

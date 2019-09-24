@@ -7,7 +7,9 @@ namespace RollGen
         public string CurrentRollExpression { get; protected set; }
 
         public abstract PartialRoll d(int die);
+        public abstract PartialRoll d(string die);
         public abstract PartialRoll Keeping(int amountToKeep);
+        public abstract PartialRoll Keeping(string amountToKeep);
         public abstract PartialRoll Explode();
 
         public abstract int AsSum();

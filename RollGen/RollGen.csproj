@@ -66,8 +66,7 @@
     <Compile Include="Limits.cs" />
     <Compile Include="PartialRoll.cs" />
     <Compile Include="PartialRolls\DomainPartialRollFactory.cs" />
-    <Compile Include="PartialRolls\ExpressionPartialRoll.cs" />
-    <Compile Include="PartialRolls\NumericPartialRoll.cs" />
+    <Compile Include="PartialRolls\DomainPartialRoll.cs" />
     <Compile Include="PartialRolls\PartialRollFactory.cs" />
     <Compile Include="PartialRolls\Roll.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

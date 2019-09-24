@@ -22,7 +22,8 @@ namespace RollGen.PartialRolls
                     && AmountToKeep > -1
                     && Quantity <= Limits.Quantity
                     && Die <= Limits.Die
-                    && Die * (long)Quantity <= Limits.ProductOfQuantityAndDie;
+                    && Die * (long)Quantity <= Limits.ProductOfQuantityAndDie
+                    && (!Explode || Die > 1);
             }
         }
 
@@ -31,14 +32,12 @@ namespace RollGen.PartialRolls
         public Roll(string toParse)
         {
             toParse = toParse.Trim();
-            Explode = toParse.EndsWith("!");
-            if (Explode)
-            {
-                toParse = toParse.Remove(toParse.Length - 1);
-            }
-            var sections = Explode ? toParse.Split('d') : toParse.Split('d', 'k');
+            Explode = toParse.Contains("!");
+            toParse = toParse.Replace("!", string.Empty);
+
+            var sections = toParse.Split('d', 'k');
+
             Die = Convert.ToInt32(sections[1]);
-            if (Explode && Die == 1) Explode = false; // Never Explode a D1
             Quantity = 1;
 
             if (!string.IsNullOrEmpty(sections[0]))
@@ -128,7 +127,14 @@ namespace RollGen.PartialRolls
             ValidateRoll();
 
             var quantity = GetEffectiveQuantity();
-            return quantity * Die;
+            var max = quantity * Die;
+
+            //INFO: Since exploded dice can in theory be infinite, we will assume 10x multiplier,
+            //which should cover 99.9% of use cases
+            if (Explode)
+                max *= 10;
+
+            return max;
         }
 
         public bool GetTrueOrFalse(Random random)
@@ -144,6 +150,9 @@ namespace RollGen.PartialRolls
         public override string ToString()
         {
             var output = $"{Quantity}d{Die}";
+
+            if (Explode)
+                output += "!";
 
             if (AmountToKeep > 0)
                 output += $"k{AmountToKeep}";

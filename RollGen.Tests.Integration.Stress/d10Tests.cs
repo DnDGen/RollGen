@@ -16,12 +16,6 @@ namespace RollGen.Tests.Integration.Stress
         }
 
         [Test]
-        public void StressD10WithMaxQuantity()
-        {
-            stressor.Stress(AssertRollWithLargestQuantityPossible);
-        }
-
-        [Test]
         public void StressD10()
         {
             stressor.Stress(AssertRoll);

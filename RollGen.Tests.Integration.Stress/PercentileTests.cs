@@ -16,12 +16,6 @@ namespace RollGen.Tests.Integration.Stress
         }
 
         [Test]
-        public void StressPercentileWithMaxQuantity()
-        {
-            stressor.Stress(AssertRollWithLargestQuantityPossible);
-        }
-
-        [Test]
         public void StressPercentile()
         {
             stressor.Stress(AssertRoll);

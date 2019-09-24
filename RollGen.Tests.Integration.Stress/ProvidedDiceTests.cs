@@ -1,5 +1,6 @@
 ﻿using Ninject;
 using NUnit.Framework;
+using System;
 
 namespace RollGen.Tests.Integration.Stress
 {
@@ -8,21 +9,18 @@ namespace RollGen.Tests.Integration.Stress
     {
         [Inject]
         public Dice Dice { get; set; }
+        [Inject]
+        public Random Random { get; set; }
 
         protected abstract int die { get; }
 
         protected abstract int GetRoll(int quantity);
 
-        protected void AssertRollWithLargestQuantityPossible()
-        {
-            var roll = GetRoll(Limits.Quantity);
-            Assert.That(roll, Is.InRange(Limits.Quantity, Limits.Quantity * die));
-        }
-
         protected void AssertRoll()
         {
-            var roll = GetRoll(1);
-            Assert.That(roll, Is.InRange(1, die));
+            var quantity = Random.Next(1000) + 1;
+            var roll = GetRoll(quantity);
+            Assert.That(roll, Is.InRange(quantity, die * quantity));
         }
     }
 }

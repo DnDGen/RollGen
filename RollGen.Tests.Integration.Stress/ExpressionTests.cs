@@ -1,6 +1,5 @@
 ﻿using Ninject;
 using NUnit.Framework;
-using System;
 
 namespace RollGen.Tests.Integration.Stress
 {
@@ -14,7 +13,7 @@ namespace RollGen.Tests.Integration.Stress
         [TestCase("1d2+3", 4, 5)]
         [TestCase("1d2+3d4", 4, 14)]
         [TestCase("7d6k5", 5, 30)]
-        [TestCase("7d8!", 7, 1000)] //INFO: Due to how explode works, we don't know what the upper bound should be, but 1000 should be a safe bet
+        [TestCase("7d8!", 7, 560)]
         public void RollExpression(string expression, int lower, int upper)
         {
             stressor.Stress(() => AssertExpression(expression, lower, upper));
@@ -24,23 +23,6 @@ namespace RollGen.Tests.Integration.Stress
         {
             var roll = Dice.Roll(expression).AsSum();
             Assert.That(roll, Is.InRange(lower, upper));
-        }
-
-        [TestCase(1, Limits.Die)]
-        [TestCase(Limits.Quantity, 1)]
-        public void RollWithLargestDieRollPossible(int quantity, int die)
-        {
-            var roll = $"{quantity}d{die}";
-            stressor.Stress(() => AssertExpression(roll, quantity, die * quantity));
-        }
-
-        [Test]
-        public void RollWithLargestDieRollPossible()
-        {
-            var rootOfLimit = Convert.ToInt32(Math.Floor(Math.Sqrt(Limits.ProductOfQuantityAndDie)));
-            var roll = $"{rootOfLimit}d{rootOfLimit}";
-
-            stressor.Stress(() => AssertExpression(roll, rootOfLimit, rootOfLimit * rootOfLimit));
         }
     }
 }

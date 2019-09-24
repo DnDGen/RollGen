@@ -163,7 +163,9 @@ namespace RollGen.Tests.Unit
         [TestCase("I want to roll 1 d2.", "I want to roll 1.")]
         [TestCase("1+2", "1+2")]
         [TestCase("  1  d     2    ", "1")]
-        [TestCase("  6  d     9      k   5  ", "1")]
+        [TestCase("  6  d     9      k    5  ", "1")]
+        [TestCase("  6  d     9   !   k    5  ", "1")]
+        [TestCase("  6  d     9     k    5  !", "1")]
         [TestCase("one d two", "one d two")]
         [TestCase("other things", "other things")]
         [TestCase("Contains 1d6+2 ghouls and 2d4 zombies", "Contains 1+2 ghouls and (2 + 3) zombies")]
@@ -443,7 +445,9 @@ namespace RollGen.Tests.Unit
         [TestCase("I have 2d3k copper pieces.", "I have 1k copper pieces.")]
         [TestCase("I have 7d8k3 copper pieces.", "I have 1 copper pieces.")]
         [TestCase("Gonna die, roll a 1d2d3d4d5d6!!", "Gonna die, roll a 5!")]
+        [TestCase("Gonna die, roll a 1d2d3d4d5d6!!!", "Gonna die, roll a 5!!")]
         [TestCase("Gonna die, roll a 1 d 2 d 3 d 4 d 5 d 6!!", "Gonna die, roll a 5!")]
+        [TestCase("Gonna die, roll a 1 d 2 d 3 d 4 d 5 d 6!!!", "Gonna die, roll a 5!!")]
         public void LenientReplaceExpressionWithTotals(string expression, string expectedExpression)
         {
             var mockPartialRoll = new Mock<PartialRoll>();

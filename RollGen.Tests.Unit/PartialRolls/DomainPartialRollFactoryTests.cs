@@ -19,50 +19,68 @@ namespace RollGen.Tests.Unit.PartialRolls
             mockRandom = new Mock<Random>();
             mockExpressionEvaluator = new Mock<ExpressionEvaluator>();
             partialRollFactory = new DomainPartialRollFactory(mockRandom.Object, mockExpressionEvaluator.Object);
+
+            var count = 0;
+            mockRandom.Setup(r => r.Next(It.IsAny<int>())).Returns((int max) => count++ % max);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>(It.IsAny<string>())).Returns((string s) => DefaultIntValue(s));
+        }
+
+        private int DefaultIntValue(string source)
+        {
+            if (int.TryParse(source, out var output))
+                return output;
+
+            throw new ArgumentException($"{source} was not configured to be evaluated");
         }
 
         [Test]
-        public void ReturnNumericPartialRoll()
+        public void ReturnPartialRollFromNumericQuantity()
         {
             var partialRoll = partialRollFactory.Build(9266);
-            Assert.That(partialRoll, Is.InstanceOf<NumericPartialRoll>());
+            Assert.That(partialRoll, Is.InstanceOf<DomainPartialRoll>());
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("9266"));
         }
 
         [Test]
-        public void ReturnExpressionPartialRoll()
+        public void ReturnPartialRollFromQuantityExpression()
         {
             var partialRoll = partialRollFactory.Build("roll expression");
-            Assert.That(partialRoll, Is.InstanceOf<ExpressionPartialRoll>());
+            Assert.That(partialRoll, Is.InstanceOf<DomainPartialRoll>());
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("(roll expression)"));
         }
 
         [Test]
         public void UseSameInstanceOfRandomForAllPartialRolls()
         {
-            mockRandom.Setup(r => r.Next(9266)).Returns(90210);
+            mockRandom.SetupSequence(r => r.Next(9266))
+                .Returns(1337)
+                .Returns(600);
 
-            var firstPartialRoll = partialRollFactory.Build(42);
-            var secondPartialRoll = partialRollFactory.Build(42);
+            var firstPartialRoll = partialRollFactory.Build(1);
+            var secondPartialRoll = partialRollFactory.Build(1);
 
             var firstRoll = firstPartialRoll.d(9266).AsSum();
             var secondRoll = secondPartialRoll.d(9266).AsSum();
 
-            Assert.That(secondRoll, Is.EqualTo(firstRoll));
-            Assert.That(firstRoll, Is.EqualTo(3788862));
+            Assert.That(firstRoll, Is.EqualTo(1338));
+            Assert.That(secondRoll, Is.EqualTo(601));
         }
 
         [Test]
         public void UseSameInstanceOfRandomForAllPartialRollsBasedOnExpression()
         {
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>("roll expression")).Returns(9266);
+            mockRandom.SetupSequence(r => r.Next(90210))
+                .Returns(1337)
+                .Returns(600);
 
-            var firstPartialRoll = partialRollFactory.Build("roll expression");
-            var secondPartialRoll = partialRollFactory.Build("roll expression");
+            var firstPartialRoll = partialRollFactory.Build("1d90210");
+            var secondPartialRoll = partialRollFactory.Build("1d90210");
 
             var firstRoll = firstPartialRoll.AsSum();
             var secondRoll = secondPartialRoll.AsSum();
 
-            Assert.That(secondRoll, Is.EqualTo(firstRoll));
-            Assert.That(firstRoll, Is.EqualTo(9266));
+            Assert.That(firstRoll, Is.EqualTo(1338));
+            Assert.That(secondRoll, Is.EqualTo(601));
         }
     }
 }

@@ -9,25 +9,35 @@ namespace RollGen.Tests.Integration.Stress
     {
         [Inject]
         public Dice Dice { get; set; }
-
-        [TestCase(1, Limits.Die)]
-        [TestCase(Limits.Quantity, 1)]
-        public void RollWithLargestDieRollPossible(int quantity, int die)
-        {
-            stressor.Stress(() => AssertRoll(quantity, die));
-        }
+        [Inject]
+        public Random Random { get; set; }
 
         [Test]
-        public void RollWithLargestDieRollPossible()
+        public void Roll()
         {
-            var rootOfLimit = Convert.ToInt32(Math.Floor(Math.Sqrt(Limits.ProductOfQuantityAndDie)));
-            stressor.Stress(() => AssertRoll(rootOfLimit, rootOfLimit));
+            stressor.Stress(AssertRoll);
         }
 
-        private void AssertRoll(int quantity, int die)
+        [TestCase("1d2", "3d4", 1, 24)]
+        [TestCase("3d4-1", "5d6+2", 2, 352)]
+        public void RollWithExpression(string quantityExpression, string dieExpression, int lower, int upper)
         {
+            stressor.Stress(() => AssertRoll(quantityExpression, dieExpression, lower, upper));
+        }
+
+        private void AssertRoll()
+        {
+            var quantity = Random.Next(1000) + 1;
+            var die = Random.Next(100_000) + 1;
+
             var roll = Dice.Roll(quantity).d(die).AsSum();
             Assert.That(roll, Is.InRange(quantity, quantity * die));
+        }
+
+        private void AssertRoll(string quantity, string die, int lower, int upper)
+        {
+            var roll = Dice.Roll(quantity).d(die).AsSum();
+            Assert.That(roll, Is.InRange(lower, upper));
         }
     }
 }
