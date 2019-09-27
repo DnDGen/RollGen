@@ -7,7 +7,7 @@ namespace RollGen.Tests.Unit.Expressions
     [TestFixture]
     public class RegexConstantsTests
     {
-        [TestCase(RegexConstants.CommonRollRegexPattern, "d *\\d+(?: *((! *(k *\\d+)*)|((k *\\d+)* *!?)))?")]
+        [TestCase(RegexConstants.CommonRollRegexPattern, "d *\\d+(?: *((! *(k *\\d+)?)|((k *\\d+)? *!?)))?")]
         [TestCase(RegexConstants.StrictRollPattern, "(?:(?:\\d* +)|(?:\\d+ *)|^)" + RegexConstants.CommonRollRegexPattern)]
         [TestCase(RegexConstants.LenientRollPattern, "\\d* *" + RegexConstants.CommonRollRegexPattern)]
         [TestCase(RegexConstants.ExpressionWithoutDieRollsPattern, "(?:[-+]?\\d*\\.?\\d+[%/\\+\\-\\*])+(?:[-+]?\\d*\\.?\\d+)")]
