@@ -1,22 +1,15 @@
 language: csharp
-mono: latest
-# mono:
-#   - 5.2.0
-solution: RollGen.sln
-install:
-  - curl -O https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
-  - mono ./nuget.exe restore RollGen.sln
-  - mono ./nuget.exe install NUnit.Runners -OutputDirectory testrunner
+solution: DnDGen.RollGen.sln
+mono: none
+dotnet: 3.1
+
 script:
-  - msbuild RollGen.sln /p:TargetFrameworkVersion="v4.5.1" /p:Configuration=Stress
-  - set -e
-  - mono ./testrunner/NUnit.ConsoleRunner.*/tools/nunit3-console.exe ./RollGen.Tests.Unit/bin/Stress/RollGen.Tests.Unit.dll
-  - set -e
-  - mono ./testrunner/NUnit.ConsoleRunner.*/tools/nunit3-console.exe ./RollGen.Tests.Integration.IoC/bin/Stress/RollGen.Tests.Integration.IoC.dll
-  - set -e
-  - mono ./testrunner/NUnit.ConsoleRunner.*/tools/nunit3-console.exe ./RollGen.Tests.Integration.Stress/bin/Stress/RollGen.Tests.Integration.Common.dll
-  - set -e
-  - mono ./testrunner/NUnit.ConsoleRunner.*/tools/nunit3-console.exe ./RollGen.Tests.Integration.Stress/bin/Stress/RollGen.Tests.Integration.Stress.dll
+  - dotnet build DnDGen.RollGen.sln -c Release
+    && dotnet test ./DnDGen.RollGen.Tests.Unit/DnDGen.RollGen.Tests.Unit.csproj -v normal
+    && dotnet test ./DnDGen.RollGen.Tests.Integration/DnDGen.RollGen.Tests.Integration.IoC.csproj -v normal
+    && dotnet test ./DnDGen.RollGen.Tests.Integration/DnDGen.RollGen.Tests.Integration.csproj -v normal
+    && dotnet test ./DnDGen.RollGen.Tests.Integration.Stress/DnDGen.RollGen.Tests.Integration.Stress.csproj -v normal -c Stress
+
 deploy:
   skip_cleanup: true
   provider: script

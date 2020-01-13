@@ -1,4 +1,10 @@
-﻿namespace RollGen
+﻿using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("DnDGen.RollGen.Tests.Integration")]
+[assembly: InternalsVisibleTo("DnDGen.RollGen.Tests.Integration.IoC")]
+[assembly: InternalsVisibleTo("DnDGen.RollGen.Tests.Unit")]
+[assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
+namespace RollGen
 {
     public interface Dice
     {
