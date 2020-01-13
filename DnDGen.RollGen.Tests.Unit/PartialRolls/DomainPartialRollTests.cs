@@ -611,17 +611,17 @@ namespace RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void ReturnAsFalseIfHigh()
+        public void ReturnAsTrueIfHigh()
         {
             BuildPartialRoll(1);
             mockRandom.Setup(r => r.Next(4)).Returns(2);
 
             var result = partialRoll.d4().AsTrueOrFalse();
-            Assert.That(result, Is.False);
+            Assert.That(result, Is.True);
         }
 
         [Test]
-        public void ReturnAsTrueIfOnAverageExactly()
+        public void ReturnAsTrueIfOnThresholdExactly()
         {
             BuildPartialRoll(1);
             mockRandom.Setup(r => r.Next(4)).Returns(1);
@@ -631,27 +631,27 @@ namespace RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void ReturnAsTrueIfLow()
+        public void ReturnAsFalseIfLow()
         {
             BuildPartialRoll(1);
             mockRandom.Setup(r => r.Next(4)).Returns(0);
 
             var result = partialRoll.d4().AsTrueOrFalse();
-            Assert.That(result, Is.True);
+            Assert.That(result, Is.False);
         }
 
         [Test]
-        public void ReturnAsTrueIfLowerThanThreshold()
+        public void ReturnAsFalseIfLowerThanCustomThreshold()
         {
             BuildPartialRoll(1);
             mockRandom.Setup(r => r.Next(10)).Returns(0);
 
             var result = partialRoll.d10().AsTrueOrFalse(.15);
-            Assert.That(result, Is.True);
+            Assert.That(result, Is.False);
         }
 
         [Test]
-        public void ReturnAsTrueIfOnThresholdExactly()
+        public void ReturnAsTrueIfOnCustomThresholdExactly()
         {
             BuildPartialRoll(1);
             mockRandom.Setup(r => r.Next(10)).Returns(0);
@@ -661,13 +661,13 @@ namespace RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void ReturnAsFalseIfHigherThanThreshold()
+        public void ReturnAsTrueIfHigherThanCustomThreshold()
         {
             BuildPartialRoll(1);
             mockRandom.Setup(r => r.Next(10)).Returns(0);
 
             var result = partialRoll.d10().AsTrueOrFalse(.05);
-            Assert.That(result, Is.False);
+            Assert.That(result, Is.True);
         }
 
         [Test]

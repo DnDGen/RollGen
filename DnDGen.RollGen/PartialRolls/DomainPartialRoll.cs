@@ -75,7 +75,7 @@ namespace RollGen.PartialRolls
             var difference = minimum - 1;
             var percentage = (sum - difference) / (double)(maximum - difference);
 
-            return percentage <= threshold;
+            return percentage >= threshold;
         }
 
         private bool EvaluateExpressionWithRollsAsTrueOrFalse(string rollExpression)
@@ -118,7 +118,7 @@ namespace RollGen.PartialRolls
         private IEnumerable<int> GetIndividualRolls(string rollExpression)
         {
             //INFO: Not sure how to evaluate individual rolls from genuine expressions (6d5d4k3d2k1), so will compute those as 1 roll
-            if (Roll.CanParse(rollExpression) == false)
+            if (!Roll.CanParse(rollExpression))
             {
                 var evaluatedExpression = EvaluateExpression(rollExpression, GetTotalOfRolls);
                 return new[] { evaluatedExpression };
@@ -149,7 +149,6 @@ namespace RollGen.PartialRolls
                 var innerExpression = expressionWithReplacedRolls.Substring(openParanthesisIndex + 1, innerExpressionLength);
 
                 var innerExpressionWithReplacedRolls = EvaluateExpression(innerExpression, getRoll);
-                var target = $"({innerExpression})";
                 var replacement = innerExpressionWithReplacedRolls.ToString();
 
                 if (NeedLeadingMultiplier(expressionWithReplacedRolls))
