@@ -122,7 +122,7 @@ namespace DnDGen.RollGen.PartialRolls
             return Quantity;
         }
 
-        public int GetPotentialMaximum()
+        public int GetPotentialMaximum(bool includeExplode = true)
         {
             ValidateRoll();
 
@@ -131,7 +131,7 @@ namespace DnDGen.RollGen.PartialRolls
 
             //INFO: Since exploded dice can in theory be infinite, we will assume 10x multiplier,
             //which should cover 99.9% of use cases
-            if (Explode)
+            if (Explode && includeExplode)
                 max *= 10;
 
             return max;

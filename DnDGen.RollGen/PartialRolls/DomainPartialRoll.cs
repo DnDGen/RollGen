@@ -58,9 +58,9 @@ namespace DnDGen.RollGen.PartialRolls
             return minimum;
         }
 
-        public override int AsPotentialMaximum()
+        public override int AsPotentialMaximum(bool includeExplode = true)
         {
-            var maximum = GetMaximumRoll(CurrentRollExpression);
+            var maximum = GetMaximumRoll(CurrentRollExpression, includeExplode);
             return maximum;
         }
 
@@ -69,10 +69,11 @@ namespace DnDGen.RollGen.PartialRolls
             if (booleanExpressionRegex.IsMatch(CurrentRollExpression))
                 return EvaluateExpressionWithRollsAsTrueOrFalse(CurrentRollExpression);
 
-            var maximum = AsPotentialMaximum();
-            var product = maximum * threshold;
+            var minimumAdjustment = AsPotentialMinimum() - 1;
+            var range = AsPotentialMaximum(false) - minimumAdjustment;
+            var product = range * threshold;
             var ceiling = Math.Ceiling(product);
-            var rollThreshold = Convert.ToInt32(ceiling);
+            var rollThreshold = Convert.ToInt32(ceiling) + minimumAdjustment;
 
             if (ceiling == product)
             {
@@ -278,13 +279,13 @@ namespace DnDGen.RollGen.PartialRolls
             return minimum;
         }
 
-        private int GetMaximumRoll(string rollExpression)
+        private int GetMaximumRoll(string rollExpression, bool includeExplode)
         {
             if (Roll.CanParse(rollExpression) == false)
-                return EvaluateExpression(rollExpression, GetMaximumRoll);
+                return EvaluateExpression(rollExpression, e => GetMaximumRoll(e, includeExplode));
 
             var roll = new Roll(rollExpression);
-            var maximum = roll.GetPotentialMaximum();
+            var maximum = roll.GetPotentialMaximum(includeExplode);
 
             return maximum;
         }

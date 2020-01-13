@@ -16,7 +16,7 @@ namespace DnDGen.RollGen
         public abstract IEnumerable<int> AsIndividualRolls();
         public abstract double AsPotentialAverage();
         public abstract int AsPotentialMinimum();
-        public abstract int AsPotentialMaximum();
+        public abstract int AsPotentialMaximum(bool includeExplode = true);
         public abstract bool AsTrueOrFalse(double threshold = .5);
         public abstract bool AsTrueOrFalse(int threshold);
 

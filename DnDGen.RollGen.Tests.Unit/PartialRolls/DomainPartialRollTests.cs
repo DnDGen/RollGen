@@ -171,6 +171,14 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
+        public void AddExplodeToRollWithNumericQuantity()
+        {
+            BuildPartialRoll(9266);
+            partialRoll = partialRoll.Explode();
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("9266!"));
+        }
+
+        [Test]
         public void ChainDiceToRollWithNumericQuantity()
         {
             BuildPartialRoll(9266);
@@ -187,9 +195,10 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
                 .d(90210)
                 .Keeping("7d6k5")
                 .d("4d3k2")
+                .Explode()
                 .Keeping(42);
 
-            var expected = "9266d2d3d4d6d8d10d12d20d100d90210k(7d6k5)d(4d3k2)k42";
+            var expected = "9266d2d3d4d6d8d10d12d20d100d90210k(7d6k5)d(4d3k2)!k42";
             Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo(expected));
         }
 
@@ -298,6 +307,14 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
+        public void AddExplodeToRollWithQuantityExpression()
+        {
+            BuildPartialRoll("7d6k5");
+            partialRoll = partialRoll.Explode();
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("(7d6k5)!"));
+        }
+
+        [Test]
         public void ChainDiceToRollWithQuantityExpression()
         {
             BuildPartialRoll("7d6k5");
@@ -314,9 +331,10 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
                 .d(90210)
                 .Keeping("11d10k9")
                 .d("4d3k2")
+                .Explode()
                 .Keeping(42);
 
-            var expected = "(7d6k5)d2d3d4d6d8d10d12d20d100d90210k(11d10k9)d(4d3k2)k42";
+            var expected = "(7d6k5)d2d3d4d6d8d10d12d20d100d90210k(11d10k9)d(4d3k2)!k42";
             Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo(expected));
         }
 
@@ -610,6 +628,22 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             Assert.That(average, Is.EqualTo(6 * 42 * 600));
         }
 
+        [Test]
+        public void ReturnAsMaximumFromQuantityExpression_WithExplode()
+        {
+            BuildPartialRoll("4d3!");
+            var average = partialRoll.AsPotentialMaximum();
+            Assert.That(average, Is.EqualTo(120));
+        }
+
+        [Test]
+        public void ReturnAsMaximumFromQuantityExpression_WithoutExplode()
+        {
+            BuildPartialRoll("4d3!");
+            var average = partialRoll.AsPotentialMaximum(false);
+            Assert.That(average, Is.EqualTo(12));
+        }
+
         [TestCase(2, 2)]
         [TestCase(3, 2)]
         [TestCase(3, 3)]
@@ -776,6 +810,958 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             mockRandom.Setup(r => r.Next(100)).Returns(42);
 
             var result = partialRoll.Percentile().AsTrueOrFalse(42);
+            Assert.That(result, Is.True);
+        }
+
+        [TestCase(2, 2)]
+        [TestCase(3, 2)]
+        [TestCase(3, 3)]
+        [TestCase(4, 3)]
+        [TestCase(4, 4)]
+        [TestCase(6, 4)]
+        [TestCase(6, 5)]
+        [TestCase(6, 6)]
+        [TestCase(8, 5)]
+        [TestCase(8, 6)]
+        [TestCase(8, 7)]
+        [TestCase(8, 8)]
+        [TestCase(10, 6)]
+        [TestCase(10, 7)]
+        [TestCase(10, 8)]
+        [TestCase(10, 9)]
+        [TestCase(10, 10)]
+        [TestCase(12, 7)]
+        [TestCase(12, 8)]
+        [TestCase(12, 9)]
+        [TestCase(12, 10)]
+        [TestCase(12, 11)]
+        [TestCase(12, 12)]
+        [TestCase(20, 11)]
+        [TestCase(20, 12)]
+        [TestCase(20, 13)]
+        [TestCase(20, 14)]
+        [TestCase(20, 15)]
+        [TestCase(20, 16)]
+        [TestCase(20, 17)]
+        [TestCase(20, 18)]
+        [TestCase(20, 19)]
+        [TestCase(20, 20)]
+        [TestCase(100, 51)]
+        [TestCase(100, 52)]
+        [TestCase(100, 60)]
+        [TestCase(100, 70)]
+        [TestCase(100, 80)]
+        [TestCase(100, 90)]
+        [TestCase(100, 100)]
+        public void ReturnAsTrueIfHigh_WithPositiveBonus(int die, int roll)
+        {
+            BuildPartialRoll($"1d{die}+1");
+            mockRandom.Setup(r => r.Next(die)).Returns(roll - 1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"{die}+1")).Returns(die + 1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"{roll}+1")).Returns(roll + 1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1+1")).Returns(2);
+
+            var result = partialRoll.AsTrueOrFalse();
+            Assert.That(result, Is.True);
+        }
+
+        [TestCase(2, 2)]
+        [TestCase(3, 2)]
+        [TestCase(3, 3)]
+        [TestCase(4, 3)]
+        [TestCase(4, 4)]
+        [TestCase(6, 4)]
+        [TestCase(6, 5)]
+        [TestCase(6, 6)]
+        [TestCase(8, 5)]
+        [TestCase(8, 6)]
+        [TestCase(8, 7)]
+        [TestCase(8, 8)]
+        [TestCase(10, 6)]
+        [TestCase(10, 7)]
+        [TestCase(10, 8)]
+        [TestCase(10, 9)]
+        [TestCase(10, 10)]
+        [TestCase(12, 7)]
+        [TestCase(12, 8)]
+        [TestCase(12, 9)]
+        [TestCase(12, 10)]
+        [TestCase(12, 11)]
+        [TestCase(12, 12)]
+        [TestCase(20, 11)]
+        [TestCase(20, 12)]
+        [TestCase(20, 13)]
+        [TestCase(20, 14)]
+        [TestCase(20, 15)]
+        [TestCase(20, 16)]
+        [TestCase(20, 17)]
+        [TestCase(20, 18)]
+        [TestCase(20, 19)]
+        [TestCase(20, 20)]
+        [TestCase(100, 51)]
+        [TestCase(100, 52)]
+        [TestCase(100, 60)]
+        [TestCase(100, 70)]
+        [TestCase(100, 80)]
+        [TestCase(100, 90)]
+        [TestCase(100, 100)]
+        public void ReturnAsTrueIfHigh_WithNegativeBonus(int die, int roll)
+        {
+            BuildPartialRoll($"1d{die}-1");
+            mockRandom.Setup(r => r.Next(die)).Returns(roll - 1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"{die}-1")).Returns(die - 1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"{roll}-1")).Returns(roll - 1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1-1")).Returns(0);
+
+            var result = partialRoll.AsTrueOrFalse();
+            Assert.That(result, Is.True);
+        }
+
+        [TestCase(2, 2)]
+        [TestCase(3, 2)]
+        [TestCase(3, 3)]
+        [TestCase(4, 3)]
+        [TestCase(4, 4)]
+        [TestCase(6, 4)]
+        [TestCase(6, 5)]
+        [TestCase(6, 6)]
+        [TestCase(8, 5)]
+        [TestCase(8, 6)]
+        [TestCase(8, 7)]
+        [TestCase(8, 8)]
+        [TestCase(10, 6)]
+        [TestCase(10, 7)]
+        [TestCase(10, 8)]
+        [TestCase(10, 9)]
+        [TestCase(10, 10)]
+        [TestCase(12, 7)]
+        [TestCase(12, 8)]
+        [TestCase(12, 9)]
+        [TestCase(12, 10)]
+        [TestCase(12, 11)]
+        [TestCase(12, 12)]
+        [TestCase(20, 11)]
+        [TestCase(20, 12)]
+        [TestCase(20, 13)]
+        [TestCase(20, 14)]
+        [TestCase(20, 15)]
+        [TestCase(20, 16)]
+        [TestCase(20, 17)]
+        [TestCase(20, 18)]
+        [TestCase(20, 19)]
+        [TestCase(20, 20)]
+        [TestCase(100, 51)]
+        [TestCase(100, 52)]
+        [TestCase(100, 60)]
+        [TestCase(100, 70)]
+        [TestCase(100, 80)]
+        [TestCase(100, 90)]
+        [TestCase(100, 100)]
+        public void ReturnAsTrueIfHigh_WithMultipleRolls(int die, int roll)
+        {
+            BuildPartialRoll($"2d{die}");
+            mockRandom.Setup(r => r.Next(die)).Returns(roll - 1);
+
+            var result = partialRoll.AsTrueOrFalse();
+            Assert.That(result, Is.True);
+        }
+
+        [TestCase(2, 2)]
+        [TestCase(3, 2)]
+        [TestCase(3, 3)]
+        [TestCase(4, 3)]
+        [TestCase(4, 4)]
+        [TestCase(6, 4)]
+        [TestCase(6, 5)]
+        [TestCase(6, 6)]
+        [TestCase(8, 5)]
+        [TestCase(8, 6)]
+        [TestCase(8, 7)]
+        [TestCase(8, 8)]
+        [TestCase(10, 6)]
+        [TestCase(10, 7)]
+        [TestCase(10, 8)]
+        [TestCase(10, 9)]
+        [TestCase(10, 10)]
+        [TestCase(12, 7)]
+        [TestCase(12, 8)]
+        [TestCase(12, 9)]
+        [TestCase(12, 10)]
+        [TestCase(12, 11)]
+        [TestCase(12, 12)]
+        [TestCase(20, 11)]
+        [TestCase(20, 12)]
+        [TestCase(20, 13)]
+        [TestCase(20, 14)]
+        [TestCase(20, 15)]
+        [TestCase(20, 16)]
+        [TestCase(20, 17)]
+        [TestCase(20, 18)]
+        [TestCase(20, 19)]
+        [TestCase(20, 20)]
+        [TestCase(100, 51)]
+        [TestCase(100, 52)]
+        [TestCase(100, 60)]
+        [TestCase(100, 70)]
+        [TestCase(100, 80)]
+        [TestCase(100, 90)]
+        [TestCase(100, 100)]
+        public void ReturnAsTrueIfHigh_WithKeep(int die, int roll)
+        {
+            BuildPartialRoll($"2d{die}k1");
+            mockRandom.Setup(r => r.Next(die)).Returns(roll - 1);
+
+            var result = partialRoll.AsTrueOrFalse();
+            Assert.That(result, Is.True);
+        }
+
+        [TestCase(2, 2)]
+        [TestCase(3, 2)]
+        [TestCase(3, 3)]
+        [TestCase(4, 3)]
+        [TestCase(4, 4)]
+        [TestCase(6, 4)]
+        [TestCase(6, 5)]
+        [TestCase(6, 6)]
+        [TestCase(8, 5)]
+        [TestCase(8, 6)]
+        [TestCase(8, 7)]
+        [TestCase(8, 8)]
+        [TestCase(10, 6)]
+        [TestCase(10, 7)]
+        [TestCase(10, 8)]
+        [TestCase(10, 9)]
+        [TestCase(10, 10)]
+        [TestCase(12, 7)]
+        [TestCase(12, 8)]
+        [TestCase(12, 9)]
+        [TestCase(12, 10)]
+        [TestCase(12, 11)]
+        [TestCase(12, 12)]
+        [TestCase(20, 11)]
+        [TestCase(20, 12)]
+        [TestCase(20, 13)]
+        [TestCase(20, 14)]
+        [TestCase(20, 15)]
+        [TestCase(20, 16)]
+        [TestCase(20, 17)]
+        [TestCase(20, 18)]
+        [TestCase(20, 19)]
+        [TestCase(20, 20)]
+        [TestCase(100, 51)]
+        [TestCase(100, 52)]
+        [TestCase(100, 60)]
+        [TestCase(100, 70)]
+        [TestCase(100, 80)]
+        [TestCase(100, 90)]
+        [TestCase(100, 100)]
+        public void ReturnAsTrueIfHigh_WithExplode(int die, int roll)
+        {
+            BuildPartialRoll($"1d{die}!");
+            mockRandom
+                .SetupSequence(r => r.Next(die))
+                .Returns(roll - 1)
+                .Returns(roll - 1)
+                .Returns(roll - 1)
+                .Returns(roll - 1)
+                .Returns(roll - 1)
+                .Returns(roll - 1)
+                .Returns(roll - 1)
+                .Returns(roll - 1)
+                .Returns(roll - 1)
+                .Returns(roll - 1)
+                .Returns(0);
+
+            var result = partialRoll.AsTrueOrFalse();
+            Assert.That(result, Is.True);
+        }
+
+        [TestCase(2)]
+        [TestCase(4)]
+        [TestCase(6)]
+        [TestCase(8)]
+        [TestCase(10)]
+        [TestCase(12)]
+        [TestCase(20)]
+        [TestCase(100)]
+        [TestCase(9266)]
+        public void ReturnAsFalseIfOnThresholdExactly_WithPositiveBonus(int die)
+        {
+            var roll = die / 2;
+            BuildPartialRoll($"1d{die}+1");
+            mockRandom.Setup(r => r.Next(die)).Returns(roll - 1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"{die}+1")).Returns(die + 1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"{roll}+1")).Returns(roll + 1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1+1")).Returns(2);
+
+            var result = partialRoll.AsTrueOrFalse();
+            Assert.That(result, Is.False);
+        }
+
+        [TestCase(2)]
+        [TestCase(4)]
+        [TestCase(6)]
+        [TestCase(8)]
+        [TestCase(10)]
+        [TestCase(12)]
+        [TestCase(20)]
+        [TestCase(100)]
+        [TestCase(9266)]
+        public void ReturnAsFalseIfOnThresholdExactly_WithNegativeBonus(int die)
+        {
+            var roll = die / 2;
+            BuildPartialRoll($"1d{die}-1");
+            mockRandom.Setup(r => r.Next(die)).Returns(roll - 1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"{die}-1")).Returns(die - 1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"{roll}-1")).Returns(roll - 1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1-1")).Returns(0);
+
+            var result = partialRoll.AsTrueOrFalse();
+            Assert.That(result, Is.False);
+        }
+
+        [TestCase(2)]
+        [TestCase(4)]
+        [TestCase(6)]
+        [TestCase(8)]
+        [TestCase(10)]
+        [TestCase(12)]
+        [TestCase(20)]
+        [TestCase(100)]
+        [TestCase(9266)]
+        public void ReturnAsFalseIfOnThresholdExactly_WithMultipleRolls(int die)
+        {
+            BuildPartialRoll($"2d{die}");
+            mockRandom.Setup(r => r.Next(die)).Returns(die / 2 - 1);
+
+            var result = partialRoll.AsTrueOrFalse();
+            Assert.That(result, Is.False);
+        }
+
+        [TestCase(2)]
+        [TestCase(4)]
+        [TestCase(6)]
+        [TestCase(8)]
+        [TestCase(10)]
+        [TestCase(12)]
+        [TestCase(20)]
+        [TestCase(100)]
+        [TestCase(9266)]
+        public void ReturnAsFalseIfOnThresholdExactly_WithKeep(int die)
+        {
+            BuildPartialRoll($"2d{die}k1");
+            mockRandom.Setup(r => r.Next(die)).Returns(die / 2 - 1);
+
+            var result = partialRoll.AsTrueOrFalse();
+            Assert.That(result, Is.False);
+        }
+
+        [TestCase(2)]
+        [TestCase(4)]
+        [TestCase(6)]
+        [TestCase(8)]
+        [TestCase(10)]
+        [TestCase(12)]
+        [TestCase(20)]
+        [TestCase(100)]
+        [TestCase(9266)]
+        public void ReturnAsFalseIfOnThresholdExactly_WithExplode(int die)
+        {
+            BuildPartialRoll($"1d{die}!");
+            mockRandom.Setup(r => r.Next(die)).Returns(die / 2 - 1);
+
+            var result = partialRoll.AsTrueOrFalse();
+            Assert.That(result, Is.False);
+        }
+
+        [TestCase(2, 1)]
+        [TestCase(3, 1)]
+        [TestCase(4, 1)]
+        [TestCase(6, 1)]
+        [TestCase(6, 2)]
+        [TestCase(8, 1)]
+        [TestCase(8, 2)]
+        [TestCase(8, 3)]
+        [TestCase(10, 1)]
+        [TestCase(10, 2)]
+        [TestCase(10, 3)]
+        [TestCase(10, 4)]
+        [TestCase(12, 1)]
+        [TestCase(12, 2)]
+        [TestCase(12, 3)]
+        [TestCase(12, 4)]
+        [TestCase(12, 5)]
+        [TestCase(20, 1)]
+        [TestCase(20, 2)]
+        [TestCase(20, 3)]
+        [TestCase(20, 4)]
+        [TestCase(20, 5)]
+        [TestCase(20, 6)]
+        [TestCase(20, 7)]
+        [TestCase(20, 8)]
+        [TestCase(20, 9)]
+        [TestCase(100, 1)]
+        [TestCase(100, 2)]
+        [TestCase(100, 10)]
+        [TestCase(100, 20)]
+        [TestCase(100, 30)]
+        [TestCase(100, 40)]
+        [TestCase(100, 49)]
+        public void ReturnAsFalseIfLow_WithPositiveBonus(int die, int roll)
+        {
+            BuildPartialRoll($"1d{die}+1");
+            mockRandom.Setup(r => r.Next(die)).Returns(roll - 1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"{die}+1")).Returns(die + 1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"{roll}+1")).Returns(roll + 1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1+1")).Returns(2);
+
+            var result = partialRoll.AsTrueOrFalse();
+            Assert.That(result, Is.False);
+        }
+
+        [TestCase(2, 1)]
+        [TestCase(3, 1)]
+        [TestCase(4, 1)]
+        [TestCase(6, 1)]
+        [TestCase(6, 2)]
+        [TestCase(8, 1)]
+        [TestCase(8, 2)]
+        [TestCase(8, 3)]
+        [TestCase(10, 1)]
+        [TestCase(10, 2)]
+        [TestCase(10, 3)]
+        [TestCase(10, 4)]
+        [TestCase(12, 1)]
+        [TestCase(12, 2)]
+        [TestCase(12, 3)]
+        [TestCase(12, 4)]
+        [TestCase(12, 5)]
+        [TestCase(20, 1)]
+        [TestCase(20, 2)]
+        [TestCase(20, 3)]
+        [TestCase(20, 4)]
+        [TestCase(20, 5)]
+        [TestCase(20, 6)]
+        [TestCase(20, 7)]
+        [TestCase(20, 8)]
+        [TestCase(20, 9)]
+        [TestCase(100, 1)]
+        [TestCase(100, 2)]
+        [TestCase(100, 10)]
+        [TestCase(100, 20)]
+        [TestCase(100, 30)]
+        [TestCase(100, 40)]
+        [TestCase(100, 49)]
+        public void ReturnAsFalseIfLow_WithNegativeBonus(int die, int roll)
+        {
+            BuildPartialRoll($"1d{die}-1");
+            mockRandom.Setup(r => r.Next(die)).Returns(roll - 1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"{die}-1")).Returns(die - 1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"{roll}-1")).Returns(roll - 1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1-1")).Returns(0);
+
+            var result = partialRoll.AsTrueOrFalse();
+            Assert.That(result, Is.False);
+        }
+
+        [TestCase(2, 1)]
+        [TestCase(3, 1)]
+        [TestCase(4, 1)]
+        [TestCase(6, 1)]
+        [TestCase(6, 2)]
+        [TestCase(8, 1)]
+        [TestCase(8, 2)]
+        [TestCase(8, 3)]
+        [TestCase(10, 1)]
+        [TestCase(10, 2)]
+        [TestCase(10, 3)]
+        [TestCase(10, 4)]
+        [TestCase(12, 1)]
+        [TestCase(12, 2)]
+        [TestCase(12, 3)]
+        [TestCase(12, 4)]
+        [TestCase(12, 5)]
+        [TestCase(20, 1)]
+        [TestCase(20, 2)]
+        [TestCase(20, 3)]
+        [TestCase(20, 4)]
+        [TestCase(20, 5)]
+        [TestCase(20, 6)]
+        [TestCase(20, 7)]
+        [TestCase(20, 8)]
+        [TestCase(20, 9)]
+        [TestCase(100, 1)]
+        [TestCase(100, 2)]
+        [TestCase(100, 10)]
+        [TestCase(100, 20)]
+        [TestCase(100, 30)]
+        [TestCase(100, 40)]
+        [TestCase(100, 49)]
+        public void ReturnAsFalseIfLow_WithMultipleRolls(int die, int roll)
+        {
+            BuildPartialRoll($"2d{die}");
+            mockRandom.Setup(r => r.Next(die)).Returns(roll - 1);
+
+            var result = partialRoll.AsTrueOrFalse();
+            Assert.That(result, Is.False);
+        }
+
+        [TestCase(2, 1)]
+        [TestCase(3, 1)]
+        [TestCase(4, 1)]
+        [TestCase(6, 1)]
+        [TestCase(6, 2)]
+        [TestCase(8, 1)]
+        [TestCase(8, 2)]
+        [TestCase(8, 3)]
+        [TestCase(10, 1)]
+        [TestCase(10, 2)]
+        [TestCase(10, 3)]
+        [TestCase(10, 4)]
+        [TestCase(12, 1)]
+        [TestCase(12, 2)]
+        [TestCase(12, 3)]
+        [TestCase(12, 4)]
+        [TestCase(12, 5)]
+        [TestCase(20, 1)]
+        [TestCase(20, 2)]
+        [TestCase(20, 3)]
+        [TestCase(20, 4)]
+        [TestCase(20, 5)]
+        [TestCase(20, 6)]
+        [TestCase(20, 7)]
+        [TestCase(20, 8)]
+        [TestCase(20, 9)]
+        [TestCase(100, 1)]
+        [TestCase(100, 2)]
+        [TestCase(100, 10)]
+        [TestCase(100, 20)]
+        [TestCase(100, 30)]
+        [TestCase(100, 40)]
+        [TestCase(100, 49)]
+        public void ReturnAsFalseIfLow_WithKeep(int die, int roll)
+        {
+            BuildPartialRoll($"2d{die}k1");
+            mockRandom.Setup(r => r.Next(die)).Returns(roll - 1);
+
+            var result = partialRoll.AsTrueOrFalse();
+            Assert.That(result, Is.False);
+        }
+
+        [TestCase(2, 1)]
+        [TestCase(3, 1)]
+        [TestCase(4, 1)]
+        [TestCase(6, 1)]
+        [TestCase(6, 2)]
+        [TestCase(8, 1)]
+        [TestCase(8, 2)]
+        [TestCase(8, 3)]
+        [TestCase(10, 1)]
+        [TestCase(10, 2)]
+        [TestCase(10, 3)]
+        [TestCase(10, 4)]
+        [TestCase(12, 1)]
+        [TestCase(12, 2)]
+        [TestCase(12, 3)]
+        [TestCase(12, 4)]
+        [TestCase(12, 5)]
+        [TestCase(20, 1)]
+        [TestCase(20, 2)]
+        [TestCase(20, 3)]
+        [TestCase(20, 4)]
+        [TestCase(20, 5)]
+        [TestCase(20, 6)]
+        [TestCase(20, 7)]
+        [TestCase(20, 8)]
+        [TestCase(20, 9)]
+        [TestCase(100, 1)]
+        [TestCase(100, 2)]
+        [TestCase(100, 10)]
+        [TestCase(100, 20)]
+        [TestCase(100, 30)]
+        [TestCase(100, 40)]
+        [TestCase(100, 49)]
+        public void ReturnAsFalseIfLow_WithExplode(int die, int roll)
+        {
+            BuildPartialRoll($"1d{die}!");
+            mockRandom.Setup(r => r.Next(die)).Returns(roll - 1);
+
+            var result = partialRoll.AsTrueOrFalse();
+            Assert.That(result, Is.False);
+        }
+
+        [Test]
+        public void ReturnAsFalseIfLowerThanCustomPercentageThreshold_WithPositiveBonus()
+        {
+            BuildPartialRoll($"1d10+1");
+            mockRandom.Setup(r => r.Next(10)).Returns(1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"10+1")).Returns(11);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"2+1")).Returns(3);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1+1")).Returns(2);
+
+            var result = partialRoll.AsTrueOrFalse(.25);
+            Assert.That(result, Is.False);
+        }
+
+        [Test]
+        public void ReturnAsFalseIfLowerThanCustomPercentageThreshold_WithNegativeBonus()
+        {
+            BuildPartialRoll($"1d10-1");
+            mockRandom.Setup(r => r.Next(10)).Returns(1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"10-1")).Returns(9);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"2-1")).Returns(1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1-1")).Returns(0);
+
+            var result = partialRoll.AsTrueOrFalse(.25);
+            Assert.That(result, Is.False);
+        }
+
+        [Test]
+        public void ReturnAsFalseIfLowerThanCustomPercentageThreshold_WithMultipleRolls()
+        {
+            BuildPartialRoll($"2d10");
+            mockRandom.Setup(r => r.Next(10)).Returns(1);
+
+            var result = partialRoll.AsTrueOrFalse(.25);
+            Assert.That(result, Is.False);
+        }
+
+        [Test]
+        public void ReturnAsFalseIfLowerThanCustomPercentageThreshold_WithKeep()
+        {
+            BuildPartialRoll($"2d10k1");
+            mockRandom.Setup(r => r.Next(10)).Returns(1);
+
+            var result = partialRoll.AsTrueOrFalse(.25);
+            Assert.That(result, Is.False);
+        }
+
+        [Test]
+        public void ReturnAsFalseIfLowerThanCustomPercentageThreshold_WithExplode()
+        {
+            BuildPartialRoll($"1d10!");
+            mockRandom.Setup(r => r.Next(10)).Returns(1);
+
+            var result = partialRoll.AsTrueOrFalse(.25);
+            Assert.That(result, Is.False);
+        }
+
+        [Test]
+        public void ReturnAsFalseIfOnCustomPercentageThresholdExactly_WithPositiveBonus()
+        {
+            BuildPartialRoll($"1d10+1");
+            mockRandom.Setup(r => r.Next(10)).Returns(1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"10+1")).Returns(11);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"2+1")).Returns(3);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1+1")).Returns(2);
+
+            var result = partialRoll.AsTrueOrFalse(.2);
+            Assert.That(result, Is.False);
+        }
+
+        [Test]
+        public void ReturnAsFalseIfOnCustomPercentageThresholdExactly_WithNegativeBonus()
+        {
+            BuildPartialRoll($"1d10-1");
+            mockRandom.Setup(r => r.Next(10)).Returns(1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"10-1")).Returns(9);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"2-1")).Returns(1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1-1")).Returns(0);
+
+            var result = partialRoll.AsTrueOrFalse(.2);
+            Assert.That(result, Is.False);
+        }
+
+        [Test]
+        public void ReturnAsFalseIfOnCustomPercentageThresholdExactly_WithMultipleRolls()
+        {
+            BuildPartialRoll($"2d10");
+            mockRandom.Setup(r => r.Next(10)).Returns(1);
+
+            var result = partialRoll.AsTrueOrFalse(.2);
+            Assert.That(result, Is.False);
+        }
+
+        [Test]
+        public void ReturnAsFalseIfOnCustomPercentageThresholdExactly_WithKeep()
+        {
+            BuildPartialRoll($"2d10k1");
+            mockRandom.Setup(r => r.Next(10)).Returns(1);
+
+            var result = partialRoll.AsTrueOrFalse(.2);
+            Assert.That(result, Is.False);
+        }
+
+        [Test]
+        public void ReturnAsFalseIfOnCustomPercentageThresholdExactly_WithExplode()
+        {
+            BuildPartialRoll($"1d10!");
+            mockRandom.Setup(r => r.Next(10)).Returns(1);
+
+            var result = partialRoll.AsTrueOrFalse(.2);
+            Assert.That(result, Is.False);
+        }
+
+        [Test]
+        public void ReturnAsTrueIfHigherThanCustomPercentageThreshold_WithPositiveBonus()
+        {
+            BuildPartialRoll($"1d10+1");
+            mockRandom.Setup(r => r.Next(10)).Returns(1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"10+1")).Returns(11);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"2+1")).Returns(3);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1+1")).Returns(2);
+
+            var result = partialRoll.AsTrueOrFalse(.15);
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public void ReturnAsTrueIfHigherThanCustomPercentageThreshold_WithNegativeBonus()
+        {
+            BuildPartialRoll($"1d10-1");
+            mockRandom.Setup(r => r.Next(10)).Returns(1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"10-1")).Returns(9);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"2-1")).Returns(1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1-1")).Returns(0);
+
+            var result = partialRoll.AsTrueOrFalse(.15);
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public void ReturnAsTrueIfHigherThanCustomPercentageThreshold_WithMultipleRolls()
+        {
+            BuildPartialRoll($"2d10");
+            mockRandom.Setup(r => r.Next(10)).Returns(1);
+
+            var result = partialRoll.AsTrueOrFalse(.15);
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public void ReturnAsTrueIfHigherThanCustomPercentageThreshold_WithKeep()
+        {
+            BuildPartialRoll($"2d10k1");
+            mockRandom.Setup(r => r.Next(10)).Returns(1);
+
+            var result = partialRoll.AsTrueOrFalse(.15);
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public void ReturnAsTrueIfHigherThanCustomPercentageThreshold_WithExplode()
+        {
+            BuildPartialRoll($"1d10!");
+            mockRandom.Setup(r => r.Next(10)).Returns(1);
+
+            var result = partialRoll.AsTrueOrFalse(.15);
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public void ReturnAsFalseIfLowerThanCustomRollThreshold_WithPositiveBonus()
+        {
+            BuildPartialRoll($"1d100+1");
+            mockRandom.Setup(r => r.Next(100)).Returns(40);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"100+1")).Returns(101);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"41+1")).Returns(42);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1+1")).Returns(2);
+
+            var result = partialRoll.AsTrueOrFalse(43);
+            Assert.That(result, Is.False);
+        }
+
+        [Test]
+        public void ReturnAsFalseIfLowerThanCustomRollThreshold_WithNegativeBonus()
+        {
+            BuildPartialRoll($"1d100-1");
+            mockRandom.Setup(r => r.Next(100)).Returns(40);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"100-1")).Returns(99);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"41-1")).Returns(40);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1-1")).Returns(0);
+
+            var result = partialRoll.AsTrueOrFalse(41);
+            Assert.That(result, Is.False);
+        }
+
+        [Test]
+        public void ReturnAsFalseIfLowerThanCustomRollThreshold_WithMultipleRolls()
+        {
+            BuildPartialRoll($"2d100");
+            mockRandom.Setup(r => r.Next(100)).Returns(40);
+
+            var result = partialRoll.AsTrueOrFalse(42 * 2);
+            Assert.That(result, Is.False);
+        }
+
+        [Test]
+        public void ReturnAsFalseIfLowerThanCustomRollThreshold_WithKeep()
+        {
+            BuildPartialRoll($"2d100k1");
+            mockRandom.Setup(r => r.Next(100)).Returns(40);
+
+            var result = partialRoll.AsTrueOrFalse(42 * 2);
+            Assert.That(result, Is.False);
+        }
+
+        [Test]
+        public void ReturnAsFalseIfLowerThanCustomRollThreshold_WithExplode()
+        {
+            BuildPartialRoll($"1d100!");
+            mockRandom.Setup(r => r.Next(100)).Returns(40);
+
+            var result = partialRoll.AsTrueOrFalse(42 * 2);
+            Assert.That(result, Is.False);
+        }
+
+        [Test]
+        public void ReturnAsTrueIfOnCustomRollThresholdExactly_WithPositiveBonus()
+        {
+            BuildPartialRoll($"1d100+1");
+            mockRandom.Setup(r => r.Next(100)).Returns(41);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"100+1")).Returns(101);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"42+1")).Returns(43);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1+1")).Returns(2);
+
+            var result = partialRoll.AsTrueOrFalse(43);
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public void ReturnAsTrueIfOnCustomRollThresholdExactly_WithNegativeBonus()
+        {
+            BuildPartialRoll($"1d100-1");
+            mockRandom.Setup(r => r.Next(100)).Returns(41);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"100-1")).Returns(99);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"42-1")).Returns(41);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1-1")).Returns(0);
+
+            var result = partialRoll.AsTrueOrFalse(41);
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public void ReturnAsTrueIfOnCustomRollThresholdExactly_WithMultipleRolls()
+        {
+            BuildPartialRoll($"2d100");
+            mockRandom.Setup(r => r.Next(100)).Returns(41);
+
+            var result = partialRoll.AsTrueOrFalse(42 * 2);
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public void ReturnAsTrueIfOnCustomRollThresholdExactly_WithKeep()
+        {
+            BuildPartialRoll($"2d100k1");
+            mockRandom.Setup(r => r.Next(100)).Returns(41);
+
+            var result = partialRoll.AsTrueOrFalse(42);
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public void ReturnAsTrueIfOnCustomRollThresholdExactly_WithExplode()
+        {
+            BuildPartialRoll($"1d100!");
+            mockRandom.Setup(r => r.Next(100)).Returns(41);
+
+            var result = partialRoll.AsTrueOrFalse(42);
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public void ReturnAsTrueIfHigherThanCustomRollThreshold_WithPositiveBonus()
+        {
+            BuildPartialRoll($"1d100+1");
+            mockRandom.Setup(r => r.Next(100)).Returns(42);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"100+1")).Returns(101);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"43+1")).Returns(44);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1+1")).Returns(2);
+
+            var result = partialRoll.AsTrueOrFalse(42);
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public void ReturnAsTrueIfHigherThanCustomRollThreshold_WithNegativeBonus()
+        {
+            BuildPartialRoll($"1d100-1");
+            mockRandom.Setup(r => r.Next(100)).Returns(42);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"100-1")).Returns(99);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"43-1")).Returns(42);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1-1")).Returns(0);
+
+            var result = partialRoll.AsTrueOrFalse(42);
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public void ReturnAsTrueIfHigherThanCustomRollThreshold_WithMultipleRolls()
+        {
+            BuildPartialRoll($"2d100");
+            mockRandom.Setup(r => r.Next(100)).Returns(42);
+
+            var result = partialRoll.AsTrueOrFalse(42);
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public void ReturnAsTrueIfHigherThanCustomRollThreshold_WithKeep()
+        {
+            BuildPartialRoll($"2d100k1");
+            mockRandom.Setup(r => r.Next(100)).Returns(42);
+
+            var result = partialRoll.AsTrueOrFalse(42);
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public void ReturnAsTrueIfHigherThanCustomRollThreshold_WithExplode()
+        {
+            BuildPartialRoll($"1d100!");
+            mockRandom.Setup(r => r.Next(100)).Returns(42);
+
+            var result = partialRoll.AsTrueOrFalse(42);
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public void ReturnAsTrueIfHigherThanCustomRollThreshold_WithExplode_HighThreshold()
+        {
+            BuildPartialRoll($"1d100!");
+            mockRandom
+                .SetupSequence(r => r.Next(100))
+                .Returns(99)
+                .Returns(2);
+
+            var result = partialRoll.AsTrueOrFalse(102);
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public void ReturnAsFalseIfLowerThanCustomRollThreshold_WithExplode_HighThreshold()
+        {
+            BuildPartialRoll($"1d100!");
+            mockRandom
+                .SetupSequence(r => r.Next(100))
+                .Returns(99)
+                .Returns(0);
+
+            var result = partialRoll.AsTrueOrFalse(102);
+            Assert.That(result, Is.False);
+        }
+
+        [Test]
+        public void ReturnAsTrueIfOnCustomRollThreshold_WithExplode_HighThreshold()
+        {
+            BuildPartialRoll($"1d100!");
+            mockRandom
+                .SetupSequence(r => r.Next(100))
+                .Returns(99)
+                .Returns(1);
+
+            var result = partialRoll.AsTrueOrFalse(102);
             Assert.That(result, Is.True);
         }
 
