@@ -10,15 +10,39 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
             get { return 10; }
         }
 
-        protected override int GetRoll(int quantity)
+        protected override PartialRoll GetRoll(int quantity)
         {
-            return Dice.Roll(quantity).d10().AsSum();
+            return Dice.Roll(quantity).d10();
         }
 
         [Test]
-        public void StressD10()
+        public void StressD10AsSum()
         {
-            stressor.Stress(AssertRoll);
+            stressor.Stress(AssertRollAsSum);
+        }
+
+        [Test]
+        public void StressD10AsIndividualRolls()
+        {
+            stressor.Stress(AssertRollAsIndividualRolls);
+        }
+
+        [Test]
+        public void StressD10AsMinimum()
+        {
+            stressor.Stress(AssertRollAsMinimum);
+        }
+
+        [Test]
+        public void StressD10AsMaximum()
+        {
+            stressor.Stress(AssertRollAsMaximum);
+        }
+
+        [Test]
+        public void StressD10AsAverage()
+        {
+            stressor.Stress(AssertRollAsAverage);
         }
     }
 }
