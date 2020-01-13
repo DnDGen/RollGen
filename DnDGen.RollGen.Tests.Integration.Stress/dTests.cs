@@ -2,7 +2,7 @@
 using NUnit.Framework;
 using System;
 
-namespace RollGen.Tests.Integration.Stress
+namespace DnDGen.RollGen.Tests.Integration.Stress
 {
     [TestFixture]
     public class dTests : StressTests

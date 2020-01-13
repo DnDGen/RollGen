@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
 
-namespace RollGen.Tests.Unit
+namespace DnDGen.RollGen.Tests.Unit
 {
     [TestFixture]
     public class RollCollectionTests

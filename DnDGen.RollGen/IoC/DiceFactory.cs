@@ -1,6 +1,6 @@
 ﻿using Ninject;
 
-namespace RollGen.IoC
+namespace DnDGen.RollGen.IoC
 {
     public static class DiceFactory
     {

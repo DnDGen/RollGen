@@ -1,7 +1,7 @@
-﻿using RollGen.Expressions;
+﻿using DnDGen.RollGen.Expressions;
 using System;
 
-namespace RollGen.PartialRolls
+namespace DnDGen.RollGen.PartialRolls
 {
     internal class DomainPartialRollFactory : PartialRollFactory
     {

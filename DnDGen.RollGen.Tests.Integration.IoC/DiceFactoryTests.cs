@@ -1,7 +1,7 @@
-﻿using NUnit.Framework;
-using RollGen.IoC;
+﻿using DnDGen.RollGen.IoC;
+using NUnit.Framework;
 
-namespace RollGen.Tests.Integration.IoC
+namespace DnDGen.RollGen.Tests.Integration.IoC
 {
     [TestFixture]
     public class DiceFactoryTests

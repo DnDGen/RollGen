@@ -1,8 +1,8 @@
-﻿using Ninject;
+﻿using DnDGen.RollGen.IoC;
+using Ninject;
 using NUnit.Framework;
-using RollGen.IoC;
 
-namespace RollGen.Tests.Integration.Common
+namespace DnDGen.RollGen.Tests.Integration
 {
     [TestFixture]
     public abstract class IntegrationTests

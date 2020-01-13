@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace RollGen
+namespace DnDGen.RollGen
 {
     public abstract class PartialRoll
     {

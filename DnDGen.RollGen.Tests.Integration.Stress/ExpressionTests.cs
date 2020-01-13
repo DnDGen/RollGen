@@ -1,7 +1,7 @@
 ﻿using Ninject;
 using NUnit.Framework;
 
-namespace RollGen.Tests.Integration.Stress
+namespace DnDGen.RollGen.Tests.Integration.Stress
 {
     [TestFixture]
     public class ExpressionTests : StressTests

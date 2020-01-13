@@ -1,10 +1,10 @@
 ﻿using Albatross.Expression;
+using DnDGen.RollGen.Expressions;
+using DnDGen.RollGen.PartialRolls;
 using Ninject.Modules;
-using RollGen.Expressions;
-using RollGen.PartialRolls;
 using System;
 
-namespace RollGen.IoC.Modules
+namespace DnDGen.RollGen.IoC.Modules
 {
     internal class CoreModule : NinjectModule
     {

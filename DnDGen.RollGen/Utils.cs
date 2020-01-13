@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace RollGen
+namespace DnDGen.RollGen
 {
     public static class Utils
     {

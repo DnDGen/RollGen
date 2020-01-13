@@ -2,7 +2,7 @@
 using System;
 using System.Text.RegularExpressions;
 
-namespace RollGen.Expressions
+namespace DnDGen.RollGen.Expressions
 {
     internal class AlbatrossExpressionEvaluator : ExpressionEvaluator
     {

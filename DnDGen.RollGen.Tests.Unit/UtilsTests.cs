@@ -1,7 +1,7 @@
 ﻿using NUnit.Framework;
 using System;
 
-namespace RollGen.Tests.Unit
+namespace DnDGen.RollGen.Tests.Unit
 {
     [TestFixture]
     public class UtilsTests

@@ -1,10 +1,10 @@
-﻿using Moq;
+﻿using DnDGen.RollGen.PartialRolls;
+using Moq;
 using NUnit.Framework;
-using RollGen.PartialRolls;
 using System;
 using System.Linq;
 
-namespace RollGen.Tests.Unit.PartialRolls
+namespace DnDGen.RollGen.Tests.Unit.PartialRolls
 {
     [TestFixture]
     public class RollTests

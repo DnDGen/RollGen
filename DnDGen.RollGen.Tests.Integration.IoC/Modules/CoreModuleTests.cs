@@ -1,12 +1,12 @@
 ﻿using Albatross.Expression;
+using DnDGen.RollGen.Expressions;
+using DnDGen.RollGen.PartialRolls;
+using DnDGen.RollGen.Tests.Integration;
 using Ninject;
 using NUnit.Framework;
-using RollGen.Expressions;
-using RollGen.PartialRolls;
-using RollGen.Tests.Integration.Common;
 using System;
 
-namespace RollGen.Tests.Bootstrap.Modules
+namespace DnDGen.RollGen.Tests.Bootstrap.Modules
 {
     [TestFixture]
     public class CoreModuleTests : IntegrationTests

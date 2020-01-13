@@ -1,10 +1,10 @@
-﻿using Ninject;
+﻿using DnDGen.RollGen.IoC;
+using Ninject;
 using NUnit.Framework;
-using RollGen.IoC;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace RollGen.Tests.Integration.Stress
+namespace DnDGen.RollGen.Tests.Integration.Stress
 {
     [TestFixture]
     public class RandomSeedTests : StressTests

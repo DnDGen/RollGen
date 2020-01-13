@@ -1,9 +1,9 @@
-﻿using Moq;
+﻿using DnDGen.RollGen.PartialRolls;
+using Moq;
 using NUnit.Framework;
-using RollGen.PartialRolls;
 using System.Linq;
 
-namespace RollGen.Tests.Unit
+namespace DnDGen.RollGen.Tests.Unit
 {
     [TestFixture]
     public class DomainDiceTests

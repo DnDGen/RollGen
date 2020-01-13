@@ -1,11 +1,11 @@
 ﻿using Albatross.Expression;
 using Albatross.Expression.Tokens;
+using DnDGen.RollGen.Expressions;
 using Moq;
 using NUnit.Framework;
-using RollGen.Expressions;
 using System.Collections.Generic;
 
-namespace RollGen.Tests.Unit.Expressions
+namespace DnDGen.RollGen.Tests.Unit.Expressions
 {
     [TestFixture]
     public class AlbatrossExpressionEvaluatorTests

@@ -1,4 +1,4 @@
-﻿namespace RollGen.PartialRolls
+﻿namespace DnDGen.RollGen.PartialRolls
 {
     internal interface PartialRollFactory
     {

@@ -1,7 +1,7 @@
 ﻿using Ninject;
 using NUnit.Framework;
 
-namespace RollGen.Tests.Integration.Common
+namespace DnDGen.RollGen.Tests.Integration
 {
     [TestFixture]
     public class ParantheticalRollTests : IntegrationTests

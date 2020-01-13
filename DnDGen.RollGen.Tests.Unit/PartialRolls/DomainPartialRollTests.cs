@@ -1,11 +1,11 @@
-﻿using Moq;
+﻿using DnDGen.RollGen.Expressions;
+using DnDGen.RollGen.PartialRolls;
+using Moq;
 using NUnit.Framework;
-using RollGen.Expressions;
-using RollGen.PartialRolls;
 using System;
 using System.Linq;
 
-namespace RollGen.Tests.Unit.PartialRolls
+namespace DnDGen.RollGen.Tests.Unit.PartialRolls
 {
     [TestFixture]
     public class DomainPartialRollTests
@@ -610,33 +610,112 @@ namespace RollGen.Tests.Unit.PartialRolls
             Assert.That(average, Is.EqualTo(6 * 42 * 600));
         }
 
-        [Test]
-        public void ReturnAsTrueIfHigh()
+        [TestCase(2, 2)]
+        [TestCase(3, 2)]
+        [TestCase(3, 3)]
+        [TestCase(4, 3)]
+        [TestCase(4, 4)]
+        [TestCase(6, 4)]
+        [TestCase(6, 5)]
+        [TestCase(6, 6)]
+        [TestCase(8, 5)]
+        [TestCase(8, 6)]
+        [TestCase(8, 7)]
+        [TestCase(8, 8)]
+        [TestCase(10, 6)]
+        [TestCase(10, 7)]
+        [TestCase(10, 8)]
+        [TestCase(10, 9)]
+        [TestCase(10, 10)]
+        [TestCase(12, 7)]
+        [TestCase(12, 8)]
+        [TestCase(12, 9)]
+        [TestCase(12, 10)]
+        [TestCase(12, 11)]
+        [TestCase(12, 12)]
+        [TestCase(20, 11)]
+        [TestCase(20, 12)]
+        [TestCase(20, 13)]
+        [TestCase(20, 14)]
+        [TestCase(20, 15)]
+        [TestCase(20, 16)]
+        [TestCase(20, 17)]
+        [TestCase(20, 18)]
+        [TestCase(20, 19)]
+        [TestCase(20, 20)]
+        [TestCase(100, 51)]
+        [TestCase(100, 52)]
+        [TestCase(100, 60)]
+        [TestCase(100, 70)]
+        [TestCase(100, 80)]
+        [TestCase(100, 90)]
+        [TestCase(100, 100)]
+        public void ReturnAsTrueIfHigh(int die, int roll)
         {
             BuildPartialRoll(1);
-            mockRandom.Setup(r => r.Next(4)).Returns(2);
+            mockRandom.Setup(r => r.Next(die)).Returns(roll - 1);
 
-            var result = partialRoll.d4().AsTrueOrFalse();
+            var result = partialRoll.d(die).AsTrueOrFalse();
             Assert.That(result, Is.True);
         }
 
-        [Test]
-        public void ReturnAsTrueIfOnThresholdExactly()
+        [TestCase(2)]
+        [TestCase(4)]
+        [TestCase(6)]
+        [TestCase(8)]
+        [TestCase(10)]
+        [TestCase(12)]
+        [TestCase(20)]
+        [TestCase(100)]
+        [TestCase(9266)]
+        public void ReturnAsFalseIfOnThresholdExactly(int die)
         {
             BuildPartialRoll(1);
-            mockRandom.Setup(r => r.Next(4)).Returns(1);
+            mockRandom.Setup(r => r.Next(die)).Returns(die / 2 - 1);
 
-            var result = partialRoll.d4().AsTrueOrFalse();
-            Assert.That(result, Is.True);
+            var result = partialRoll.d(die).AsTrueOrFalse();
+            Assert.That(result, Is.False);
         }
 
-        [Test]
-        public void ReturnAsFalseIfLow()
+        [TestCase(2, 1)]
+        [TestCase(3, 1)]
+        [TestCase(4, 1)]
+        [TestCase(6, 1)]
+        [TestCase(6, 2)]
+        [TestCase(8, 1)]
+        [TestCase(8, 2)]
+        [TestCase(8, 3)]
+        [TestCase(10, 1)]
+        [TestCase(10, 2)]
+        [TestCase(10, 3)]
+        [TestCase(10, 4)]
+        [TestCase(12, 1)]
+        [TestCase(12, 2)]
+        [TestCase(12, 3)]
+        [TestCase(12, 4)]
+        [TestCase(12, 5)]
+        [TestCase(20, 1)]
+        [TestCase(20, 2)]
+        [TestCase(20, 3)]
+        [TestCase(20, 4)]
+        [TestCase(20, 5)]
+        [TestCase(20, 6)]
+        [TestCase(20, 7)]
+        [TestCase(20, 8)]
+        [TestCase(20, 9)]
+        [TestCase(100, 1)]
+        [TestCase(100, 2)]
+        [TestCase(100, 10)]
+        [TestCase(100, 20)]
+        [TestCase(100, 30)]
+        [TestCase(100, 40)]
+        [TestCase(100, 49)]
+        public void ReturnAsFalseIfLow(int die, int roll)
         {
             BuildPartialRoll(1);
-            mockRandom.Setup(r => r.Next(4)).Returns(0);
+            mockRandom.Setup(r => r.Next(die)).Returns(roll - 1);
 
-            var result = partialRoll.d4().AsTrueOrFalse();
+            var result = partialRoll.d(die).AsTrueOrFalse();
             Assert.That(result, Is.False);
         }
 
@@ -651,13 +730,13 @@ namespace RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void ReturnAsTrueIfOnCustomThresholdExactly()
+        public void ReturnAsFalseIfOnCustomThresholdExactly()
         {
             BuildPartialRoll(1);
             mockRandom.Setup(r => r.Next(10)).Returns(0);
 
             var result = partialRoll.d10().AsTrueOrFalse(.1);
-            Assert.That(result, Is.True);
+            Assert.That(result, Is.False);
         }
 
         [Test]

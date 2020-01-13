@@ -1,10 +1,10 @@
-﻿using RollGen.Expressions;
+﻿using DnDGen.RollGen.Expressions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace RollGen.PartialRolls
+namespace DnDGen.RollGen.PartialRolls
 {
     internal class Roll
     {

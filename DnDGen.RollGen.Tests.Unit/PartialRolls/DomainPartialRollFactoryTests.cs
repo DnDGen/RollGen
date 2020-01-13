@@ -1,10 +1,10 @@
-﻿using Moq;
+﻿using DnDGen.RollGen.Expressions;
+using DnDGen.RollGen.PartialRolls;
+using Moq;
 using NUnit.Framework;
-using RollGen.Expressions;
-using RollGen.PartialRolls;
 using System;
 
-namespace RollGen.Tests.Unit.PartialRolls
+namespace DnDGen.RollGen.Tests.Unit.PartialRolls
 {
     [TestFixture]
     public class DomainPartialRollFactoryTests

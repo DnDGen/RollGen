@@ -1,9 +1,8 @@
 ﻿using DnDGen.Stress;
 using NUnit.Framework;
-using RollGen.Tests.Integration.Common;
 using System.Reflection;
 
-namespace RollGen.Tests.Integration.Stress
+namespace DnDGen.RollGen.Tests.Integration.Stress
 {
     [TestFixture]
     public abstract class StressTests : IntegrationTests
@@ -16,7 +15,6 @@ namespace RollGen.Tests.Integration.Stress
             var options = new StressorOptions()
             {
                 RunningAssembly = Assembly.GetExecutingAssembly(),
-                TimeLimitPercentage = .95,
 #if STRESS
                 IsFullStress = true,
 #else

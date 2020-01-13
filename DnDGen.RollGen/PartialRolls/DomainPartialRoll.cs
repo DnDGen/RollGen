@@ -1,10 +1,10 @@
-﻿using RollGen.Expressions;
+﻿using DnDGen.RollGen.Expressions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace RollGen.PartialRolls
+namespace DnDGen.RollGen.PartialRolls
 {
     internal class DomainPartialRoll : PartialRoll
     {
@@ -75,7 +75,7 @@ namespace RollGen.PartialRolls
             var difference = minimum - 1;
             var percentage = (sum - difference) / (double)(maximum - difference);
 
-            return percentage >= threshold;
+            return percentage > threshold;
         }
 
         private bool EvaluateExpressionWithRollsAsTrueOrFalse(string rollExpression)

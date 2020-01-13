@@ -1,4 +1,4 @@
-﻿namespace RollGen
+﻿namespace DnDGen.RollGen
 {
     internal class RollPrototype
     {

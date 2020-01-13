@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
 
-namespace RollGen.Tests.Integration.Stress
+namespace DnDGen.RollGen.Tests.Integration.Stress
 {
     [TestFixture]
     public class d12Tests : ProvidedDiceTests

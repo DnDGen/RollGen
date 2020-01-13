@@ -32,8 +32,8 @@ var expressionMinRoll = dice.Roll("5+3d4*3").AsPotentialMinimum(); //5+3*3, retu
 var maxRoll = dice.Roll(4).d6().AsPotentialMaximum(); //Returns the maximum roll for the expression.  For here, it will return 24.
 var expressionMaxRoll = dice.Roll("5+3d4*3").AsPotentialMaximum(); //5+12*3, returning 41 
 
-var success = dice.Roll().Percentile().AsTrueOrFalse(); //Returns true if high, false if low
-var customSuccess = dice.Roll().Percentile().AsTrueOrFalse(.9); //Returns true if >= 90, false if < 90
+var success = dice.Roll().Percentile().AsTrueOrFalse(); //Returns true if high (51-100), false if low (1-50)
+var customSuccess = dice.Roll().Percentile().AsTrueOrFalse(.9); //Returns true if > 90, false if <= 90
 var expressionSuccess = dice.Roll("5+3d4*2").AsTrueOrFalse(); //Returns true if high, false if low
 var explicitExpressionSuccess = dice.Roll("2d6 >= 1d12").AsTrueOrFalse(); //Evalutes boolean expression after rolling
 

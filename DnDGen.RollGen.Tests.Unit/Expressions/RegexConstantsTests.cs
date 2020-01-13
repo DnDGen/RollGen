@@ -1,8 +1,8 @@
-﻿using NUnit.Framework;
-using RollGen.Expressions;
+﻿using DnDGen.RollGen.Expressions;
+using NUnit.Framework;
 using System.Text.RegularExpressions;
 
-namespace RollGen.Tests.Unit.Expressions
+namespace DnDGen.RollGen.Tests.Unit.Expressions
 {
     [TestFixture]
     public class RegexConstantsTests
