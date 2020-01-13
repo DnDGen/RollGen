@@ -6,7 +6,7 @@ dotnet: 3.1
 script:
   - dotnet build DnDGen.RollGen.sln -c Release
     && dotnet test ./DnDGen.RollGen.Tests.Unit/DnDGen.RollGen.Tests.Unit.csproj -v normal
-    && dotnet test ./DnDGen.RollGen.Tests.Integration/DnDGen.RollGen.Tests.Integration.IoC.csproj -v normal
+    && dotnet test ./DnDGen.RollGen.Tests.Integration.IoC/DnDGen.RollGen.Tests.Integration.IoC.csproj -v normal
     && dotnet test ./DnDGen.RollGen.Tests.Integration/DnDGen.RollGen.Tests.Integration.csproj -v normal
     && dotnet test ./DnDGen.RollGen.Tests.Integration.Stress/DnDGen.RollGen.Tests.Integration.Stress.csproj -v normal -c Stress
 
