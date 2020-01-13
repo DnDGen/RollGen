@@ -16,7 +16,7 @@ namespace RollGen.Tests.Integration.Stress
             var options = new StressorOptions()
             {
                 RunningAssembly = Assembly.GetExecutingAssembly(),
-                TimeLimitPercentage = .85,
+                TimeLimitPercentage = .95,
 #if STRESS
                 IsFullStress = true,
 #else
