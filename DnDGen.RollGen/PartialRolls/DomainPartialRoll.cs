@@ -69,13 +69,26 @@ namespace DnDGen.RollGen.PartialRolls
             if (booleanExpressionRegex.IsMatch(CurrentRollExpression))
                 return EvaluateExpressionWithRollsAsTrueOrFalse(CurrentRollExpression);
 
-            var minimum = AsPotentialMinimum();
             var maximum = AsPotentialMaximum();
-            var sum = AsSum();
-            var difference = minimum - 1;
-            var percentage = (sum - difference) / (double)(maximum - difference);
+            var product = maximum * threshold;
+            var ceiling = Math.Ceiling(product);
+            var rollThreshold = Convert.ToInt32(ceiling);
 
-            return percentage > threshold;
+            if (ceiling == product)
+            {
+                rollThreshold++;
+            }
+
+            return AsTrueOrFalse(rollThreshold);
+        }
+
+        public override bool AsTrueOrFalse(int threshold)
+        {
+            if (booleanExpressionRegex.IsMatch(CurrentRollExpression))
+                return EvaluateExpressionWithRollsAsTrueOrFalse(CurrentRollExpression);
+
+            var sum = AsSum();
+            return sum >= threshold;
         }
 
         private bool EvaluateExpressionWithRollsAsTrueOrFalse(string rollExpression)

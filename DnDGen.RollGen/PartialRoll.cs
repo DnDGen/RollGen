@@ -18,6 +18,7 @@ namespace DnDGen.RollGen
         public abstract int AsPotentialMinimum();
         public abstract int AsPotentialMaximum();
         public abstract bool AsTrueOrFalse(double threshold = .5);
+        public abstract bool AsTrueOrFalse(int threshold);
 
         public PartialRoll d2() => d(2);
         public PartialRoll d3() => d(3);

@@ -720,7 +720,7 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void ReturnAsFalseIfLowerThanCustomThreshold()
+        public void ReturnAsFalseIfLowerThanCustomPercentageThreshold()
         {
             BuildPartialRoll(1);
             mockRandom.Setup(r => r.Next(10)).Returns(0);
@@ -730,7 +730,7 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void ReturnAsFalseIfOnCustomThresholdExactly()
+        public void ReturnAsFalseIfOnCustomPercentageThresholdExactly()
         {
             BuildPartialRoll(1);
             mockRandom.Setup(r => r.Next(10)).Returns(0);
@@ -740,12 +740,42 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void ReturnAsTrueIfHigherThanCustomThreshold()
+        public void ReturnAsTrueIfHigherThanCustomPercentageThreshold()
         {
             BuildPartialRoll(1);
             mockRandom.Setup(r => r.Next(10)).Returns(0);
 
             var result = partialRoll.d10().AsTrueOrFalse(.05);
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public void ReturnAsFalseIfLowerThanCustomRollThreshold()
+        {
+            BuildPartialRoll(1);
+            mockRandom.Setup(r => r.Next(100)).Returns(40);
+
+            var result = partialRoll.Percentile().AsTrueOrFalse(42);
+            Assert.That(result, Is.False);
+        }
+
+        [Test]
+        public void ReturnAsTrueIfOnCustomRollThresholdExactly()
+        {
+            BuildPartialRoll(1);
+            mockRandom.Setup(r => r.Next(100)).Returns(41);
+
+            var result = partialRoll.Percentile().AsTrueOrFalse(42);
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public void ReturnAsTrueIfHigherThanCustomRollThreshold()
+        {
+            BuildPartialRoll(1);
+            mockRandom.Setup(r => r.Next(100)).Returns(42);
+
+            var result = partialRoll.Percentile().AsTrueOrFalse(42);
             Assert.That(result, Is.True);
         }
 
