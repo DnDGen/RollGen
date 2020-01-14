@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netcoreapp3.1;net45</TargetFrameworks>
+    <Version>15.0.0</Version>
+    <Authors>Karl M. Speer</Authors>
+    <Company>DnDGen</Company>
+    <Product>RollGen</Product>
+    <Description>This gives a basic, fluid interface for rolling dice from the D20 system - commonly known to work with Dungeons and Dragons.  Die included are d2, d3, d4, d6, d8, d10, d12, d20, Percentile (d100), and custom die rolls.</Description>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/DnDGen/RollGen</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/DnDGen/RollGen</RepositoryUrl>
+    <PackageTags>dice dungeons dragons d20 dnd adnd ioc ninject dependency inject injection</PackageTags>
+    <PackageIcon>18531-twenty-sided-dice-vector-thumb.png</PackageIcon>
+    <PackageIconUrl />
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="18531-twenty-sided-dice-vector-thumb.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Albatross.Expression" Version="2.0.4" />
+    <PackageReference Include="Ninject" Version="3.3.4" />
+  </ItemGroup>
+
+  <!--Needed for Framework compatibility when building in Travis-->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" PrivateAssets="All" Version="1.0.0" />
+  </ItemGroup>
+
+</Project>

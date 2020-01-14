@@ -26,7 +26,15 @@ var expressionKeptRolls = dice.Roll("3d4k2").AsSum(); //Returns the sum of 2 hig
 var averageRoll = dice.Roll(4).d6().AsPotentialAverage(); //Returns the average roll for the expression.  For here, it will return 14.
 var expressionAverageRoll = dice.Roll("5+3d4*3").AsPotentialAverage(); //5+7.5*3, returning 27.5 
 
-var success = dice.Roll().Percentile().AsTrueOrFalse(); //Returns true if high, false if low
+var minRoll = dice.Roll(4).d6().AsPotentialMinimum(); //Returns the minimum roll for the expression.  For here, it will return 4.
+var expressionMinRoll = dice.Roll("5+3d4*3").AsPotentialMinimum(); //5+3*3, returning 14
+
+var maxRoll = dice.Roll(4).d6().AsPotentialMaximum(); //Returns the maximum roll for the expression.  For here, it will return 24.
+var expressionMaxRoll = dice.Roll("5+3d4*3").AsPotentialMaximum(); //5+12*3, returning 41 
+
+var success = dice.Roll().Percentile().AsTrueOrFalse(); //Returns true if high (51-100), false if low (1-50)
+var customPercentageSuccess = dice.Roll().Percentile().AsTrueOrFalse(.9); //Returns true if > 90, false if <= 90
+var customRollSuccess = dice.Roll().Percentile().AsTrueOrFalse(90); //Returns true if >= 90, false if < 90
 var expressionSuccess = dice.Roll("5+3d4*2").AsTrueOrFalse(); //Returns true if high, false if low
 var explicitExpressionSuccess = dice.Roll("2d6 >= 1d12").AsTrueOrFalse(); //Evalutes boolean expression after rolling
 
@@ -38,14 +46,17 @@ var rolledComplexSentence = dice.ReplaceWrappedExpression<double>("Fireball does
 var optimizedRoll = RollHelper.GetRoll(4, 9); //returns "1d6+3", which is the most evenly-distributed roll possible
 var optimizedRollWithMultipleDice = RollHelper.GetRoll(1, 9); //returns "1d8+1d2-1", because it more evenly-distributed than "4d3-3"
 
+var explodedRolls = dice.Roll(4).d6().Explode().AsIndividualRolls(); //If a 6 is rolled, then an additional roll is performed.  I.E., 3 + 6 + 5 + 4 + 1
+var expressionExplodedRolls = dice.Roll("3d4!").AsSum(); //Return the sum of the rolls, including bonus rolls from explosion
+var expressionExplodedKeptRolls = dice.Roll("3d4!k2").AsSum(); //Returns the sum of 2 highest rolls, including bonus rolls from explosion
+
 ```
 
 Important things to note:
 
-1. If your first roll is an expression (a string), then you cannot extend it with additional rolls (such `d6()`, `d(7)`, or `Keeping(4)`).
-2. When retrieving individual rolls from an expression, only the sum of the expression is returned.  This is because determining what an "individual roll" is within a complex expression is not certain.  As an example, what would individual rolls be for `1d2+3d4`?
-3. Paranthetical statements in expressions (such as `5*(2d3-4)`) are not supported.  Mathematical expressions supported are `+`, `-`, `*`, `/`, and `%`, as well as die rolls as demonstrated above.  Spaces are allowed in the expression strings
-4. For replacement methods on `Dice`, there is an option to do "lenient" replacements (optional boolean).  The difference:
+1. When retrieving individual rolls from an expression, only the sum of the expression is returned.  This is because determining what an "individual roll" is within a complex expression is not certain.  As an example, what would individual rolls be for `1d2+3d4`?
+2. Mathematical expressions supported are `+`, `-`, `*`, `/`, and `%`, as well as die rolls as demonstrated above.  Spaces are allowed in the expression strings.  Paranthetical expressions are also allowed.
+3. For replacement methods on `Dice`, there is an option to do "lenient" replacements (optional boolean).  The difference:
     a. "1d2 ghouls and 2d4 zombies" strict -> "1 ghouls and 5 zombies"
     b. "1d2 ghouls and 2d4 zombies" lenient -> "1 ghouls an3 zombies" (it reads "and 2d4" as "an(d 2d4)")
 
