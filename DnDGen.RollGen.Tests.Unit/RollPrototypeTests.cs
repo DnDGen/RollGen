@@ -38,5 +38,14 @@ namespace DnDGen.RollGen.Tests.Unit
 
             Assert.That(prototype.ToString(), Is.EqualTo("9266d90210"));
         }
+
+        [Test]
+        public void RangeIsComputed()
+        {
+            prototype.Quantity = 9266;
+            prototype.Die = 90210;
+
+            Assert.That(prototype.Range, Is.EqualTo(9266 * 90210 - 9266 + 1));
+        }
     }
 }

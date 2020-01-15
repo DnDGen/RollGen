@@ -14,6 +14,7 @@ namespace DnDGen.RollGen
         public int Quantities => Rolls.Sum(r => r.Quantity);
         public int Lower => Quantities + Adjustment;
         public int Upper => Rolls.Sum(r => r.Quantity * r.Die) + Adjustment;
+        public int Range => Upper - Lower + 1;
 
         public RollCollection()
         {
@@ -64,16 +65,22 @@ namespace DnDGen.RollGen
 
         public int GetRanking(int lower, int upper)
         {
-            var rangeDifference = RangeDifference(lower, upper);
-
-            var rank = rangeDifference * 100000;
+            if (!Matches(lower, upper))
+                return int.MaxValue;
 
             if (!Rolls.Any())
-                return rank;
+                return 0;
 
-            rank += (Quantities - 1) * 10000;
-            rank += Rolls.Count * 1000;
-            rank += StandardDice.Max() - Rolls.Max(r => r.Die) + 1;
+            var rank = 1; //So the rank is higher than a constant
+
+            if (Rolls.Count == 1 && Rolls[0].Die == 2)
+            {
+                rank += 100_000_000;
+            }
+
+            rank += (Rolls.Count - 1) * 100_000;
+            rank += (Quantities - 1) * 1_000;
+            rank += StandardDice.Max() - Rolls.Max(r => r.Die);
 
             return rank;
         }
