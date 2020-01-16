@@ -155,6 +155,17 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
+        public void AddDiePartialRollToRollWithNumericQuantity()
+        {
+            BuildPartialRoll(9266);
+            var otherPartialRoll = new DomainPartialRoll(42, mockRandom.Object, mockExpressionEvaluator.Object);
+            otherPartialRoll.d(600);
+
+            partialRoll = partialRoll.d(otherPartialRoll);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("9266d(42d600)"));
+        }
+
+        [Test]
         public void AddNumericKeepingToRollWithNumericQuantity()
         {
             BuildPartialRoll(9266);
@@ -168,6 +179,17 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             BuildPartialRoll(9266);
             partialRoll = partialRoll.Keeping("4d3k2");
             Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("9266k(4d3k2)"));
+        }
+
+        [Test]
+        public void AddKeepingPartialRolloRollWithNumericQuantity()
+        {
+            BuildPartialRoll(9266);
+            var otherPartialRoll = new DomainPartialRoll(42, mockRandom.Object, mockExpressionEvaluator.Object);
+            otherPartialRoll.d(600);
+
+            partialRoll = partialRoll.Keeping(otherPartialRoll);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("9266k(42d600)"));
         }
 
         [Test]
@@ -196,9 +218,43 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
                 .Keeping("7d6k5")
                 .d("4d3k2")
                 .Explode()
-                .Keeping(42);
+                .Keeping(42)
+                .Plus(600)
+                .Minus(1337)
+                .Times(1336)
+                .DividedBy(96)
+                .Modulos(783)
+                .Plus("82d45")
+                .Minus("12d34")
+                .Times("23d45")
+                .DividedBy("34d56")
+                .Modulos("45d67");
 
-            var expected = "9266d2d3d4d6d8d10d12d20d100d90210k(7d6k5)d(4d3k2)!k42";
+            var expected = "9266";
+            expected += "d2";
+            expected += "d3";
+            expected += "d4";
+            expected += "d6";
+            expected += "d8";
+            expected += "d10";
+            expected += "d12";
+            expected += "d20";
+            expected += "d100";
+            expected += "d90210";
+            expected += "k(7d6k5)";
+            expected += "d(4d3k2)";
+            expected += "!";
+            expected += "k42";
+            expected += "+600";
+            expected += "-1337";
+            expected += "*1336";
+            expected += "/96";
+            expected += "%783";
+            expected += "+(82d45)";
+            expected += "-(12d34)";
+            expected += "*(23d45)";
+            expected += "/(34d56)";
+            expected += "%(45d67)";
             Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo(expected));
         }
 
@@ -291,6 +347,17 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
+        public void AddDiePartialRollToRollWithQuantityExpression()
+        {
+            BuildPartialRoll("7d6k5");
+            var otherPartialRoll = new DomainPartialRoll(42, mockRandom.Object, mockExpressionEvaluator.Object);
+            otherPartialRoll.d(600);
+
+            partialRoll = partialRoll.d(otherPartialRoll);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("(7d6k5)d(42d600)"));
+        }
+
+        [Test]
         public void AddNumericKeepingToRollWithQuantityExpression()
         {
             BuildPartialRoll("7d6k5");
@@ -304,6 +371,17 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             BuildPartialRoll("7d6k5");
             partialRoll = partialRoll.Keeping("4d3k2");
             Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("(7d6k5)k(4d3k2)"));
+        }
+
+        [Test]
+        public void AddKeepingPartialRollToRollQuantityExpression()
+        {
+            BuildPartialRoll("7d6k5");
+            var otherPartialRoll = new DomainPartialRoll(42, mockRandom.Object, mockExpressionEvaluator.Object);
+            otherPartialRoll.d(600);
+
+            partialRoll = partialRoll.Keeping(otherPartialRoll);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("(7d6k5)k(42d600)"));
         }
 
         [Test]
@@ -332,9 +410,43 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
                 .Keeping("11d10k9")
                 .d("4d3k2")
                 .Explode()
-                .Keeping(42);
+                .Keeping(42)
+                .Plus(600)
+                .Minus(1337)
+                .Times(1336)
+                .DividedBy(96)
+                .Modulos(783)
+                .Plus("82d45")
+                .Minus("12d34")
+                .Times("23d45")
+                .DividedBy("34d56")
+                .Modulos("45d67");
 
-            var expected = "(7d6k5)d2d3d4d6d8d10d12d20d100d90210k(11d10k9)d(4d3k2)!k42";
+            var expected = "(7d6k5)";
+            expected += "d2";
+            expected += "d3";
+            expected += "d4";
+            expected += "d6";
+            expected += "d8";
+            expected += "d10";
+            expected += "d12";
+            expected += "d20";
+            expected += "d100";
+            expected += "d90210";
+            expected += "k(11d10k9)";
+            expected += "d(4d3k2)";
+            expected += "!";
+            expected += "k42";
+            expected += "+600";
+            expected += "-1337";
+            expected += "*1336";
+            expected += "/96";
+            expected += "%783";
+            expected += "+(82d45)";
+            expected += "-(12d34)";
+            expected += "*(23d45)";
+            expected += "/(34d56)";
+            expected += "%(45d67)";
             Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo(expected));
         }
 
@@ -2281,6 +2393,316 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             BuildPartialRoll("5*((1d2) + 1");
             Assert.That(() => partialRoll.AsSum(),
                 Throws.InvalidOperationException.With.Message.EqualTo($"No closing paranthesis found for expression '(5*((1d2) + 1)'"));
+        }
+
+        [TestCase(42)]
+        [TestCase(13.37)]
+        [TestCase(1336L)]
+        public void PlusAddsValueToValue(double value)
+        {
+            BuildPartialRoll(9266);
+
+            partialRoll.Plus(value);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo($"9266+{value}"));
+        }
+
+        [TestCase(42)]
+        [TestCase(13.37)]
+        [TestCase(1336L)]
+        public void PlusAddsValueToExpression(double value)
+        {
+            BuildPartialRoll("9266d90210");
+
+            partialRoll.Plus(value);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo($"(9266d90210)+{value}"));
+        }
+
+        [Test]
+        public void PlusAddsExpressionToValue()
+        {
+            BuildPartialRoll(9266);
+
+            partialRoll.Plus("42d600");
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo($"9266+(42d600)"));
+        }
+
+        [Test]
+        public void PlusAddsExpressionToExpression()
+        {
+            BuildPartialRoll("9266d90210");
+
+            partialRoll.Plus("42d600");
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo($"(9266d90210)+(42d600)"));
+        }
+
+        [Test]
+        public void PlusAddsOtherPartialRollToValue()
+        {
+            BuildPartialRoll(9266);
+            var otherPartialRoll = new DomainPartialRoll(90210, mockRandom.Object, mockExpressionEvaluator.Object);
+            otherPartialRoll.d(42);
+
+            partialRoll.Plus(otherPartialRoll);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo($"9266+(90210d42)"));
+        }
+
+        [Test]
+        public void PlusAddsOtherPartialRollToExpression()
+        {
+            BuildPartialRoll("9266d90210");
+            var otherPartialRoll = new DomainPartialRoll(42, mockRandom.Object, mockExpressionEvaluator.Object);
+            otherPartialRoll.d(600);
+
+            partialRoll.Plus(otherPartialRoll);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo($"(9266d90210)+(42d600)"));
+        }
+
+        [TestCase(42)]
+        [TestCase(13.37)]
+        [TestCase(1336L)]
+        public void MinusAddsValueToValue(double value)
+        {
+            BuildPartialRoll(9266);
+
+            partialRoll.Minus(value);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo($"9266-{value}"));
+        }
+
+        [TestCase(42)]
+        [TestCase(13.37)]
+        [TestCase(1336L)]
+        public void MinusAddsValueToExpression(double value)
+        {
+            BuildPartialRoll("9266d90210");
+
+            partialRoll.Minus(value);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo($"(9266d90210)-{value}"));
+        }
+
+        [Test]
+        public void MinusAddsExpressionToValue()
+        {
+            BuildPartialRoll(9266);
+
+            partialRoll.Minus("42d600");
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo($"9266-(42d600)"));
+        }
+
+        [Test]
+        public void MinusAddsExpressionToExpression()
+        {
+            BuildPartialRoll("9266d90210");
+
+            partialRoll.Minus("42d600");
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo($"(9266d90210)-(42d600)"));
+        }
+
+        [Test]
+        public void MinusAddsOtherPartialRollToValue()
+        {
+            BuildPartialRoll(9266);
+            var otherPartialRoll = new DomainPartialRoll(90210, mockRandom.Object, mockExpressionEvaluator.Object);
+            otherPartialRoll.d(42);
+
+            partialRoll.Minus(otherPartialRoll);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo($"9266-(90210d42)"));
+        }
+
+        [Test]
+        public void MinusAddsOtherPartialRollToExpression()
+        {
+            BuildPartialRoll("9266d90210");
+            var otherPartialRoll = new DomainPartialRoll(42, mockRandom.Object, mockExpressionEvaluator.Object);
+            otherPartialRoll.d(600);
+
+            partialRoll.Minus(otherPartialRoll);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo($"(9266d90210)-(42d600)"));
+        }
+
+        [TestCase(42)]
+        [TestCase(13.37)]
+        [TestCase(1336L)]
+        public void TimesAddsValueToValue(double value)
+        {
+            BuildPartialRoll(9266);
+
+            partialRoll.Times(value);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo($"9266*{value}"));
+        }
+
+        [TestCase(42)]
+        [TestCase(13.37)]
+        [TestCase(1336L)]
+        public void TimesAddsValueToExpression(double value)
+        {
+            BuildPartialRoll("9266d90210");
+
+            partialRoll.Times(value);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo($"(9266d90210)*{value}"));
+        }
+
+        [Test]
+        public void TimesAddsExpressionToValue()
+        {
+            BuildPartialRoll(9266);
+
+            partialRoll.Times("42d600");
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo($"9266*(42d600)"));
+        }
+
+        [Test]
+        public void TimesAddsExpressionToExpression()
+        {
+            BuildPartialRoll("9266d90210");
+
+            partialRoll.Times("42d600");
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo($"(9266d90210)*(42d600)"));
+        }
+
+        [Test]
+        public void TimesAddsOtherPartialRollToValue()
+        {
+            BuildPartialRoll(9266);
+            var otherPartialRoll = new DomainPartialRoll(90210, mockRandom.Object, mockExpressionEvaluator.Object);
+            otherPartialRoll.d(42);
+
+            partialRoll.Times(otherPartialRoll);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo($"9266*(90210d42)"));
+        }
+
+        [Test]
+        public void TimesAddsOtherPartialRollToExpression()
+        {
+            BuildPartialRoll("9266d90210");
+            var otherPartialRoll = new DomainPartialRoll(42, mockRandom.Object, mockExpressionEvaluator.Object);
+            otherPartialRoll.d(600);
+
+            partialRoll.Times(otherPartialRoll);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo($"(9266d90210)*(42d600)"));
+        }
+
+        [TestCase(42)]
+        [TestCase(13.37)]
+        [TestCase(1336L)]
+        public void DividedByAddsValueToValue(double value)
+        {
+            BuildPartialRoll(9266);
+
+            partialRoll.DividedBy(value);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo($"9266/{value}"));
+        }
+
+        [TestCase(42)]
+        [TestCase(13.37)]
+        [TestCase(1336L)]
+        public void DividedByAddsValueToExpression(double value)
+        {
+            BuildPartialRoll("9266d90210");
+
+            partialRoll.DividedBy(value);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo($"(9266d90210)/{value}"));
+        }
+
+        [Test]
+        public void DividedByAddsExpressionToValue()
+        {
+            BuildPartialRoll(9266);
+
+            partialRoll.DividedBy("42d600");
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo($"9266/(42d600)"));
+        }
+
+        [Test]
+        public void DividedByAddsExpressionToExpression()
+        {
+            BuildPartialRoll("9266d90210");
+
+            partialRoll.DividedBy("42d600");
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo($"(9266d90210)/(42d600)"));
+        }
+
+        [Test]
+        public void DividedByAddsOtherPartialRollToValue()
+        {
+            BuildPartialRoll(9266);
+            var otherPartialRoll = new DomainPartialRoll(90210, mockRandom.Object, mockExpressionEvaluator.Object);
+            otherPartialRoll.d(42);
+
+            partialRoll.DividedBy(otherPartialRoll);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo($"9266/(90210d42)"));
+        }
+
+        [Test]
+        public void DividedByAddsOtherPartialRollToExpression()
+        {
+            BuildPartialRoll("9266d90210");
+            var otherPartialRoll = new DomainPartialRoll(42, mockRandom.Object, mockExpressionEvaluator.Object);
+            otherPartialRoll.d(600);
+
+            partialRoll.DividedBy(otherPartialRoll);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo($"(9266d90210)/(42d600)"));
+        }
+
+        [TestCase(42)]
+        [TestCase(13.37)]
+        [TestCase(1336L)]
+        public void ModulosAddsValueToValue(double value)
+        {
+            BuildPartialRoll(9266);
+
+            partialRoll.Modulos(value);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo($"9266%{value}"));
+        }
+
+        [TestCase(42)]
+        [TestCase(13.37)]
+        [TestCase(1336L)]
+        public void ModulosAddsValueToExpression(double value)
+        {
+            BuildPartialRoll("9266d90210");
+
+            partialRoll.Modulos(value);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo($"(9266d90210)%{value}"));
+        }
+
+        [Test]
+        public void ModulosAddsExpressionToValue()
+        {
+            BuildPartialRoll(9266);
+
+            partialRoll.Modulos("42d600");
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo($"9266%(42d600)"));
+        }
+
+        [Test]
+        public void ModulosAddsExpressionToExpression()
+        {
+            BuildPartialRoll("9266d90210");
+
+            partialRoll.Modulos("42d600");
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo($"(9266d90210)%(42d600)"));
+        }
+
+        [Test]
+        public void ModulosAddsOtherPartialRollToValue()
+        {
+            BuildPartialRoll(9266);
+            var otherPartialRoll = new DomainPartialRoll(90210, mockRandom.Object, mockExpressionEvaluator.Object);
+            otherPartialRoll.d(42);
+
+            partialRoll.Modulos(otherPartialRoll);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo($"9266%(90210d42)"));
+        }
+
+        [Test]
+        public void ModulosAddsOtherPartialRollToExpression()
+        {
+            BuildPartialRoll("9266d90210");
+            var otherPartialRoll = new DomainPartialRoll(42, mockRandom.Object, mockExpressionEvaluator.Object);
+            otherPartialRoll.d(600);
+
+            partialRoll.Modulos(otherPartialRoll);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo($"(9266d90210)%(42d600)"));
         }
     }
 }

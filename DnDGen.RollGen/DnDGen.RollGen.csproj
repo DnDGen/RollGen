@@ -14,7 +14,8 @@
     <PackageIcon>18531-twenty-sided-dice-vector-thumb.png</PackageIcon>
     <PackageIconUrl />
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageReleaseNotes>Refine Roll Helper</PackageReleaseNotes>
+    <PackageReleaseNotes>Refine Roll Helper
+Feature #49</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
