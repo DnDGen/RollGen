@@ -14,5 +14,7 @@
         {
             return Build();
         }
+
+        public int Range => Die * Quantity - Quantity + 1;
     }
 }
