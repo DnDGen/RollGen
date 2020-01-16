@@ -68,18 +68,14 @@ namespace DnDGen.RollGen
             if (!Matches(lower, upper))
                 return int.MaxValue;
 
+            var rank = 0;
             if (!Rolls.Any())
-                return 0;
+                return rank;
 
-            var rank = 1; //So the rank is higher than a constant
-
-            if (Rolls.Count == 1 && Rolls[0].Die == 2)
-            {
-                rank += 100_000_000;
-            }
-
-            rank += (Rolls.Count - 1) * 100_000;
-            rank += (Quantities - 1) * 1_000;
+            rank += Rolls.Count(r => r.Quantity > 100) * 100_000_000;
+            rank += Rolls.Count(r => r.Die * 5 < r.Quantity) * 100_000_000;
+            rank += Rolls.Count * 100_000;
+            rank += Quantities * 1_000;
             rank += StandardDice.Max() - Rolls.Max(r => r.Die);
 
             return rank;

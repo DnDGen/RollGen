@@ -200,9 +200,9 @@ namespace DnDGen.RollGen.Tests.Unit
             Assert.That(ranking, Is.EqualTo(int.MaxValue));
         }
 
-        [TestCase(1, 1)]
-        [TestCase(2, 1001)]
-        [TestCase(3, 2001)]
+        [TestCase(1, 100_000 + 1000)]
+        [TestCase(2, 100_000 + 1000 * 2)]
+        [TestCase(3, 100_000 + 1000 * 3)]
         public void RankingForOneRollInRange(int quantity, int expectedRanking)
         {
             collection.Adjustment = 9266;
@@ -310,15 +310,15 @@ namespace DnDGen.RollGen.Tests.Unit
             Assert.That(ranking, Is.EqualTo(int.MaxValue));
         }
 
-        [TestCase(1, 1, 100_000 + 1_000 + 1)]
-        [TestCase(2, 1, 100_000 + 2_000 + 1)]
-        [TestCase(3, 1, 100_000 + 3_000 + 1)]
-        [TestCase(1, 2, 100_000 + 2_000 + 1)]
-        [TestCase(2, 2, 100_000 + 3_000 + 1)]
-        [TestCase(3, 2, 100_000 + 4_000 + 1)]
-        [TestCase(1, 3, 100_000 + 3_000 + 1)]
-        [TestCase(2, 3, 100_000 + 4_000 + 1)]
-        [TestCase(3, 3, 100_000 + 5_000 + 1)]
+        [TestCase(1, 1, 100_000 * 2 + 1_000 * 2)]
+        [TestCase(2, 1, 100_000 * 2 + 1_000 * 3)]
+        [TestCase(3, 1, 100_000 * 2 + 1_000 * 4)]
+        [TestCase(1, 2, 100_000 * 2 + 1_000 * 3)]
+        [TestCase(2, 2, 100_000 * 2 + 1_000 * 4)]
+        [TestCase(3, 2, 100_000 * 2 + 1_000 * 5)]
+        [TestCase(1, 3, 100_000 * 2 + 1_000 * 4)]
+        [TestCase(2, 3, 100_000 * 2 + 1_000 * 5)]
+        [TestCase(3, 3, 100_000 * 2 + 1_000 * 6)]
         public void RankingForMultipleRollsInRange(int quantity1, int quantity2, int expectedRanking)
         {
             collection.Adjustment = 9266;
@@ -592,8 +592,8 @@ namespace DnDGen.RollGen.Tests.Unit
             Assert.That(ranking, Is.EqualTo(int.MaxValue));
         }
 
-        [TestCase(1, 8, 1, 2, -1, 100_000 + 1_000 + 92 + 1)]
-        [TestCase(1, 6, 1, 4, -1, 100_000 + 1_000 + 94 + 1)]
+        [TestCase(1, 8, 1, 2, -1, 100_000 * 2 + 1_000 * 2 + 92)]
+        [TestCase(1, 6, 1, 4, -1, 100_000 * 2 + 1_000 * 2 + 94)]
         public void RankingForMultipleRollsInRangeWithDifferentDice(int q1, int d1, int q2, int d2, int adjustment, int expectedRanking)
         {
             collection.Adjustment = adjustment;
@@ -618,14 +618,15 @@ namespace DnDGen.RollGen.Tests.Unit
             Assert.That(ranking, Is.EqualTo(expectedRanking));
         }
 
-        [TestCase(3, 98)]
-        [TestCase(4, 97)]
-        [TestCase(6, 95)]
-        [TestCase(8, 93)]
-        [TestCase(10, 91)]
-        [TestCase(12, 89)]
-        [TestCase(20, 81)]
-        [TestCase(100, 1)]
+        [TestCase(2, 100_000 + 1000 + 98)]
+        [TestCase(3, 100_000 + 1000 + 97)]
+        [TestCase(4, 100_000 + 1000 + 96)]
+        [TestCase(6, 100_000 + 1000 + 94)]
+        [TestCase(8, 100_000 + 1000 + 92)]
+        [TestCase(10, 100_000 + 1000 + 90)]
+        [TestCase(12, 100_000 + 1000 + 88)]
+        [TestCase(20, 100_000 + 1000 + 80)]
+        [TestCase(100, 100_000 + 1000)]
         public void RankingForRollInRangeWithMaxDice(int die, int expectedRanking)
         {
             var prototype = new RollPrototype
@@ -640,8 +641,8 @@ namespace DnDGen.RollGen.Tests.Unit
             Assert.That(ranking, Is.EqualTo(expectedRanking));
         }
 
-        [TestCase(1000, 10000, 1000, 10, 1_000 * 999 + 90 + 1)]
-        public void ComputeRanking(int lower, int upper, int quantity, int die, int rank)
+        [TestCase(1000, 10000, 1000, 10, 100_000_000 * 2 + 100_000 * 11 + 90)]
+        public void ComputeSingleDieRanking(int lower, int upper, int quantity, int die, int rank)
         {
             var prototype = new RollPrototype
             {
@@ -656,9 +657,9 @@ namespace DnDGen.RollGen.Tests.Unit
             Assert.That(ranking, Is.EqualTo(rank));
         }
 
-        [TestCase(11, 40, 1, 20, 2, 6, 100_000 + 1_000 * 2 + 80 + 1)]
-        [TestCase(11, 40, 2, 12, 1, 8, 100_000 + 1_000 * 2 + 88 + 1)]
-        public void ComputeRanking(int lower, int upper, int q1, int d1, int q2, int d2, int rank)
+        [TestCase(11, 40, 1, 20, 2, 6, 100_000 * 2 + 1_000 * 3 + 80)]
+        [TestCase(11, 40, 2, 12, 1, 8, 100_000 * 2 + 1_000 * 3 + 88)]
+        public void ComputeMultiDieRanking(int lower, int upper, int q1, int d1, int q2, int d2, int rank)
         {
             var p1 = new RollPrototype
             {
@@ -679,19 +680,57 @@ namespace DnDGen.RollGen.Tests.Unit
             Assert.That(ranking, Is.EqualTo(rank));
         }
 
-        [Test]
-        public void RankingForRollInRangeOnlyD2()
+        [TestCase(101, 2, 100_000_000 * 2 + 100_000 + 1000 * 101 + 98)]
+        [TestCase(11, 2, 100_000_000 + 100_000 + 1000 * 11 + 98)]
+        [TestCase(101, 3, 100_000_000 * 2 + 100_000 + 1000 * 101 + 97)]
+        [TestCase(16, 3, 100_000_000 + 100_000 + 1000 * 16 + 97)]
+        [TestCase(101, 4, 100_000_000 * 2 + 100_000 + 1000 * 101 + 96)]
+        [TestCase(21, 4, 100_000_000 + 100_000 + 1000 * 21 + 96)]
+        [TestCase(101, 6, 100_000_000 * 2 + 100_000 + 1000 * 101 + 94)]
+        [TestCase(31, 6, 100_000_000 + 100_000 + 1000 * 31 + 94)]
+        [TestCase(101, 8, 100_000_000 * 2 + 100_000 + 1000 * 101 + 92)]
+        [TestCase(41, 8, 100_000_000 + 100_000 + 1000 * 41 + 92)]
+        [TestCase(101, 10, 100_000_000 * 2 + 100_000 + 1000 * 101 + 90)]
+        [TestCase(51, 10, 100_000_000 + 100_000 + 1000 * 51 + 90)]
+        [TestCase(101, 12, 100_000_000 * 2 + 100_000 + 1000 * 101 + 88)]
+        [TestCase(61, 12, 100_000_000 + 100_000 + 1000 * 61 + 88)]
+        [TestCase(101, 20, 100_000_000 * 2 + 100_000 + 1000 * 101 + 80)]
+        [TestCase(101, 100, 100_000_000 + 100_000 + 1000 * 101)]
+        [TestCase(501, 100, 100_000_000 * 2 + 100_000 + 1000 * 501)]
+        public void RankingForRollInRangeWithExcessivelyHighQuantity(int quantity, int die, int rank)
         {
             var prototype = new RollPrototype
             {
-                Quantity = 1,
-                Die = 2
+                Quantity = quantity,
+                Die = die
             };
 
             collection.Rolls.Add(prototype);
 
-            var ranking = collection.GetRanking(1, 2);
-            Assert.That(ranking, Is.EqualTo(100_000_099));
+            var ranking = collection.GetRanking(quantity, quantity * die);
+            Assert.That(ranking, Is.EqualTo(rank));
+        }
+
+        [Test]
+        public void RankingForRollInRangeWithExcessivelyHighQuantity_MultipleRolls()
+        {
+            var prototype = new RollPrototype
+            {
+                Quantity = 101,
+                Die = 100
+            };
+
+            var otherPrototype = new RollPrototype
+            {
+                Quantity = 50,
+                Die = 2
+            };
+
+            collection.Rolls.Add(prototype);
+            collection.Rolls.Add(otherPrototype);
+
+            var ranking = collection.GetRanking(151, 10200);
+            Assert.That(ranking, Is.EqualTo(100_000_000 * 2 + 100_000 * 2 + 1000 * 151));
         }
 
         [Test]
