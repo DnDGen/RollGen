@@ -297,5 +297,65 @@ namespace DnDGen.RollGen.PartialRolls
             source = source.Insert(index, replacement);
             return source;
         }
+
+        public override PartialRoll Plus(string expression)
+        {
+            CurrentRollExpression += $"+({expression})";
+            return this;
+        }
+
+        public override PartialRoll Plus(double value)
+        {
+            CurrentRollExpression += $"+{value}";
+            return this;
+        }
+
+        public override PartialRoll Minus(string expression)
+        {
+            CurrentRollExpression += $"-({expression})";
+            return this;
+        }
+
+        public override PartialRoll Minus(double value)
+        {
+            CurrentRollExpression += $"-{value}";
+            return this;
+        }
+
+        public override PartialRoll Times(string expression)
+        {
+            CurrentRollExpression += $"*({expression})";
+            return this;
+        }
+
+        public override PartialRoll Times(double value)
+        {
+            CurrentRollExpression += $"*{value}";
+            return this;
+        }
+
+        public override PartialRoll DividedBy(string expression)
+        {
+            CurrentRollExpression += $"/({expression})";
+            return this;
+        }
+
+        public override PartialRoll DividedBy(double value)
+        {
+            CurrentRollExpression += $"/{value}";
+            return this;
+        }
+
+        public override PartialRoll Modulos(string expression)
+        {
+            CurrentRollExpression += $"%({expression})";
+            return this;
+        }
+
+        public override PartialRoll Modulos(double value)
+        {
+            CurrentRollExpression += $"%{value}";
+            return this;
+        }
     }
 }
