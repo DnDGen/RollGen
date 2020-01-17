@@ -2,8 +2,7 @@
 {
     public static class Limits
     {
-        public const int Quantity = 16500000; //2^24
-        public const int ProductOfQuantityAndDie = int.MaxValue;
-        public const int Die = int.MaxValue;
+        public const int Quantity = 10_000;
+        public const int Die = 10_000;
     }
 }

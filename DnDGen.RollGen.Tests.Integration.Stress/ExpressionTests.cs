@@ -79,21 +79,19 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
             Assert.That(max, Is.EqualTo(upper));
         }
 
-        [TestCase("1+2-(3*4/5)%6", 1, 1)]
-        [TestCase("1d2+3", 4, 5)]
-        [TestCase("1d2+3d4", 4, 14)]
-        [TestCase("7d6k5", 5, 30)]
-        [TestCase("7d8!", 7, 560)]
-        public void RollExpressionAsAverage(string expression, int lower, int upper)
+        [TestCase("1+2-(3*4/5)%6", 1 + 2 - (3 * 4 / 5d) % 6)]
+        [TestCase("1d2+3", 4.5)]
+        [TestCase("1d2+3d4", 9)]
+        [TestCase("7d6k5", 17.5)]
+        [TestCase("7d8!", 31.5)]
+        public void RollExpressionAsAverage(string expression, double average)
         {
-            stressor.Stress(() => AssertExpressionAsAverage(expression, lower, upper));
+            stressor.Stress(() => AssertExpressionAsAverage(expression, average));
         }
 
-        private void AssertExpressionAsAverage(string expression, int lower, int upper)
+        private void AssertExpressionAsAverage(string expression, double average)
         {
             var roll = Dice.Roll(expression).AsPotentialAverage();
-            var average = (lower + upper) / 2d;
-
             Assert.That(roll, Is.EqualTo(average));
         }
 

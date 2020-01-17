@@ -56,8 +56,8 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 
         private void AssertRollAsSum()
         {
-            var quantity = Random.Next(QuantityLimit) + 1;
-            var die = Random.Next(DieLimit) + 1;
+            var quantity = Random.Next(Limits.Quantity) + 1;
+            var die = Random.Next(Limits.Die) + 1;
 
             var roll = GetRoll(quantity, die);
             Assert.That(roll.AsSum(), Is.InRange(quantity, quantity * die));
@@ -65,8 +65,8 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 
         private void AssertRollAsIndividualRolls()
         {
-            var quantity = Random.Next(QuantityLimit) + 1;
-            var die = Random.Next(DieLimit) + 1;
+            var quantity = Random.Next(Limits.Quantity) + 1;
+            var die = Random.Next(Limits.Die) + 1;
 
             var roll = GetRoll(quantity, die);
             var rolls = roll.AsIndividualRolls();
@@ -77,8 +77,8 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 
         private void AssertRollAsAverage()
         {
-            var quantity = Random.Next(QuantityLimit) + 1;
-            var die = Random.Next(DieLimit) + 1;
+            var quantity = Random.Next(Limits.Quantity) + 1;
+            var die = Random.Next(Limits.Die) + 1;
 
             var roll = GetRoll(quantity, die);
             var average = quantity * (die + 1) / 2.0d;
@@ -87,8 +87,8 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 
         private void AssertRollAsMinimum()
         {
-            var quantity = Random.Next(QuantityLimit) + 1;
-            var die = Random.Next(DieLimit) + 1;
+            var quantity = Random.Next(Limits.Quantity) + 1;
+            var die = Random.Next(Limits.Die) + 1;
 
             var roll = GetRoll(quantity, die);
             Assert.That(roll.AsPotentialMinimum(), Is.EqualTo(quantity));
@@ -96,8 +96,8 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 
         private void AssertRollAsMaximum()
         {
-            var quantity = Random.Next(QuantityLimit) + 1;
-            var die = Random.Next(DieLimit) + 1;
+            var quantity = Random.Next(Limits.Quantity) + 1;
+            var die = Random.Next(Limits.Die) + 1;
 
             var roll = GetRoll(quantity, die);
             Assert.That(roll.AsPotentialMaximum(), Is.EqualTo(die * quantity));
@@ -105,8 +105,8 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 
         protected void AssertRollAsTrueOrFalse()
         {
-            var quantity = Random.Next(QuantityLimit) + 1;
-            var die = Random.Next(DieLimit) + 1;
+            var quantity = Random.Next(Limits.Quantity) + 1;
+            var die = Random.Next(Limits.Die) + 1;
 
             var percentageThreshold = Random.NextDouble();
             var rollThreshold = Random.Next(quantity * die) + 1;

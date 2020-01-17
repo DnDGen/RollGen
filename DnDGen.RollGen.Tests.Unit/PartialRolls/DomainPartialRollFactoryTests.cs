@@ -69,12 +69,12 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         [Test]
         public void UseSameInstanceOfRandomForAllPartialRollsBasedOnExpression()
         {
-            mockRandom.SetupSequence(r => r.Next(90210))
+            mockRandom.SetupSequence(r => r.Next(1336))
                 .Returns(1337)
                 .Returns(600);
 
-            var firstPartialRoll = partialRollFactory.Build("1d90210");
-            var secondPartialRoll = partialRollFactory.Build("1d90210");
+            var firstPartialRoll = partialRollFactory.Build("1d1336");
+            var secondPartialRoll = partialRollFactory.Build("1d1336");
 
             var firstRoll = firstPartialRoll.AsSum();
             var secondRoll = secondPartialRoll.AsSum();

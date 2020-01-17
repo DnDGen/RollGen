@@ -21,8 +21,8 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 
         private void AssertKeep()
         {
-            var quantity = Random.Next(QuantityLimit) + 1;
-            var die = Random.Next(DieLimit) + 1;
+            var quantity = Random.Next(Limits.Quantity - 1) + 2;
+            var die = Random.Next(Limits.Die) + 1;
             var keep = Random.Next(quantity - 1) + 1;
 
             var rolls = Dice.Roll(quantity).d(die).Keeping(keep).AsIndividualRolls();

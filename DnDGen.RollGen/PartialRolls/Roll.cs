@@ -13,19 +13,11 @@ namespace DnDGen.RollGen.PartialRolls
         public int AmountToKeep { get; set; }
         public bool Explode { get; set; }
 
-        public bool IsValid
-        {
-            get
-            {
-                return Quantity > 0
-                    && Die > 0
-                    && AmountToKeep > -1
-                    && Quantity <= Limits.Quantity
-                    && Die <= Limits.Die
-                    && Die * (long)Quantity <= Limits.ProductOfQuantityAndDie
-                    && (!Explode || Die > 1);
-            }
-        }
+        public bool IsValid => QuantityValid && DieValid && KeepValid && ExplodeValid;
+        private bool QuantityValid => Quantity > 0 && Quantity <= Limits.Quantity;
+        private bool DieValid => Die > 0 && Die <= Limits.Die;
+        private bool KeepValid => AmountToKeep > -1 && AmountToKeep <= Limits.Quantity;
+        private bool ExplodeValid => !Explode || Die > 1;
 
         public Roll() { }
 
@@ -83,8 +75,24 @@ namespace DnDGen.RollGen.PartialRolls
 
         private void ValidateRoll()
         {
-            if (!IsValid)
-                throw new InvalidOperationException($"{this} is not a valid roll.  It might be too large for RollGen or involve values that are too low.");
+            if (IsValid)
+                return;
+
+            var message = $"{this} is not a valid roll.";
+
+            if (!QuantityValid)
+                message += $"\n\tQuantity: 0 < {Quantity} < {Limits.Quantity}";
+
+            if (!DieValid)
+                message += $"\n\tDie: 0 < {Die} < {Limits.Die}";
+
+            if (!KeepValid)
+                message += $"\n\tKeep: 0 <= {AmountToKeep} < {Limits.Quantity}";
+
+            if (!ExplodeValid)
+                message += $"\n\tExplode: Cannot explode die {Die}, must be > 1";
+
+            throw new InvalidOperationException(message);
         }
 
         public int GetSum(Random random)
@@ -154,7 +162,7 @@ namespace DnDGen.RollGen.PartialRolls
             if (Explode)
                 output += "!";
 
-            if (AmountToKeep > 0)
+            if (AmountToKeep != 0)
                 output += $"k{AmountToKeep}";
 
             return output;

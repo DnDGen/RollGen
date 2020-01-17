@@ -20,15 +20,15 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 
         private void AssertPlus()
         {
-            var quantity = Random.Next(QuantityLimit) + 1;
-            var die = Random.Next(DieLimit) + 1;
-            var plus = Random.Next();
+            var quantity = Random.Next(Limits.Quantity) + 1;
+            var die = Random.Next(Limits.Die) + 1;
+            var plus = Random.Next(int.MaxValue - quantity * die);
 
-            var roll = Dice.Roll(quantity).d(die).Plus(plus).AsSum();
+            var roll = Dice.Roll(quantity).d(die).Plus(plus);
             var min = quantity + plus;
             var max = quantity * die + plus;
 
-            Assert.That(roll, Is.InRange(min, max));
+            Assert.That(roll.AsSum(), Is.InRange(min, max), roll.ToString());
         }
 
         [Test]
@@ -39,8 +39,8 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 
         private void AssertMinus()
         {
-            var quantity = Random.Next(QuantityLimit) + 1;
-            var die = Random.Next(DieLimit) + 1;
+            var quantity = Random.Next(Limits.Quantity) + 1;
+            var die = Random.Next(Limits.Die) + 1;
             var minus = Random.Next();
 
             var roll = Dice.Roll(quantity).d(die).Minus(minus).AsSum();
@@ -58,15 +58,15 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 
         private void AssertTimes()
         {
-            var quantity = Random.Next(QuantityLimit) + 1;
-            var die = Random.Next(DieLimit) + 1;
-            var times = Random.Next(10_000);
+            var quantity = Random.Next(Limits.Quantity) + 1;
+            var die = Random.Next(Limits.Die) + 1;
+            var times = Random.Next(int.MaxValue / quantity / die);
 
-            var roll = Dice.Roll(quantity).d(die).Times(times).AsSum();
+            var roll = Dice.Roll(quantity).d(die).Times(times);
             var min = quantity * times;
             var max = quantity * die * times;
 
-            Assert.That(roll, Is.InRange(min, max));
+            Assert.That(roll.AsSum(), Is.InRange(min, max), roll.ToString());
         }
 
         [Test]
@@ -77,15 +77,15 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 
         private void AssertDividedBy()
         {
-            var quantity = Random.Next(QuantityLimit) + 1;
-            var die = Random.Next(DieLimit) + 1;
+            var quantity = Random.Next(Limits.Quantity) + 1;
+            var die = Random.Next(Limits.Die) + 1;
             var divisor = Random.Next();
 
-            var roll = Dice.Roll(quantity).d(die).DividedBy(divisor).AsSum();
+            var roll = Dice.Roll(quantity).d(die).DividedBy(divisor);
             var min = quantity / divisor;
             var max = quantity * die / divisor;
 
-            Assert.That(roll, Is.InRange(min, max));
+            Assert.That(roll.AsSum(), Is.InRange(min, max), roll.ToString());
         }
 
         [Test]
@@ -96,8 +96,8 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 
         private void AssertModulos()
         {
-            var quantity = Random.Next(QuantityLimit) + 1;
-            var die = Random.Next(DieLimit) + 1;
+            var quantity = Random.Next(Limits.Quantity) + 1;
+            var die = Random.Next(Limits.Die) + 1;
             var mod = Random.Next();
 
             var roll = Dice.Roll(quantity).d(die).Modulos(mod).AsSum();

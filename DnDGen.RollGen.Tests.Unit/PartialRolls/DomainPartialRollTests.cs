@@ -469,9 +469,9 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         [Test]
         public void ReturnAsSumFromNumericQuantity_2Rolls()
         {
-            BuildPartialRoll(9266);
+            BuildPartialRoll(42);
             var sum = partialRoll.d2().d3().AsSum();
-            Assert.That(sum, Is.EqualTo(9266 * 1.5 * 2));
+            Assert.That(sum, Is.EqualTo(126));
         }
 
         [Test]
@@ -520,10 +520,10 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         [Test]
         public void ReturnAsIndividualRollsFromNumericQuantity_2Rolls()
         {
-            BuildPartialRoll(9266);
+            BuildPartialRoll(42);
             var rolls = partialRoll.d2().d3().AsIndividualRolls();
             Assert.That(rolls.Count(), Is.EqualTo(1));
-            Assert.That(rolls.Single(), Is.EqualTo(9266 * 1.5 * 2));
+            Assert.That(rolls.Single(), Is.EqualTo(126));
         }
 
         [Test]
@@ -711,9 +711,9 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         [Test]
         public void ReturnAsMaximumFromNumericQuantity_2Rolls()
         {
-            BuildPartialRoll(9266);
+            BuildPartialRoll(96);
             var average = partialRoll.d(42).d(600).AsPotentialMaximum();
-            Assert.That(average, Is.EqualTo(9266 * 42 * 600));
+            Assert.That(average, Is.EqualTo(96 * 42 * 600));
         }
 
         [Test]
@@ -2250,26 +2250,26 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         [Test]
         public void ReturnNumericKeepingWithNumericQuantity()
         {
-            BuildPartialRoll(9266);
+            BuildPartialRoll(66);
 
-            var keptRolls = partialRoll.d(90210).Keeping(42).AsIndividualRolls();
+            var keptRolls = partialRoll.d(600).Keeping(42).AsIndividualRolls();
+            var expectedRolls = Enumerable.Range(66 - 41, 42);
 
             Assert.That(keptRolls.Count, Is.EqualTo(42));
-            for (var roll = 9266; roll > 9266 - 42; roll--)
-                Assert.That(keptRolls, Contains.Item(roll));
+            Assert.That(keptRolls, Is.EquivalentTo(expectedRolls));
         }
 
         [Test]
         public void ReturnNumericKeepingWithQuantityExpression()
         {
             BuildPartialRoll("quantity expression");
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>("quantity expression")).Returns(9266);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>("quantity expression")).Returns(66);
 
-            var keptRolls = partialRoll.d(90210).Keeping(42).AsIndividualRolls();
-            var expectedRolls = Enumerable.Range(9266 - 41, 42);
+            var keptRolls = partialRoll.d(600).Keeping(42).AsIndividualRolls();
+            var expectedRolls = Enumerable.Range(66 - 41, 42);
 
             Assert.That(keptRolls.Count(), Is.EqualTo(1));
-            Assert.That(keptRolls.Single(), Is.EqualTo(388311).And.EqualTo(expectedRolls.Sum()));
+            Assert.That(keptRolls.Single(), Is.EqualTo(expectedRolls.Sum()));
         }
 
         [Test]
@@ -2277,10 +2277,10 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             BuildPartialRoll(9266);
 
-            var keptRolls = partialRoll.d(90210).Keeping("4d3").AsIndividualRolls();
+            var keptRolls = partialRoll.d(42).Keeping("4d3").AsIndividualRolls();
 
             Assert.That(keptRolls.Count, Is.EqualTo(1));
-            Assert.That(keptRolls.Single(), Is.EqualTo(64869));
+            Assert.That(keptRolls.Single(), Is.EqualTo(42 * 7));
         }
 
         [Test]
@@ -2289,10 +2289,10 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             BuildPartialRoll("quantity expression");
             mockExpressionEvaluator.Setup(e => e.Evaluate<int>("quantity expression")).Returns(9266);
 
-            var keptRolls = partialRoll.d(90210).Keeping("4d3").AsIndividualRolls();
+            var keptRolls = partialRoll.d(42).Keeping("4d3").AsIndividualRolls();
 
             Assert.That(keptRolls.Count(), Is.EqualTo(1));
-            Assert.That(keptRolls.Single(), Is.EqualTo(64869));
+            Assert.That(keptRolls.Single(), Is.EqualTo(42 * 7));
         }
 
         [Test]
@@ -2322,7 +2322,10 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             BuildPartialRoll(1);
             partialRoll.d(1).Explode();
-            Assert.That(() => partialRoll.AsSum(), Throws.InstanceOf<InvalidOperationException>().With.Message.EqualTo("1d1! is not a valid roll.  It might be too large for RollGen or involve values that are too low."));
+
+
+            Assert.That(() => partialRoll.AsSum(),
+                Throws.InstanceOf<InvalidOperationException>().With.Message.EqualTo("1d1! is not a valid roll.\n\tExplode: Cannot explode die 1, must be > 1"));
         }
 
         [TestCase(1, 6, new[] { 1, 666 }, ExpectedResult = 1)] // Single, no Explode
