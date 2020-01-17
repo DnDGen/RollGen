@@ -36,6 +36,11 @@ namespace DnDGen.RollGen
             return partialRollFactory.Build(rollExpression);
         }
 
+        public PartialRoll Roll(PartialRoll roll)
+        {
+            return partialRollFactory.Build(roll.CurrentRollExpression);
+        }
+
         public string ReplaceWrappedExpressions<T>(string source, string expressionOpen = "{", string expressionClose = "}", char? expressionOpenEscape = '\\')
         {
             var pattern = $"{Regex.Escape(expressionOpen)}(.*?){Regex.Escape(expressionClose)}";

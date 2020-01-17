@@ -1,6 +1,8 @@
-﻿using DnDGen.RollGen.PartialRolls;
+﻿using DnDGen.RollGen.Expressions;
+using DnDGen.RollGen.PartialRolls;
 using Moq;
 using NUnit.Framework;
+using System;
 using System.Linq;
 
 namespace DnDGen.RollGen.Tests.Unit
@@ -53,6 +55,19 @@ namespace DnDGen.RollGen.Tests.Unit
             mockPartialRollFactory.Setup(f => f.Build("92d66")).Returns(mockPartialRollWithQuantity.Object);
 
             var partialRoll = dice.Roll("92d66");
+            Assert.That(partialRoll, Is.InstanceOf<PartialRoll>());
+            Assert.That(partialRoll, Is.EqualTo(mockPartialRollWithQuantity.Object));
+        }
+
+        [Test]
+        public void RollAnotherRoll()
+        {
+            var otherRoll = new DomainPartialRoll("92d66", new Mock<Random>().Object, new Mock<ExpressionEvaluator>().Object);
+
+            var mockPartialRollWithQuantity = new Mock<PartialRoll>();
+            mockPartialRollFactory.Setup(f => f.Build("(92d66)")).Returns(mockPartialRollWithQuantity.Object);
+
+            var partialRoll = dice.Roll(otherRoll);
             Assert.That(partialRoll, Is.InstanceOf<PartialRoll>());
             Assert.That(partialRoll, Is.EqualTo(mockPartialRollWithQuantity.Object));
         }

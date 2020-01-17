@@ -1,6 +1,7 @@
 ﻿using Ninject;
 using NUnit.Framework;
 using System;
+using System.Linq;
 
 namespace DnDGen.RollGen.Tests.Integration.Stress
 {
@@ -21,14 +22,29 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
         private void AssertPlus()
         {
             var quantity = Random.Next(Limits.Quantity) + 1;
-            var die = Random.Next(Limits.Die) + 1;
-            var plus = Random.Next(int.MaxValue - quantity * die);
+            var plus = Random.Next(int.MaxValue - quantity) + Random.NextDouble();
+            var percentageThreshold = Random.NextDouble();
+            var rollThreshold = Random.Next(quantity) + 1;
 
-            var roll = Dice.Roll(quantity).d(die).Plus(plus);
-            var min = quantity + plus;
-            var max = quantity * die + plus;
+            var roll = Dice.Roll(quantity).Plus(plus);
 
-            Assert.That(roll.AsSum(), Is.InRange(min, max), roll.ToString());
+            AssertTotal(roll, quantity + plus, percentageThreshold, rollThreshold);
+        }
+
+        private void AssertTotal(PartialRoll roll, double total, double percentageThreshold, int rollThreshold)
+        {
+            Assert.That(roll.AsSum(), Is.EqualTo(total), roll.ToString());
+            Assert.That(roll.AsPotentialMinimum(), Is.EqualTo(total));
+            Assert.That(roll.AsPotentialMaximum(), Is.EqualTo(total));
+            Assert.That(roll.AsPotentialMaximum(true), Is.EqualTo(total * 10));
+            Assert.That(roll.AsPotentialAverage(), Is.EqualTo(total));
+            Assert.That(roll.AsTrueOrFalse(percentageThreshold), Is.False, "Percentage");
+            Assert.That(roll.AsTrueOrFalse(rollThreshold), Is.True, "Roll");
+
+            var rolls = roll.AsIndividualRolls();
+
+            Assert.That(rolls.Count(), Is.EqualTo(1));
+            Assert.That(rolls, Has.All.EqualTo(total));
         }
 
         [Test]
@@ -40,14 +56,13 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
         private void AssertMinus()
         {
             var quantity = Random.Next(Limits.Quantity) + 1;
-            var die = Random.Next(Limits.Die) + 1;
-            var minus = Random.Next();
+            var minus = Random.Next(1_000_000_000) + Random.NextDouble();
+            var percentageThreshold = Random.NextDouble();
+            var rollThreshold = Random.Next(1) + 1;
 
-            var roll = Dice.Roll(quantity).d(die).Minus(minus).AsSum();
-            var min = quantity - minus;
-            var max = quantity * die - minus;
+            var roll = Dice.Roll(quantity).Minus(minus);
 
-            Assert.That(roll, Is.InRange(min, max));
+            AssertTotal(roll, quantity - minus, percentageThreshold, rollThreshold);
         }
 
         [Test]
@@ -59,14 +74,13 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
         private void AssertTimes()
         {
             var quantity = Random.Next(Limits.Quantity) + 1;
-            var die = Random.Next(Limits.Die) + 1;
-            var times = Random.Next(int.MaxValue / quantity / die);
+            var times = Random.Next(int.MaxValue / quantity) + Random.NextDouble();
+            var percentageThreshold = Random.NextDouble();
+            var rollThreshold = Random.Next(quantity) + 1;
 
-            var roll = Dice.Roll(quantity).d(die).Times(times);
-            var min = quantity * times;
-            var max = quantity * die * times;
+            var roll = Dice.Roll(quantity).Times(times);
 
-            Assert.That(roll.AsSum(), Is.InRange(min, max), roll.ToString());
+            AssertTotal(roll, quantity * times, percentageThreshold, rollThreshold);
         }
 
         [Test]
@@ -78,14 +92,13 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
         private void AssertDividedBy()
         {
             var quantity = Random.Next(Limits.Quantity) + 1;
-            var die = Random.Next(Limits.Die) + 1;
-            var divisor = Random.Next();
+            var dividedBy = Random.Next() + Random.NextDouble();
+            var percentageThreshold = Random.NextDouble();
+            var rollThreshold = Random.Next(quantity) + 1;
 
-            var roll = Dice.Roll(quantity).d(die).DividedBy(divisor);
-            var min = quantity / divisor;
-            var max = quantity * die / divisor;
+            var roll = Dice.Roll(quantity).DividedBy(dividedBy);
 
-            Assert.That(roll.AsSum(), Is.InRange(min, max), roll.ToString());
+            AssertTotal(roll, quantity / dividedBy, percentageThreshold, rollThreshold);
         }
 
         [Test]
@@ -97,11 +110,13 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
         private void AssertModulos()
         {
             var quantity = Random.Next(Limits.Quantity) + 1;
-            var die = Random.Next(Limits.Die) + 1;
             var mod = Random.Next();
+            var percentageThreshold = Random.NextDouble();
+            var rollThreshold = Random.Next(mod);
 
-            var roll = Dice.Roll(quantity).d(die).Modulos(mod).AsSum();
-            Assert.That(roll, Is.InRange(0, mod - 1));
+            var roll = Dice.Roll(quantity).Modulos(mod);
+
+            AssertTotal(roll, quantity % mod, percentageThreshold, rollThreshold);
         }
     }
 }
