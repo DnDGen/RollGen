@@ -43,6 +43,12 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
             stressor.Stress(AssertRollAsAverage);
         }
 
+        [Test]
+        public void RollAsTrueOrFalse()
+        {
+            stressor.Stress(AssertRollAsTrueOrFalse);
+        }
+
         private PartialRoll GetRoll(int quantity, int die)
         {
             return Dice.Roll(quantity).d(die);
@@ -50,8 +56,8 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 
         private void AssertRollAsSum()
         {
-            var quantity = Random.Next(1000) + 1;
-            var die = Random.Next(100_000) + 1;
+            var quantity = Random.Next(QuantityLimit) + 1;
+            var die = Random.Next(DieLimit) + 1;
 
             var roll = GetRoll(quantity, die);
             Assert.That(roll.AsSum(), Is.InRange(quantity, quantity * die));
@@ -59,8 +65,8 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 
         private void AssertRollAsIndividualRolls()
         {
-            var quantity = Random.Next(1000) + 1;
-            var die = Random.Next(100_000) + 1;
+            var quantity = Random.Next(QuantityLimit) + 1;
+            var die = Random.Next(DieLimit) + 1;
 
             var roll = GetRoll(quantity, die);
             var rolls = roll.AsIndividualRolls();
@@ -71,8 +77,8 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 
         private void AssertRollAsAverage()
         {
-            var quantity = Random.Next(1000) + 1;
-            var die = Random.Next(100_000) + 1;
+            var quantity = Random.Next(QuantityLimit) + 1;
+            var die = Random.Next(DieLimit) + 1;
 
             var roll = GetRoll(quantity, die);
             var average = quantity * (die + 1) / 2.0d;
@@ -81,8 +87,8 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 
         private void AssertRollAsMinimum()
         {
-            var quantity = Random.Next(1000) + 1;
-            var die = Random.Next(100_000) + 1;
+            var quantity = Random.Next(QuantityLimit) + 1;
+            var die = Random.Next(DieLimit) + 1;
 
             var roll = GetRoll(quantity, die);
             Assert.That(roll.AsPotentialMinimum(), Is.EqualTo(quantity));
@@ -90,24 +96,24 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 
         private void AssertRollAsMaximum()
         {
-            var quantity = Random.Next(1000) + 1;
-            var die = Random.Next(100_000) + 1;
+            var quantity = Random.Next(QuantityLimit) + 1;
+            var die = Random.Next(DieLimit) + 1;
 
             var roll = GetRoll(quantity, die);
             Assert.That(roll.AsPotentialMaximum(), Is.EqualTo(die * quantity));
         }
 
-        [TestCase("1d2", "3d4", 1, 24)]
-        [TestCase("3d4-1", "5d6+2", 2, 352)]
-        public void RollWithExpression(string quantityExpression, string dieExpression, int lower, int upper)
+        protected void AssertRollAsTrueOrFalse()
         {
-            stressor.Stress(() => AssertRoll(quantityExpression, dieExpression, lower, upper));
-        }
+            var quantity = Random.Next(QuantityLimit) + 1;
+            var die = Random.Next(DieLimit) + 1;
 
-        private void AssertRoll(string quantity, string die, int lower, int upper)
-        {
-            var roll = Dice.Roll(quantity).d(die).AsSum();
-            Assert.That(roll, Is.InRange(lower, upper));
+            var percentageThreshold = Random.NextDouble();
+            var rollThreshold = Random.Next(quantity * die) + 1;
+
+            var roll = GetRoll(quantity, die);
+            Assert.That(roll.AsTrueOrFalse(percentageThreshold), Is.True.Or.False, "Percentage");
+            Assert.That(roll.AsTrueOrFalse(rollThreshold), Is.True.Or.False, "Roll");
         }
     }
 }

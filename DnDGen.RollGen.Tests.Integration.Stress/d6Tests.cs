@@ -22,27 +22,33 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
         }
 
         [Test]
-        public void StressD10AsIndividualRolls()
+        public void StressD6AsIndividualRolls()
         {
             stressor.Stress(AssertRollAsIndividualRolls);
         }
 
         [Test]
-        public void StressD10AsMinimum()
+        public void StressD6AsMinimum()
         {
             stressor.Stress(AssertRollAsMinimum);
         }
 
         [Test]
-        public void StressD10AsMaximum()
+        public void StressD6AsMaximum()
         {
             stressor.Stress(AssertRollAsMaximum);
         }
 
         [Test]
-        public void StressD10AsAverage()
+        public void StressD6AsAverage()
         {
             stressor.Stress(AssertRollAsAverage);
+        }
+
+        [Test]
+        public void StressD6AsTrueOrFalse()
+        {
+            stressor.Stress(AssertRollAsTrueOrFalse);
         }
     }
 }

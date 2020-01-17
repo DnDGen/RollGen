@@ -19,14 +19,14 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 
         protected void AssertRollAsSum()
         {
-            var quantity = Random.Next(1000) + 1;
+            var quantity = Random.Next(QuantityLimit) + 1;
             var roll = GetRoll(quantity);
             Assert.That(roll.AsSum(), Is.InRange(quantity, die * quantity));
         }
 
         protected void AssertRollAsIndividualRolls()
         {
-            var quantity = Random.Next(1000) + 1;
+            var quantity = Random.Next(QuantityLimit) + 1;
             var roll = GetRoll(quantity);
             var rolls = roll.AsIndividualRolls();
 
@@ -36,7 +36,7 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 
         protected void AssertRollAsAverage()
         {
-            var quantity = Random.Next(1000) + 1;
+            var quantity = Random.Next(QuantityLimit) + 1;
             var roll = GetRoll(quantity);
             var average = quantity * (die + 1) / 2.0d;
             Assert.That(roll.AsPotentialAverage(), Is.EqualTo(average));
@@ -44,16 +44,28 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 
         protected void AssertRollAsMinimum()
         {
-            var quantity = Random.Next(1000) + 1;
+            var quantity = Random.Next(QuantityLimit) + 1;
             var roll = GetRoll(quantity);
             Assert.That(roll.AsPotentialMinimum(), Is.EqualTo(quantity));
         }
 
         protected void AssertRollAsMaximum()
         {
-            var quantity = Random.Next(1000) + 1;
+            var quantity = Random.Next(QuantityLimit) + 1;
             var roll = GetRoll(quantity);
             Assert.That(roll.AsPotentialMaximum(), Is.EqualTo(die * quantity));
+        }
+
+        protected void AssertRollAsTrueOrFalse()
+        {
+            var quantity = Random.Next(QuantityLimit) + 1;
+            var roll = GetRoll(quantity);
+
+            var percentageThreshold = Random.NextDouble();
+            var rollThreshold = Random.Next(quantity * die) + 1;
+
+            Assert.That(roll.AsTrueOrFalse(percentageThreshold), Is.True.Or.False, "Percentage");
+            Assert.That(roll.AsTrueOrFalse(rollThreshold), Is.True.Or.False, "Roll");
         }
     }
 }

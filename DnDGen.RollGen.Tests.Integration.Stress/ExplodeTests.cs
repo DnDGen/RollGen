@@ -21,8 +21,8 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 
         private void AssertExplode()
         {
-            var quantity = Random.Next(1000) + 1;
-            var die = Random.Next(100_000) + 2; //INFO: Can't allow d1, as explode fails on that
+            var quantity = Random.Next(QuantityLimit) + 1;
+            var die = Random.Next(DieLimit) + 2; //INFO: Can't allow d1, as explode fails on that
 
             var rolls = Dice.Roll(quantity).d(die).Explode().AsIndividualRolls();
             var maxCount = rolls.Count(r => r == die);

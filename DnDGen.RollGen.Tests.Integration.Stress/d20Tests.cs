@@ -44,5 +44,11 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
         {
             stressor.Stress(AssertRollAsAverage);
         }
+
+        [Test]
+        public void StressD20AsTrueOrFalse()
+        {
+            stressor.Stress(AssertRollAsTrueOrFalse);
+        }
     }
 }

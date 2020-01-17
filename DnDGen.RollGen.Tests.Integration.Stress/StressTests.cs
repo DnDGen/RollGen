@@ -9,6 +9,9 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
     {
         protected Stressor stressor;
 
+        protected const int QuantityLimit = 10_000;
+        protected const int DieLimit = 1_000_000;
+
         [OneTimeSetUp]
         public void StressSetup()
         {
