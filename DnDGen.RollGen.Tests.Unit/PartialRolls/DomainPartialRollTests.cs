@@ -42,7 +42,7 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             throw new ArgumentException($"{source} was not configured to be evaluated");
         }
 
-        private void BuildPartialRoll(int quantity)
+        private void BuildPartialRoll(double quantity)
         {
             partialRoll = new DomainPartialRoll(quantity, mockRandom.Object, mockExpressionEvaluator.Object);
         }
@@ -451,7 +451,7 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void ReturnAsSumFromNumericQuantity_NoRoll()
+        public void ReturnAsSumFromNumericQuantity_NoRoll_Int()
         {
             BuildPartialRoll(9266);
             var sum = partialRoll.AsSum();
@@ -459,7 +459,15 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void ReturnAsSumFromNumericQuantity_1Roll()
+        public void ReturnAsSumFromNumericQuantity_NoRoll_Double()
+        {
+            BuildPartialRoll(92.66);
+            var sum = partialRoll.AsSum<double>();
+            Assert.That(sum, Is.EqualTo(92.66));
+        }
+
+        [Test]
+        public void ReturnAsSumFromNumericQuantity_1Roll_Int()
         {
             BuildPartialRoll(9266);
             var sum = partialRoll.d2().AsSum();
@@ -467,7 +475,15 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void ReturnAsSumFromNumericQuantity_2Rolls()
+        public void ReturnAsSumFromNumericQuantity_1Roll_Double()
+        {
+            BuildPartialRoll(92.66);
+            var sum = partialRoll.d2().AsSum<double>();
+            Assert.That(sum, Is.EqualTo(9266 * 1.5));
+        }
+
+        [Test]
+        public void ReturnAsSumFromNumericQuantity_2Rolls_Int()
         {
             BuildPartialRoll(42);
             var sum = partialRoll.d2().d3().AsSum();
@@ -475,7 +491,15 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void ReturnAsSumFromQuantityExpression_NoRoll()
+        public void ReturnAsSumFromNumericQuantity_2Rolls_Double()
+        {
+            BuildPartialRoll(4.2);
+            var sum = partialRoll.d2().d3().AsSum<double>();
+            Assert.That(sum, Is.EqualTo(126));
+        }
+
+        [Test]
+        public void ReturnAsSumFromQuantityExpression_NoRoll_Int()
         {
             BuildPartialRoll("4d3k2");
             var sum = partialRoll.AsSum();
@@ -483,7 +507,15 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void ReturnAsSumFromQuantityExpression_1Roll()
+        public void ReturnAsSumFromQuantityExpression_NoRoll_Double()
+        {
+            BuildPartialRoll("43.2");
+            var sum = partialRoll.AsSum<double>();
+            Assert.That(sum, Is.EqualTo(43.2));
+        }
+
+        [Test]
+        public void ReturnAsSumFromQuantityExpression_1Roll_Int()
         {
             BuildPartialRoll("4d3k2");
             var sum = partialRoll.d2().AsSum();
@@ -491,7 +523,15 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void ReturnAsSumFromQuantityExpression_2Rolls()
+        public void ReturnAsSumFromQuantityExpression_1Roll_Double()
+        {
+            BuildPartialRoll("43.2");
+            var sum = partialRoll.d2().AsSum<double>();
+            Assert.That(sum, Is.EqualTo(7));
+        }
+
+        [Test]
+        public void ReturnAsSumFromQuantityExpression_2Rolls_Int()
         {
             BuildPartialRoll("4d3k2");
             var sum = partialRoll.d2().d3().AsSum();
@@ -499,7 +539,15 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void ReturnAsIndividualRollsFromNumericQuantity_NoRoll()
+        public void ReturnAsSumFromQuantityExpression_2Rolls_Double()
+        {
+            BuildPartialRoll("43.2");
+            var sum = partialRoll.d2().d3().AsSum<double>();
+            Assert.That(sum, Is.EqualTo(13));
+        }
+
+        [Test]
+        public void ReturnAsIndividualRollsFromNumericQuantity_NoRoll_Int()
         {
             BuildPartialRoll(9266);
             var rolls = partialRoll.AsIndividualRolls();
@@ -508,7 +556,16 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void ReturnAsIndividualRollsFromNumericQuantity_1Roll()
+        public void ReturnAsIndividualRollsFromNumericQuantity_NoRoll_Double()
+        {
+            BuildPartialRoll(92.66);
+            var rolls = partialRoll.AsIndividualRolls<double>();
+            Assert.That(rolls.Count(), Is.EqualTo(1));
+            Assert.That(rolls.Single(), Is.EqualTo(92.66));
+        }
+
+        [Test]
+        public void ReturnAsIndividualRollsFromNumericQuantity_1Roll_Int()
         {
             BuildPartialRoll(9266);
             var rolls = partialRoll.d2().AsIndividualRolls();
@@ -518,7 +575,7 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void ReturnAsIndividualRollsFromNumericQuantity_2Rolls()
+        public void ReturnAsIndividualRollsFromNumericQuantity_2Rolls_Int()
         {
             BuildPartialRoll(42);
             var rolls = partialRoll.d2().d3().AsIndividualRolls();
@@ -527,7 +584,7 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void ReturnAsIndividualRollsFromQuantityExpression_NoRoll()
+        public void ReturnAsIndividualRollsFromQuantityExpression_NoRoll_Int()
         {
             BuildPartialRoll("4d3k2");
             var rolls = partialRoll.AsIndividualRolls();
@@ -536,7 +593,16 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void ReturnAsIndividualRollsFromQuantityExpression_1Roll()
+        public void ReturnAsIndividualRollsFromQuantityExpression_NoRoll_Double()
+        {
+            BuildPartialRoll("43.2");
+            var rolls = partialRoll.AsIndividualRolls<double>();
+            Assert.That(rolls.Count(), Is.EqualTo(1));
+            Assert.That(rolls.Single(), Is.EqualTo(43.2));
+        }
+
+        [Test]
+        public void ReturnAsIndividualRollsFromQuantityExpression_1Roll_Int()
         {
             BuildPartialRoll("4d3k2");
             var rolls = partialRoll.d2().AsIndividualRolls();
@@ -545,7 +611,7 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void ReturnAsIndividualRollsFromQuantityExpression_2Rolls()
+        public void ReturnAsIndividualRollsFromQuantityExpression_2Rolls_Int()
         {
             BuildPartialRoll("4d3k2");
             var rolls = partialRoll.d2().d3().AsIndividualRolls();
@@ -645,7 +711,7 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void ReturnAsMinimumFromNumericQuantity_NoRoll()
+        public void ReturnAsMinimumFromNumericQuantity_NoRoll_Int()
         {
             BuildPartialRoll(9266);
             var average = partialRoll.AsPotentialMinimum();
@@ -653,7 +719,15 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void ReturnAsMinimumFromNumericQuantity_1Roll()
+        public void ReturnAsMinimumFromNumericQuantity_NoRoll_Double()
+        {
+            BuildPartialRoll(92.66);
+            var average = partialRoll.AsPotentialMinimum<double>();
+            Assert.That(average, Is.EqualTo(92.66));
+        }
+
+        [Test]
+        public void ReturnAsMinimumFromNumericQuantity_1Roll_Int()
         {
             BuildPartialRoll(9266);
             var average = partialRoll.d(42).AsPotentialMinimum();
@@ -661,7 +735,7 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void ReturnAsMinimumFromNumericQuantity_2Rolls()
+        public void ReturnAsMinimumFromNumericQuantity_2Rolls_Int()
         {
             BuildPartialRoll(9266);
             var average = partialRoll.d(42).d(600).AsPotentialMinimum();
@@ -669,7 +743,7 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void ReturnAsMinimumFromQuantityExpression_NoRoll()
+        public void ReturnAsMinimumFromQuantityExpression_NoRoll_Int()
         {
             BuildPartialRoll("4d3k2");
             var average = partialRoll.AsPotentialMinimum();
@@ -677,7 +751,15 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void ReturnAsMinimumFromQuantityExpression_1Roll()
+        public void ReturnAsMinimumFromQuantityExpression_NoRoll_Double()
+        {
+            BuildPartialRoll("43.2");
+            var average = partialRoll.AsPotentialMinimum<double>();
+            Assert.That(average, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void ReturnAsMinimumFromQuantityExpression_1Roll_Int()
         {
             BuildPartialRoll("4d3k2");
             var average = partialRoll.d(42).AsPotentialMinimum();
@@ -685,7 +767,15 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void ReturnAsMinimumFromQuantityExpression_2Rolls()
+        public void ReturnAsMinimumFromQuantityExpression_1Roll_Double()
+        {
+            BuildPartialRoll("43.2");
+            var average = partialRoll.d(42).AsPotentialMinimum<double>();
+            Assert.That(average, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void ReturnAsMinimumFromQuantityExpression_2Rolls_Int()
         {
             BuildPartialRoll("4d3k2");
             var average = partialRoll.d(42).d(600).AsPotentialMinimum();
@@ -693,7 +783,15 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void ReturnAsMaximumFromNumericQuantity_NoRoll()
+        public void ReturnAsMinimumFromQuantityExpression_2Rolls_Double()
+        {
+            BuildPartialRoll("43.2");
+            var average = partialRoll.d(42).d(600).AsPotentialMinimum<double>();
+            Assert.That(average, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void ReturnAsMaximumFromNumericQuantity_NoRoll_Int()
         {
             BuildPartialRoll(9266);
             var average = partialRoll.AsPotentialMaximum();
@@ -701,7 +799,15 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void ReturnAsMaximumFromNumericQuantity_1Roll()
+        public void ReturnAsMaximumFromNumericQuantity_NoRoll_Double()
+        {
+            BuildPartialRoll(92.66);
+            var average = partialRoll.AsPotentialMaximum<double>();
+            Assert.That(average, Is.EqualTo(92.66));
+        }
+
+        [Test]
+        public void ReturnAsMaximumFromNumericQuantity_1Roll_Int()
         {
             BuildPartialRoll(9266);
             var average = partialRoll.d(42).AsPotentialMaximum();
@@ -709,7 +815,7 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void ReturnAsMaximumFromNumericQuantity_2Rolls()
+        public void ReturnAsMaximumFromNumericQuantity_2Rolls_Int()
         {
             BuildPartialRoll(96);
             var average = partialRoll.d(42).d(600).AsPotentialMaximum();
@@ -717,15 +823,22 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void ReturnAsMaximumFromQuantityExpression_NoRoll()
+        public void ReturnAsMaximumFromQuantityExpression_NoRoll_Int()
         {
             BuildPartialRoll("4d3k2");
             var average = partialRoll.AsPotentialMaximum();
             Assert.That(average, Is.EqualTo(6));
         }
+        [Test]
+        public void ReturnAsMaximumFromQuantityExpression_NoRoll_Double()
+        {
+            BuildPartialRoll("43.2");
+            var average = partialRoll.AsPotentialMaximum<double>();
+            Assert.That(average, Is.EqualTo(43.2));
+        }
 
         [Test]
-        public void ReturnAsMaximumFromQuantityExpression_1Roll()
+        public void ReturnAsMaximumFromQuantityExpression_1Roll_Int()
         {
             BuildPartialRoll("4d3k2");
             var average = partialRoll.d(42).AsPotentialMaximum();
@@ -733,7 +846,7 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void ReturnAsMaximumFromQuantityExpression_2Rolls()
+        public void ReturnAsMaximumFromQuantityExpression_2Rolls_Int()
         {
             BuildPartialRoll("4d3k2");
             var average = partialRoll.d(42).d(600).AsPotentialMaximum();
@@ -741,7 +854,7 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void ReturnAsMaximumFromQuantityExpression_WithExplode()
+        public void ReturnAsMaximumFromQuantityExpression_WithExplode_Int()
         {
             BuildPartialRoll("4d3!");
             var average = partialRoll.AsPotentialMaximum();
@@ -749,11 +862,31 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void ReturnAsMaximumFromQuantityExpression_WithoutExplode()
+        public void ReturnAsMaximumFromQuantityExpression_WithExplode_Double()
+        {
+            BuildPartialRoll("4d3!+2.1");
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>("120+2.1")).Returns(122.1);
+
+            var average = partialRoll.AsPotentialMaximum<double>();
+            Assert.That(average, Is.EqualTo(120 + 2.1));
+        }
+
+        [Test]
+        public void ReturnAsMaximumFromQuantityExpression_WithoutExplode_Int()
         {
             BuildPartialRoll("4d3!");
             var average = partialRoll.AsPotentialMaximum(false);
             Assert.That(average, Is.EqualTo(12));
+        }
+
+        [Test]
+        public void ReturnAsMaximumFromQuantityExpression_WithoutExplode_Double()
+        {
+            BuildPartialRoll("4d3!+2.1");
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>("12+2.1")).Returns(14.1);
+
+            var average = partialRoll.AsPotentialMaximum<double>(false);
+            Assert.That(average, Is.EqualTo(12 + 2.1));
         }
 
         [TestCase(2, 2)]
@@ -1568,9 +1701,9 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             BuildPartialRoll($"1d{die}+1");
             mockRandom.Setup(r => r.Next(die)).Returns(roll - 1);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"{die}+1")).Returns(die + 1);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"{roll}+1")).Returns(roll + 1);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1+1")).Returns(2);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"{die}+1")).Returns(die + 1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"{roll}+1")).Returns(roll + 1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"1+1")).Returns(2);
 
             var result = partialRoll.AsTrueOrFalse();
             Assert.That(result, Is.False);
@@ -1613,9 +1746,9 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             BuildPartialRoll($"1d{die}-1");
             mockRandom.Setup(r => r.Next(die)).Returns(roll - 1);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"{die}-1")).Returns(die - 1);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"{roll}-1")).Returns(roll - 1);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1-1")).Returns(0);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"{die}-1")).Returns(die - 1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"{roll}-1")).Returns(roll - 1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"1-1")).Returns(0);
 
             var result = partialRoll.AsTrueOrFalse();
             Assert.That(result, Is.False);
@@ -1784,9 +1917,9 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             BuildPartialRoll($"1d{die}+1d42");
             mockRandom.Setup(r => r.Next(die)).Returns(roll - 1);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1+1")).Returns(2);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"{die}+42")).Returns(die + 42);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"{roll}+1")).Returns(roll + 1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"1+1")).Returns(2);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"{die}+42")).Returns(die + 42);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"{roll}+1")).Returns(roll + 1);
 
             var result = partialRoll.AsTrueOrFalse();
             Assert.That(result, Is.False);
@@ -1797,9 +1930,9 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             BuildPartialRoll($"1d10+1");
             mockRandom.Setup(r => r.Next(10)).Returns(1);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"10+1")).Returns(11);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"2+1")).Returns(3);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1+1")).Returns(2);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"10+1")).Returns(11);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"2+1")).Returns(3);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"1+1")).Returns(2);
 
             var result = partialRoll.AsTrueOrFalse(.25);
             Assert.That(result, Is.False);
@@ -1810,9 +1943,9 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             BuildPartialRoll($"1d10-1");
             mockRandom.Setup(r => r.Next(10)).Returns(1);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"10-1")).Returns(9);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"2-1")).Returns(1);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1-1")).Returns(0);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"10-1")).Returns(9);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"2-1")).Returns(1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"1-1")).Returns(0);
 
             var result = partialRoll.AsTrueOrFalse(.25);
             Assert.That(result, Is.False);
@@ -1854,9 +1987,9 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             BuildPartialRoll($"1d10+1d8");
             mockRandom.Setup(r => r.Next(10)).Returns(1);
             mockRandom.Setup(r => r.Next(8)).Returns(1);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1+1")).Returns(2);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"10+8")).Returns(18);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"2+2")).Returns(4);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"1+1")).Returns(2);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"10+8")).Returns(18);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"2+2")).Returns(4);
 
             var result = partialRoll.AsTrueOrFalse(.25);
             Assert.That(result, Is.False);
@@ -1867,9 +2000,9 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             BuildPartialRoll($"1d10+1");
             mockRandom.Setup(r => r.Next(10)).Returns(1);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"10+1")).Returns(11);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"2+1")).Returns(3);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1+1")).Returns(2);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"10+1")).Returns(11);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"2+1")).Returns(3);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"1+1")).Returns(2);
 
             var result = partialRoll.AsTrueOrFalse(.2);
             Assert.That(result, Is.False);
@@ -1880,9 +2013,9 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             BuildPartialRoll($"1d10-1");
             mockRandom.Setup(r => r.Next(10)).Returns(1);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"10-1")).Returns(9);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"2-1")).Returns(1);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1-1")).Returns(0);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"10-1")).Returns(9);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"2-1")).Returns(1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"1-1")).Returns(0);
 
             var result = partialRoll.AsTrueOrFalse(.2);
             Assert.That(result, Is.False);
@@ -2706,6 +2839,127 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
 
             partialRoll.Modulos(otherPartialRoll);
             Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo($"(9266d90210)%(42d600)"));
+        }
+
+        [Test]
+        public void AsSum_ThrowsException_WhenQuantityIsDecimal()
+        {
+            BuildPartialRoll(92.66);
+            partialRoll.d2();
+
+            Assert.That(() => partialRoll.AsSum<double>(),
+                Throws.ArgumentException.With.Message.EqualTo("Cannot have decimal values for die rolls"));
+        }
+
+        [Test]
+        public void AsSum_ThrowsException_WhenDieIsDecimal()
+        {
+            BuildPartialRoll(92);
+            partialRoll.d("6.6");
+
+            Assert.That(() => partialRoll.AsSum<double>(),
+                Throws.ArgumentException.With.Message.EqualTo("Cannot have decimal values for die rolls"));
+        }
+
+        [Test]
+        public void AsIndividualRolls_ThrowsException_WhenQuantityIsDecimal()
+        {
+            BuildPartialRoll(92.66);
+            partialRoll.d2();
+
+            Assert.That(() => partialRoll.AsIndividualRolls<double>(),
+                Throws.ArgumentException.With.Message.EqualTo("Cannot have decimal values for die rolls"));
+        }
+
+        [Test]
+        public void AsIndividualRolls_ThrowsException_WhenDieIsDecimal()
+        {
+            BuildPartialRoll(92);
+            partialRoll.d("6.6");
+
+            Assert.That(() => partialRoll.AsIndividualRolls<double>(),
+                Throws.ArgumentException.With.Message.EqualTo("Cannot have decimal values for die rolls"));
+        }
+
+        [Test]
+        public void AsMinimum_ThrowsException_WhenQuantityIsDecimal()
+        {
+            BuildPartialRoll(92.66);
+            partialRoll.d2();
+
+            Assert.That(() => partialRoll.AsPotentialMinimum<double>(),
+                Throws.ArgumentException.With.Message.EqualTo("Cannot have decimal values for die rolls"));
+        }
+
+        [Test]
+        public void AsMinimum_ThrowsException_WhenDieIsDecimal()
+        {
+            BuildPartialRoll(92);
+            partialRoll.d("6.6");
+
+            Assert.That(() => partialRoll.AsPotentialMinimum<double>(),
+                Throws.ArgumentException.With.Message.EqualTo("Cannot have decimal values for die rolls"));
+        }
+
+        [Test]
+        public void AsMaximum_ThrowsException_WhenQuantityIsDecimal()
+        {
+            BuildPartialRoll(92.66);
+            partialRoll.d2();
+
+            Assert.That(() => partialRoll.AsPotentialMaximum<double>(),
+                Throws.ArgumentException.With.Message.EqualTo("Cannot have decimal values for die rolls"));
+        }
+
+        [Test]
+        public void AsMaximum_ThrowsException_WhenDieIsDecimal()
+        {
+            BuildPartialRoll(92);
+            partialRoll.d("6.6");
+
+            Assert.That(() => partialRoll.AsPotentialMaximum<double>(),
+                Throws.ArgumentException.With.Message.EqualTo("Cannot have decimal values for die rolls"));
+        }
+
+        [Test]
+        public void AsAverage_ThrowsException_WhenQuantityIsDecimal()
+        {
+            BuildPartialRoll(92.66);
+            partialRoll.d2();
+
+            Assert.That(() => partialRoll.AsPotentialAverage(),
+                Throws.ArgumentException.With.Message.EqualTo("Cannot have decimal values for die rolls"));
+        }
+
+        [Test]
+        public void AsAverage_ThrowsException_WhenDieIsDecimal()
+        {
+            BuildPartialRoll(92);
+            partialRoll.d("6.6");
+
+            Assert.That(() => partialRoll.AsPotentialAverage(),
+                Throws.ArgumentException.With.Message.EqualTo("Cannot have decimal values for die rolls"));
+        }
+
+        [Test]
+        public void AsTrueOrFalse_ThrowsException_WhenQuantityIsDecimal()
+        {
+            BuildPartialRoll(92.66);
+            partialRoll.d2();
+
+            Assert.That(() => partialRoll.AsTrueOrFalse(),
+                Throws.ArgumentException.With.Message.EqualTo("Cannot have decimal values for die rolls"));
+        }
+
+        [Test]
+        public void AsTrueOrFalse_ThrowsException_WhenDieIsDecimal()
+        {
+            BuildPartialRoll(92);
+            partialRoll.d("6.6");
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>("6.6")).Returns((string s) => 6.6);
+
+            Assert.That(() => partialRoll.AsTrueOrFalse(),
+                Throws.ArgumentException.With.Message.EqualTo("Cannot have decimal values for die rolls"));
         }
     }
 }

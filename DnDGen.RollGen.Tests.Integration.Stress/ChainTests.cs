@@ -79,8 +79,8 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 
             Assert.That(roll.AsSum(), Is.InRange(min, max * 10), roll.CurrentRollExpression);
             Assert.That(roll.AsPotentialMinimum(), Is.EqualTo(min), roll.CurrentRollExpression);
-            Assert.That(roll.AsPotentialMaximum(), Is.EqualTo(max), roll.CurrentRollExpression);
-            Assert.That(roll.AsPotentialMaximum(true), Is.EqualTo(max * 10), roll.CurrentRollExpression);
+            Assert.That(roll.AsPotentialMaximum(false), Is.EqualTo(max), roll.CurrentRollExpression);
+            Assert.That(roll.AsPotentialMaximum(), Is.EqualTo(max * 10), roll.CurrentRollExpression);
             Assert.That(roll.AsPotentialAverage(), Is.EqualTo(avg), roll.CurrentRollExpression);
             Assert.That(roll.AsTrueOrFalse(percentageThreshold), Is.True.Or.False, roll.CurrentRollExpression);
             Assert.That(roll.AsTrueOrFalse(rollThreshold), Is.True.Or.False, roll.CurrentRollExpression);

@@ -34,8 +34,8 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 
             Assert.That(roll.AsSum(), Is.InRange(quantity, quantity * die));
             Assert.That(roll.AsPotentialMinimum(), Is.EqualTo(quantity));
+            Assert.That(roll.AsPotentialMaximum(false), Is.EqualTo(quantity * die));
             Assert.That(roll.AsPotentialMaximum(), Is.EqualTo(quantity * die));
-            Assert.That(roll.AsPotentialMaximum(true), Is.EqualTo(quantity * die));
             Assert.That(roll.AsPotentialAverage(), Is.EqualTo(average));
             Assert.That(roll.AsTrueOrFalse(percentageThreshold), Is.True.Or.False, "Percentage");
             Assert.That(roll.AsTrueOrFalse(rollThreshold), Is.True.Or.False, "Roll");
