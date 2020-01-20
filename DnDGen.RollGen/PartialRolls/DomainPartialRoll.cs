@@ -77,14 +77,15 @@ namespace DnDGen.RollGen.PartialRolls
             var product = range * threshold;
             var rollThreshold = product + minimumAdjustment;
 
-            if (HasDecimalValue(rollThreshold))
-                rollThreshold = Math.Ceiling(rollThreshold);
+            if (IsInteger(rollThreshold))
+                rollThreshold += .5;
 
-            var roll = Convert.ToInt32(Math.Floor(rollThreshold));
+            rollThreshold = Math.Ceiling(rollThreshold);
+            var roll = Convert.ToInt32(rollThreshold);
             return AsTrueOrFalse(roll);
         }
 
-        private bool HasDecimalValue(double value)
+        private bool IsInteger(double value)
         {
             return Math.Abs(value % 1) <= (double.Epsilon * 100);
         }

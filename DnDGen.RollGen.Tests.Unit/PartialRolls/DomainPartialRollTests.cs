@@ -475,26 +475,10 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void ReturnAsSumFromNumericQuantity_1Roll_Double()
-        {
-            BuildPartialRoll(92.66);
-            var sum = partialRoll.d2().AsSum<double>();
-            Assert.That(sum, Is.EqualTo(9266 * 1.5));
-        }
-
-        [Test]
         public void ReturnAsSumFromNumericQuantity_2Rolls_Int()
         {
             BuildPartialRoll(42);
             var sum = partialRoll.d2().d3().AsSum();
-            Assert.That(sum, Is.EqualTo(126));
-        }
-
-        [Test]
-        public void ReturnAsSumFromNumericQuantity_2Rolls_Double()
-        {
-            BuildPartialRoll(4.2);
-            var sum = partialRoll.d2().d3().AsSum<double>();
             Assert.That(sum, Is.EqualTo(126));
         }
 
@@ -523,26 +507,10 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void ReturnAsSumFromQuantityExpression_1Roll_Double()
-        {
-            BuildPartialRoll("43.2");
-            var sum = partialRoll.d2().AsSum<double>();
-            Assert.That(sum, Is.EqualTo(7));
-        }
-
-        [Test]
         public void ReturnAsSumFromQuantityExpression_2Rolls_Int()
         {
             BuildPartialRoll("4d3k2");
             var sum = partialRoll.d2().d3().AsSum();
-            Assert.That(sum, Is.EqualTo(13));
-        }
-
-        [Test]
-        public void ReturnAsSumFromQuantityExpression_2Rolls_Double()
-        {
-            BuildPartialRoll("43.2");
-            var sum = partialRoll.d2().d3().AsSum<double>();
             Assert.That(sum, Is.EqualTo(13));
         }
 
@@ -755,7 +723,7 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             BuildPartialRoll("43.2");
             var average = partialRoll.AsPotentialMinimum<double>();
-            Assert.That(average, Is.EqualTo(2));
+            Assert.That(average, Is.EqualTo(43.2));
         }
 
         [Test]
@@ -767,26 +735,10 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void ReturnAsMinimumFromQuantityExpression_1Roll_Double()
-        {
-            BuildPartialRoll("43.2");
-            var average = partialRoll.d(42).AsPotentialMinimum<double>();
-            Assert.That(average, Is.EqualTo(2));
-        }
-
-        [Test]
         public void ReturnAsMinimumFromQuantityExpression_2Rolls_Int()
         {
             BuildPartialRoll("4d3k2");
             var average = partialRoll.d(42).d(600).AsPotentialMinimum();
-            Assert.That(average, Is.EqualTo(2));
-        }
-
-        [Test]
-        public void ReturnAsMinimumFromQuantityExpression_2Rolls_Double()
-        {
-            BuildPartialRoll("43.2");
-            var average = partialRoll.d(42).d(600).AsPotentialMinimum<double>();
             Assert.That(average, Is.EqualTo(2));
         }
 
@@ -1271,9 +1223,9 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             BuildPartialRoll($"1d{die}+1");
             mockRandom.Setup(r => r.Next(die)).Returns(roll - 1);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"{die}+1")).Returns(die + 1);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"{roll}+1")).Returns(roll + 1);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1+1")).Returns(2);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"{die}+1")).Returns(die + 1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"{roll}+1")).Returns(roll + 1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"1+1")).Returns(2);
 
             var result = partialRoll.AsTrueOrFalse();
             Assert.That(result, Is.True);
@@ -1323,9 +1275,9 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             BuildPartialRoll($"1d{die}-1");
             mockRandom.Setup(r => r.Next(die)).Returns(roll - 1);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"{die}-1")).Returns(die - 1);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"{roll}-1")).Returns(roll - 1);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1-1")).Returns(0);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"{die}-1")).Returns(die - 1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"{roll}-1")).Returns(roll - 1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"1-1")).Returns(0);
 
             var result = partialRoll.AsTrueOrFalse();
             Assert.That(result, Is.True);
@@ -1535,9 +1487,9 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             BuildPartialRoll($"1d{die}+1d42");
             mockRandom.Setup(r => r.Next(die)).Returns(roll - 1);
             mockRandom.Setup(r => r.Next(42)).Returns(21);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1+1")).Returns(2);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"{die}+42")).Returns(die + 42);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"{roll}+22")).Returns(roll + 22);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"1+1")).Returns(2);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"{die}+42")).Returns(die + 42);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"{roll}+22")).Returns(roll + 22);
 
             var result = partialRoll.AsTrueOrFalse();
             Assert.That(result, Is.True);
@@ -1557,9 +1509,9 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             var roll = die / 2;
             BuildPartialRoll($"1d{die}+1");
             mockRandom.Setup(r => r.Next(die)).Returns(roll - 1);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"{die}+1")).Returns(die + 1);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"{roll}+1")).Returns(roll + 1);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1+1")).Returns(2);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"{die}+1")).Returns(die + 1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"{roll}+1")).Returns(roll + 1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"1+1")).Returns(2);
 
             var result = partialRoll.AsTrueOrFalse();
             Assert.That(result, Is.False);
@@ -1579,9 +1531,9 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             var roll = die / 2;
             BuildPartialRoll($"1d{die}-1");
             mockRandom.Setup(r => r.Next(die)).Returns(roll - 1);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"{die}-1")).Returns(die - 1);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"{roll}-1")).Returns(roll - 1);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1-1")).Returns(0);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"{die}-1")).Returns(die - 1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"{roll}-1")).Returns(roll - 1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"1-1")).Returns(0);
 
             var result = partialRoll.AsTrueOrFalse();
             Assert.That(result, Is.False);
@@ -1656,9 +1608,9 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             BuildPartialRoll($"1d{die} + 1d42");
             mockRandom.Setup(r => r.Next(die)).Returns(roll - 1);
             mockRandom.Setup(r => r.Next(42)).Returns(20);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1 + 1")).Returns(2);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"{die} + 42")).Returns(die + 42);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"{roll} + 21")).Returns(roll + 21);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"1 + 1")).Returns(2);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"{die} + 42")).Returns(die + 42);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"{roll} + 21")).Returns(roll + 21);
 
             var result = partialRoll.AsTrueOrFalse();
             Assert.That(result, Is.False);
@@ -2057,9 +2009,9 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             BuildPartialRoll($"1d10+1d6");
             mockRandom.Setup(r => r.Next(10)).Returns(1);
             mockRandom.Setup(r => r.Next(6)).Returns(1);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1+1")).Returns(2);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"10+6")).Returns(16);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"2+2")).Returns(4);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"1+1")).Returns(2);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"10+6")).Returns(16);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"2+2")).Returns(4);
 
             var result = partialRoll.AsTrueOrFalse(.25);
             Assert.That(result, Is.False);
@@ -2070,9 +2022,9 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             BuildPartialRoll($"1d10+1");
             mockRandom.Setup(r => r.Next(10)).Returns(1);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"10+1")).Returns(11);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"2+1")).Returns(3);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1+1")).Returns(2);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"10+1")).Returns(11);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"2+1")).Returns(3);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"1+1")).Returns(2);
 
             var result = partialRoll.AsTrueOrFalse(.15);
             Assert.That(result, Is.True);
@@ -2083,9 +2035,9 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             BuildPartialRoll($"1d10-1");
             mockRandom.Setup(r => r.Next(10)).Returns(1);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"10-1")).Returns(9);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"2-1")).Returns(1);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1-1")).Returns(0);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"10-1")).Returns(9);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"2-1")).Returns(1);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"1-1")).Returns(0);
 
             var result = partialRoll.AsTrueOrFalse(.15);
             Assert.That(result, Is.True);
@@ -2127,9 +2079,9 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             BuildPartialRoll($"1d10+1d6");
             mockRandom.Setup(r => r.Next(10)).Returns(1);
             mockRandom.Setup(r => r.Next(6)).Returns(2);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1+1")).Returns(2);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"10+6")).Returns(16);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"2+3")).Returns(5);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"1+1")).Returns(2);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"10+6")).Returns(16);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"2+3")).Returns(5);
 
             var result = partialRoll.AsTrueOrFalse(.25);
             Assert.That(result, Is.True);
@@ -2140,9 +2092,9 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             BuildPartialRoll($"1d100+1");
             mockRandom.Setup(r => r.Next(100)).Returns(40);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"100+1")).Returns(101);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"41+1")).Returns(42);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1+1")).Returns(2);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"100+1")).Returns(101);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"41+1")).Returns(42);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"1+1")).Returns(2);
 
             var result = partialRoll.AsTrueOrFalse(43);
             Assert.That(result, Is.False);
@@ -2153,9 +2105,9 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             BuildPartialRoll($"1d100-1");
             mockRandom.Setup(r => r.Next(100)).Returns(40);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"100-1")).Returns(99);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"41-1")).Returns(40);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1-1")).Returns(0);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"100-1")).Returns(99);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"41-1")).Returns(40);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"1-1")).Returns(0);
 
             var result = partialRoll.AsTrueOrFalse(41);
             Assert.That(result, Is.False);
@@ -2197,7 +2149,7 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             BuildPartialRoll($"1d100+1d12");
             mockRandom.Setup(r => r.Next(100)).Returns(30);
             mockRandom.Setup(r => r.Next(12)).Returns(9);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"31+10")).Returns(41);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"31+10")).Returns(41);
 
             var result = partialRoll.AsTrueOrFalse(42);
             Assert.That(result, Is.False);
@@ -2208,9 +2160,9 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             BuildPartialRoll($"1d100+1");
             mockRandom.Setup(r => r.Next(100)).Returns(41);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"100+1")).Returns(101);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"42+1")).Returns(43);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1+1")).Returns(2);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"100+1")).Returns(101);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"42+1")).Returns(43);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"1+1")).Returns(2);
 
             var result = partialRoll.AsTrueOrFalse(43);
             Assert.That(result, Is.True);
@@ -2221,9 +2173,9 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             BuildPartialRoll($"1d100-1");
             mockRandom.Setup(r => r.Next(100)).Returns(41);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"100-1")).Returns(99);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"42-1")).Returns(41);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1-1")).Returns(0);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"100-1")).Returns(99);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"42-1")).Returns(41);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"1-1")).Returns(0);
 
             var result = partialRoll.AsTrueOrFalse(41);
             Assert.That(result, Is.True);
@@ -2265,7 +2217,7 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             BuildPartialRoll($"1d100+1d12");
             mockRandom.Setup(r => r.Next(100)).Returns(30);
             mockRandom.Setup(r => r.Next(12)).Returns(10);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"31+11")).Returns(42);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"31+11")).Returns(42);
 
             var result = partialRoll.AsTrueOrFalse(42);
             Assert.That(result, Is.True);
@@ -2276,9 +2228,9 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             BuildPartialRoll($"1d100+1");
             mockRandom.Setup(r => r.Next(100)).Returns(42);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"100+1")).Returns(101);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"43+1")).Returns(44);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1+1")).Returns(2);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"100+1")).Returns(101);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"43+1")).Returns(44);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"1+1")).Returns(2);
 
             var result = partialRoll.AsTrueOrFalse(42);
             Assert.That(result, Is.True);
@@ -2289,9 +2241,9 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             BuildPartialRoll($"1d100-1");
             mockRandom.Setup(r => r.Next(100)).Returns(42);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"100-1")).Returns(99);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"43-1")).Returns(42);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1-1")).Returns(0);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"100-1")).Returns(99);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"43-1")).Returns(42);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"1-1")).Returns(0);
 
             var result = partialRoll.AsTrueOrFalse(42);
             Assert.That(result, Is.True);
@@ -2372,9 +2324,9 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             BuildPartialRoll($"1d100+1d12");
             mockRandom.Setup(r => r.Next(100)).Returns(31);
             mockRandom.Setup(r => r.Next(12)).Returns(10);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"1+1")).Returns(2);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"100+12")).Returns(112);
-            mockExpressionEvaluator.Setup(e => e.Evaluate<int>($"32+11")).Returns(43);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"1+1")).Returns(2);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"100+12")).Returns(112);
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>($"32+11")).Returns(43);
 
             var result = partialRoll.AsTrueOrFalse(42);
             Assert.That(result, Is.True);

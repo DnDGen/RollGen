@@ -33,18 +33,18 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 
         private void AssertTotal(PartialRoll roll, double total, double percentageThreshold, int rollThreshold)
         {
-            Assert.That(roll.AsSum<double>(), Is.EqualTo(total), roll.ToString());
-            Assert.That(roll.AsPotentialMinimum<double>(), Is.EqualTo(total));
-            Assert.That(roll.AsPotentialMaximum<double>(false), Is.EqualTo(total));
-            Assert.That(roll.AsPotentialMaximum<double>(), Is.EqualTo(total * 10));
-            Assert.That(roll.AsPotentialAverage(), Is.EqualTo(total));
-            Assert.That(roll.AsTrueOrFalse(percentageThreshold), Is.False, "Percentage");
-            Assert.That(roll.AsTrueOrFalse(rollThreshold), Is.True, "Roll");
+            Assert.That(roll.AsSum<double>(), Is.EqualTo(total), roll.CurrentRollExpression);
+            Assert.That(roll.AsPotentialMinimum<double>(), Is.EqualTo(total), roll.CurrentRollExpression);
+            Assert.That(roll.AsPotentialMaximum<double>(false), Is.EqualTo(total), roll.CurrentRollExpression);
+            Assert.That(roll.AsPotentialMaximum<double>(), Is.EqualTo(total), roll.CurrentRollExpression);
+            Assert.That(roll.AsPotentialAverage(), Is.EqualTo(total), roll.CurrentRollExpression);
+            Assert.That(roll.AsTrueOrFalse(percentageThreshold), Is.False, $"Percentage ({percentageThreshold}): {roll.CurrentRollExpression}");
+            Assert.That(roll.AsTrueOrFalse(rollThreshold), Is.True, $"Roll ({rollThreshold}): {roll.CurrentRollExpression}");
 
             var rolls = roll.AsIndividualRolls<double>();
 
-            Assert.That(rolls.Count(), Is.EqualTo(1));
-            Assert.That(rolls, Has.All.EqualTo(total));
+            Assert.That(rolls.Count(), Is.EqualTo(1), roll.CurrentRollExpression);
+            Assert.That(rolls, Has.All.EqualTo(total), roll.CurrentRollExpression);
         }
 
         [Test]
@@ -94,7 +94,8 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
             var quantity = Random.Next(Limits.Quantity) + 1;
             var dividedBy = Random.Next(quantity) + Random.NextDouble();
             var percentageThreshold = Random.NextDouble();
-            var rollThreshold = Random.Next(quantity) + 1;
+            var thresholdLimit = Convert.ToInt32(Math.Floor(quantity / dividedBy));
+            var rollThreshold = Random.Next(thresholdLimit) + 1;
 
             var roll = Dice.Roll(quantity).DividedBy(dividedBy);
 
