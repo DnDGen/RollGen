@@ -74,7 +74,7 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
         private void AssertTimes()
         {
             var quantity = Random.Next(Limits.Quantity) + 1;
-            var times = Random.Next(int.MaxValue / quantity) + Random.NextDouble();
+            var times = Random.Next(int.MaxValue / quantity) + 1 + Random.NextDouble();
             var percentageThreshold = Random.NextDouble();
             var rollThreshold = Random.Next(quantity) + 1;
 
