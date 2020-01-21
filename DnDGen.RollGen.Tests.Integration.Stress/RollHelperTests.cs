@@ -26,8 +26,7 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 
         private void AssertGetRoll(Func<int, int, string> getRoll)
         {
-            //INFO: Use 100 instead of die limit, since built rollsonly use standard dice
-            var upper = Random.Next(Limits.Quantity * 100) + 1;
+            var upper = Random.Next(Limits.Die) + 1;
             var lower = Random.Next(upper);
 
             Assert.That(lower, Is.LessThan(upper));

@@ -22,9 +22,11 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
         protected void AssertExplode()
         {
             var quantity = Random.Next(Limits.Quantity) + 1;
-            var die = Random.Next(Limits.Die) + 2; //INFO: Can't allow d1, as explode fails on that
+            var die = Random.Next(Limits.Die - 1) + 2; //INFO: Can't allow d1, as explode fails on that
             var percentageThreshold = Random.NextDouble();
             var rollThreshold = Random.Next(quantity * die) + 1;
+
+            Assert.That(die, Is.InRange(2, Limits.Die));
 
             var roll = GetRoll(quantity, die);
 
