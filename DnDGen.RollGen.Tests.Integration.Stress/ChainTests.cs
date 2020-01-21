@@ -56,39 +56,42 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 
         private void AssertRoll(PartialRoll roll, string q, string d, string k, string p, string m, string t, string db, string md, double percentageThreshold, int rollThreshold)
         {
-            var min = Math.Min(ComputeMinimum(q), ComputeMinimum(k)) * 2
+            var min = Math.Min(ComputeMinimum(q), ComputeMinimum(k)) * 3
                 + ComputeMinimum(p)
                 - ComputeMinimum(m)
                 * ComputeMinimum(t)
                 / ComputeMinimum(db)
                 % ComputeMinimum(md);
-            var max = ComputeMaximum(k) * 10
+            var max = ComputeMaximum(k) * 4
+                + ComputeMaximum(k) * 10
                 + ComputeMaximum(k) * 100
                 + ComputeMaximum(p)
                 - ComputeMaximum(m)
                 * ComputeMaximum(t)
                 / ComputeMaximum(db)
                 % ComputeMaximum(md);
-            var avg = ComputeMaximum(k) * 10
-                + ComputeMaximum(k) * 100
-                + ComputeAverage(p)
-                - ComputeAverage(m)
-                * ComputeAverage(t)
-                / ComputeAverage(db)
-                % ComputeAverage(md);
+            var explodeMax = ComputeMaximum(k) * 4
+                + ComputeMaximum(k) * 10
+                + ComputeMaximum(k) * 100 * 10
+                + ComputeMaximum(p)
+                - ComputeMaximum(m)
+                * ComputeMaximum(t)
+                / ComputeMaximum(db)
+                % ComputeMaximum(md);
 
-            Assert.That(roll.AsSum(), Is.InRange(min, max * 10), roll.CurrentRollExpression);
-            Assert.That(roll.AsPotentialMinimum(), Is.EqualTo(min), roll.CurrentRollExpression);
-            Assert.That(roll.AsPotentialMaximum(false), Is.EqualTo(max), roll.CurrentRollExpression);
-            Assert.That(roll.AsPotentialMaximum(), Is.EqualTo(max * 10), roll.CurrentRollExpression);
-            Assert.That(roll.AsPotentialAverage(), Is.EqualTo(avg), roll.CurrentRollExpression);
+            Assert.That(roll.AsSum<double>(), Is.InRange(min, max * 10), roll.CurrentRollExpression);
+            Assert.That(roll.AsPotentialMinimum<double>(), Is.EqualTo(min), roll.CurrentRollExpression);
+            Assert.That(roll.AsPotentialMaximum<double>(false), Is.EqualTo(max), roll.CurrentRollExpression);
+            Assert.That(roll.AsPotentialMaximum<double>(), Is.EqualTo(explodeMax), roll.CurrentRollExpression);
+            //HACK: We are ignoring the average, since it will probably result in decimal rolls during evaluation
+
             Assert.That(roll.AsTrueOrFalse(percentageThreshold), Is.True.Or.False, roll.CurrentRollExpression);
             Assert.That(roll.AsTrueOrFalse(rollThreshold), Is.True.Or.False, roll.CurrentRollExpression);
 
             var rolls = roll.AsIndividualRolls();
 
             Assert.That(rolls.Count(), Is.EqualTo(1), roll.CurrentRollExpression);
-            Assert.That(rolls, Has.All.InRange(min, max), roll.CurrentRollExpression);
+            Assert.That(rolls, Has.All.InRange(min, explodeMax), roll.CurrentRollExpression);
         }
 
         private double ComputeMinimum(string expression)
@@ -99,11 +102,6 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
         private double ComputeMaximum(string expression)
         {
             return Dice.Roll(expression).AsPotentialMaximum();
-        }
-
-        private double ComputeAverage(string expression)
-        {
-            return Dice.Roll(expression).AsPotentialAverage();
         }
 
         protected void AssertExpressionChain()
@@ -126,78 +124,14 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 
         protected void AssertRollChain()
         {
-            var q = GetRoll(
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber());
-            var d = GetRoll(
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber());
-            var k = GetRoll(
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber());
-            var p = GetRoll(
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber());
-            var m = GetRoll(
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber());
-            var t = GetRoll(
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber());
-            var db = GetRoll(
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber());
-            var md = GetRoll(
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber(),
-                GetRandomNumber());
+            var q = Dice.Roll($"{GetRandomNumber()}d{GetRandomNumber()}");
+            var d = Dice.Roll($"{GetRandomNumber()}d{GetRandomNumber()}");
+            var k = Dice.Roll($"{GetRandomNumber()}d{GetRandomNumber()}");
+            var p = Dice.Roll($"{GetRandomNumber()}d{GetRandomNumber()}");
+            var m = Dice.Roll($"{GetRandomNumber()}d{GetRandomNumber()}");
+            var t = Dice.Roll($"{GetRandomNumber()}d{GetRandomNumber()}");
+            var db = Dice.Roll($"{GetRandomNumber()}d{GetRandomNumber()}");
+            var md = Dice.Roll($"{GetRandomNumber()}d{GetRandomNumber()}");
             var percentageThreshold = Random.NextDouble();
             var rollThreshold = Random.Next();
 
@@ -221,6 +155,8 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
             .d2()
             .d3()
             .d4()
+            .Keeping(k)
+            .Plus(q)
             .d6()
             .d8()
             .d10()
@@ -241,6 +177,8 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
             .d2()
             .d3()
             .d4()
+            .Keeping(k)
+            .Plus(q)
             .d6()
             .d8()
             .d10()
@@ -261,6 +199,8 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
             .d2()
             .d3()
             .d4()
+            .Keeping(k)
+            .Plus(q)
             .d6()
             .d8()
             .d10()

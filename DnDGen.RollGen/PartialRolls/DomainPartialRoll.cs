@@ -74,6 +74,12 @@ namespace DnDGen.RollGen.PartialRolls
 
             var minimumAdjustment = AsPotentialMinimum<double>() - 1;
             var range = AsPotentialMaximum<double>(false) - minimumAdjustment;
+
+            if (range == 1)
+            {
+                return threshold < 1;
+            }
+
             var product = range * threshold;
             var rollThreshold = product + minimumAdjustment;
 

@@ -38,7 +38,7 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
             Assert.That(roll.AsPotentialMaximum<double>(false), Is.EqualTo(total), roll.CurrentRollExpression);
             Assert.That(roll.AsPotentialMaximum<double>(), Is.EqualTo(total), roll.CurrentRollExpression);
             Assert.That(roll.AsPotentialAverage(), Is.EqualTo(total), roll.CurrentRollExpression);
-            Assert.That(roll.AsTrueOrFalse(percentageThreshold), Is.False, $"Percentage ({percentageThreshold}): {roll.CurrentRollExpression}");
+            Assert.That(roll.AsTrueOrFalse(percentageThreshold), Is.True, $"Percentage ({percentageThreshold}): {roll.CurrentRollExpression}");
             Assert.That(roll.AsTrueOrFalse(rollThreshold), Is.True, $"Roll ({rollThreshold}): {roll.CurrentRollExpression}");
 
             var rolls = roll.AsIndividualRolls<double>();
@@ -56,9 +56,9 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
         private void AssertMinus()
         {
             var quantity = Random.Next(Limits.Quantity) + 1;
-            var minus = Random.Next(1_000_000_000) + Random.NextDouble();
+            var minus = Random.Next(quantity * 2) + Random.NextDouble();
             var percentageThreshold = Random.NextDouble();
-            var rollThreshold = Random.Next(1) + 1;
+            var rollThreshold = Convert.ToInt32(quantity - minus) - 1;
 
             var roll = Dice.Roll(quantity).Minus(minus);
 
@@ -113,7 +113,7 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
             var quantity = Random.Next(Limits.Quantity) + 1;
             var mod = Random.Next();
             var percentageThreshold = Random.NextDouble();
-            var rollThreshold = Random.Next(mod);
+            var rollThreshold = Random.Next(quantity % mod);
 
             var roll = Dice.Roll(quantity).Modulos(mod);
 

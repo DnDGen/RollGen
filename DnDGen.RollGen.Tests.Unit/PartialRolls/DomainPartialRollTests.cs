@@ -2332,6 +2332,86 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             Assert.That(result, Is.True);
         }
 
+        [TestCase(.01)]
+        [TestCase(.5)]
+        [TestCase(.99)]
+        public void ReturnAsTrueIfConstant_LowPercentage_Int(double percentage)
+        {
+            BuildPartialRoll(9266);
+            var result = partialRoll.AsTrueOrFalse(percentage);
+            Assert.That(result, Is.True);
+        }
+
+        [TestCase(.01)]
+        [TestCase(.5)]
+        [TestCase(.99)]
+        public void ReturnAsTrueIfConstant_LowPercentage_Double(double percentage)
+        {
+            BuildPartialRoll(92.66);
+            var result = partialRoll.AsTrueOrFalse(percentage);
+            Assert.That(result, Is.True);
+        }
+
+        [TestCase(1)]
+        [TestCase(1.01)]
+        [TestCase(2)]
+        public void ReturnAsFalseIfConstant_HighPercentage_Int(double percentage)
+        {
+            BuildPartialRoll(9266);
+            var result = partialRoll.AsTrueOrFalse(percentage);
+            Assert.That(result, Is.False);
+        }
+
+        [TestCase(1)]
+        [TestCase(1.01)]
+        [TestCase(2)]
+        public void ReturnAsFalseIfConstant_HighPercentage_Double(double percentage)
+        {
+            BuildPartialRoll(92.66);
+            var result = partialRoll.AsTrueOrFalse(percentage);
+            Assert.That(result, Is.False);
+        }
+
+        [Test]
+        public void ReturnAsFalseIfConstant_LessThanRoll_Int()
+        {
+            BuildPartialRoll(9266);
+            var result = partialRoll.AsTrueOrFalse(9267);
+            Assert.That(result, Is.False);
+        }
+
+        [Test]
+        public void ReturnAsFalseIfConstant_LessThanRoll_Double()
+        {
+            BuildPartialRoll(92.66);
+            var result = partialRoll.AsTrueOrFalse(93);
+            Assert.That(result, Is.False);
+        }
+
+        [Test]
+        public void ReturnAsTrueIfConstant_EqualToRoll_Int()
+        {
+            BuildPartialRoll(9266);
+            var result = partialRoll.AsTrueOrFalse(9266);
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public void ReturnAsTrueIfConstant_GreaterThanRoll_Int()
+        {
+            BuildPartialRoll(9266);
+            var result = partialRoll.AsTrueOrFalse(9265);
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public void ReturnAsTrueIfConstant_GreaterThanRoll_Double()
+        {
+            BuildPartialRoll(92.66);
+            var result = partialRoll.AsTrueOrFalse(92);
+            Assert.That(result, Is.True);
+        }
+
         [Test]
         public void ReturnNumericKeepingWithNumericQuantity()
         {
