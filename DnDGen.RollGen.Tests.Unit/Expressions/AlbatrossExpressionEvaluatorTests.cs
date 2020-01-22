@@ -3,6 +3,7 @@ using Albatross.Expression.Tokens;
 using DnDGen.RollGen.Expressions;
 using Moq;
 using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 
 namespace DnDGen.RollGen.Tests.Unit.Expressions
@@ -87,6 +88,28 @@ namespace DnDGen.RollGen.Tests.Unit.Expressions
 
             var result = expressionEvaluator.Evaluate<bool>("boolean expression");
             Assert.That(result, Is.False);
+        }
+
+        [Test]
+        public void EvaluateExpressionThrowsException_WhenAlbatrossFailsToEvaluate()
+        {
+            var expression = "wrong expression";
+
+            var mockToken = new Mock<IToken>();
+            var queue = new Queue<IToken>();
+            var stack = new Stack<IToken>();
+
+            mockParser.Setup(p => p.Tokenize(expression)).Returns(queue);
+            mockParser.Setup(p => p.BuildStack(queue)).Returns(stack);
+            mockParser.Setup(p => p.CreateTree(stack)).Returns(mockToken.Object);
+
+            var exception = new Exception("I failed");
+            mockToken.Setup(t => t.EvalValue(null)).Throws(exception);
+
+            Assert.That(() => expressionEvaluator.Evaluate<int>(expression),
+                Throws.InvalidOperationException
+                .With.Message.EqualTo($"Expression 'wrong expression' is invalid")
+                .And.InnerException.EqualTo(exception));
         }
     }
 }
