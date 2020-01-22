@@ -14,6 +14,7 @@ namespace DnDGen.RollGen
         public int Quantities => Rolls.Sum(r => r.Quantity);
         public int Lower => Quantities + Adjustment;
         public int Upper => Rolls.Sum(r => r.Quantity * r.Die) + Adjustment;
+        public int Range => Upper - Lower + 1;
 
         public RollCollection()
         {
@@ -39,7 +40,8 @@ namespace DnDGen.RollGen
 
         public bool Matches(int lower, int upper)
         {
-            return RangeDifference(lower, upper) == 0;
+            return RangeDifference(lower, upper) == 0
+                && !Rolls.Any(r => !r.IsValid);
         }
 
         public override string ToString()
@@ -62,18 +64,34 @@ namespace DnDGen.RollGen
             return Build().GetHashCode();
         }
 
-        public int GetRanking(int lower, int upper)
+        public int GetRankingForFewestDice(int lower, int upper)
         {
-            var rangeDifference = RangeDifference(lower, upper);
+            if (!Matches(lower, upper))
+                return int.MaxValue;
 
-            var rank = rangeDifference * 100000;
-
+            var rank = 0;
             if (!Rolls.Any())
                 return rank;
 
-            rank += (Quantities - 1) * 10000;
-            rank += Rolls.Count * 1000;
-            rank += StandardDice.Max() - Rolls.Max(r => r.Die) + 1;
+            rank += Rolls.Count * 100_000_000;
+            rank += Quantities * 1_000;
+            rank += StandardDice.Max() - Rolls.Max(r => r.Die);
+
+            return rank;
+        }
+
+        public int GetRankingForMostEvenDistribution(int lower, int upper)
+        {
+            if (!Matches(lower, upper))
+                return int.MaxValue;
+
+            var rank = 0;
+            if (!Rolls.Any())
+                return rank;
+
+            rank += Quantities * 100_000;
+            rank += Rolls.Count * 1_000;
+            rank += StandardDice.Max() - Rolls.Max(r => r.Die);
 
             return rank;
         }

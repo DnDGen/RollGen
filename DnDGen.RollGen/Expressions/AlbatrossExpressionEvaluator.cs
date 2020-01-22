@@ -22,10 +22,17 @@ namespace DnDGen.RollGen.Expressions
             if (match.Success)
                 throw new ArgumentException($"Cannot evaluate unrolled die roll {match.Value}");
 
-            var unevaluatedMatch = parser.Compile(expression).EvalValue(null);
-            var evaluatedExpression = Utils.BooleanOrType<T>(unevaluatedMatch);
+            try
+            {
+                var unevaluatedMatch = parser.Compile(expression).EvalValue(null);
+                var evaluatedExpression = Utils.BooleanOrType<T>(unevaluatedMatch);
 
-            return Utils.ChangeType<T>(evaluatedExpression);
+                return Utils.ChangeType<T>(evaluatedExpression);
+            }
+            catch (Exception e)
+            {
+                throw new InvalidOperationException($"Expression '{expression}' is invalid", e);
+            }
         }
     }
 }

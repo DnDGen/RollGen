@@ -55,9 +55,10 @@ namespace DnDGen.RollGen.Tests.Integration
         [TestCase("(9d8!k7)d(6d4!)!k(3d2k1)", 1, 4800)]
         public void ParantheticalQuantity(string quantity, int lower, int upper)
         {
-            var sum = Dice.Roll(quantity).AsSum();
-            var min = Dice.Roll(quantity).AsPotentialMinimum();
-            var max = Dice.Roll(quantity).AsPotentialMaximum();
+            var roll = Dice.Roll(quantity);
+            var sum = roll.AsSum();
+            var min = roll.AsPotentialMinimum();
+            var max = roll.AsPotentialMaximum();
 
             Assert.That(min, Is.EqualTo(lower));
             Assert.That(max, Is.EqualTo(upper));
@@ -105,14 +106,15 @@ namespace DnDGen.RollGen.Tests.Integration
         [TestCase("1-2+3(4)", 1, 11)]
         [TestCase("1-2+3(4d5)", 1, 59)]
         [TestCase("(1)(2)(3)", 1, 6)]
-        [TestCase("(1d2+3)(6d5k4)(7d8!)", 1, 56000)]
+        [TestCase("(1d2!+3)(6d5k4)", 1, 460)]
         [TestCase("(3)d(2)k(1)", 1, 2)]
         [TestCase("(9d8!k7)d(6d4!)!k(3d2k1)", 1, 4800)]
         public void ParantheticalDie(string quantity, int lower, int upper)
         {
-            var sum = Dice.Roll().d(quantity).AsSum();
-            var min = Dice.Roll().d(quantity).AsPotentialMinimum();
-            var max = Dice.Roll().d(quantity).AsPotentialMaximum();
+            var roll = Dice.Roll().d(quantity);
+            var sum = roll.AsSum();
+            var min = roll.AsPotentialMinimum();
+            var max = roll.AsPotentialMaximum();
 
             Assert.That(min, Is.EqualTo(lower));
             Assert.That(max, Is.EqualTo(upper));
@@ -160,14 +162,15 @@ namespace DnDGen.RollGen.Tests.Integration
         [TestCase("1-2+3(4)", 11, 22)]
         [TestCase("1-2+3(4d5)", 11, 118)]
         [TestCase("(1)(2)(3)", 6, 12)]
-        [TestCase("(1d2+3)(6d5k4)(7d8!)", 112, 112000)]
+        [TestCase("(1d2!+3)(6d5k4)", 16, 920)]
         [TestCase("(3)d(2)k(1)", 1, 4)]
         [TestCase("(9d8!k7)d(6d4!)!k(3d2k1)", 1, 9600)]
         public void ParantheticalKeep(string keep, int lower, int upper)
         {
-            var sum = Dice.Roll(100_000).d2().Keeping(keep).AsSum();
-            var min = Dice.Roll(100_000).d2().Keeping(keep).AsPotentialMinimum();
-            var max = Dice.Roll(100_000).d2().Keeping(keep).AsPotentialMaximum();
+            var roll = Dice.Roll(Limits.Quantity).d2().Keeping(keep);
+            var sum = roll.AsSum();
+            var min = roll.AsPotentialMinimum();
+            var max = roll.AsPotentialMaximum();
 
             Assert.That(min, Is.EqualTo(lower));
             Assert.That(max, Is.EqualTo(upper));
@@ -177,9 +180,10 @@ namespace DnDGen.RollGen.Tests.Integration
         [Test]
         public void ParantheticalQuantityAndDie()
         {
-            var sum = Dice.Roll("1d2").d("3d4").AsSum();
-            var min = Dice.Roll("1d2").d("3d4").AsPotentialMinimum();
-            var max = Dice.Roll("1d2").d("3d4").AsPotentialMaximum();
+            var roll = Dice.Roll("1d2").d("3d4");
+            var sum = roll.AsSum();
+            var min = roll.AsPotentialMinimum();
+            var max = roll.AsPotentialMaximum();
 
             Assert.That(min, Is.EqualTo(1));
             Assert.That(max, Is.EqualTo(24));
@@ -189,9 +193,10 @@ namespace DnDGen.RollGen.Tests.Integration
         [Test]
         public void ParantheticalQuantityAndDieAndKeep()
         {
-            var sum = Dice.Roll("5d6").d("3d4").Keeping("1d2").AsSum();
-            var min = Dice.Roll("5d6").d("3d4").Keeping("1d2").AsPotentialMinimum();
-            var max = Dice.Roll("5d6").d("3d4").Keeping("1d2").AsPotentialMaximum();
+            var roll = Dice.Roll("5d6").d("3d4").Keeping("1d2");
+            var sum = roll.AsSum();
+            var min = roll.AsPotentialMinimum();
+            var max = roll.AsPotentialMaximum();
 
             Assert.That(min, Is.EqualTo(1));
             Assert.That(max, Is.EqualTo(24));

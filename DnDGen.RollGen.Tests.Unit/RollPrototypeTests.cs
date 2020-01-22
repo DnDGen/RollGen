@@ -38,5 +38,59 @@ namespace DnDGen.RollGen.Tests.Unit
 
             Assert.That(prototype.ToString(), Is.EqualTo("9266d90210"));
         }
+
+        [Test]
+        public void RangeIsComputed()
+        {
+            prototype.Quantity = 9266;
+            prototype.Die = 90210;
+
+            Assert.That(prototype.Range, Is.EqualTo(9266 * 90210 - 9266 + 1));
+        }
+
+        [Test]
+        public void IsValid()
+        {
+            prototype.Quantity = 9266;
+            prototype.Die = 42;
+
+            Assert.That(prototype.IsValid, Is.True);
+        }
+
+        [Test]
+        public void IsNotValid_QuantityTooLow()
+        {
+            prototype.Quantity = 0;
+            prototype.Die = 42;
+
+            Assert.That(prototype.IsValid, Is.False);
+        }
+
+        [Test]
+        public void IsNotValid_QuantityTooHigh()
+        {
+            prototype.Quantity = Limits.Quantity + 1;
+            prototype.Die = 42;
+
+            Assert.That(prototype.IsValid, Is.False);
+        }
+
+        [Test]
+        public void IsNotValid_DieTooLow()
+        {
+            prototype.Quantity = 9266;
+            prototype.Die = 0;
+
+            Assert.That(prototype.IsValid, Is.False);
+        }
+
+        [Test]
+        public void IsNotValid_DieTooHigh()
+        {
+            prototype.Quantity = 9266;
+            prototype.Die = Limits.Die + 1;
+
+            Assert.That(prototype.IsValid, Is.False);
+        }
     }
 }

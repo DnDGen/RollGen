@@ -1,125 +1,123 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace DnDGen.RollGen
 {
     public static class RollHelper
     {
-        public static string GetRoll(int baseQuantity, int lower, int upper)
+        public static string GetRollWithFewestDice(int baseQuantity, int lower, int upper)
         {
             var newLower = lower - baseQuantity;
             var newUpper = upper - baseQuantity;
 
-            return GetRoll(newLower, newUpper);
+            return GetRollWithFewestDice(newLower, newUpper);
         }
 
-        public static string GetRoll(int lower, int upper)
+        public static string GetRollWithFewestDice(int lower, int upper)
         {
-            var collection = GetRollCollection(lower, upper);
+            var collections = GetRollCollections(lower, upper);
+            if (!collections.Any())
+                throw new ArgumentException($"Cannot generate a valid roll for range [{lower},{upper}]");
 
-            return collection.Build();
+            var bestMatchingRanking = collections.Min(c => c.GetRankingForFewestDice(lower, upper));
+            var bestMatchingCollection = collections.First(c => c.GetRankingForFewestDice(lower, upper) == bestMatchingRanking);
+
+            return bestMatchingCollection.Build();
         }
 
-        internal static RollCollection GetRollCollection(int lower, int upper)
+        public static string GetRollWithMostEvenDistribution(int baseQuantity, int lower, int upper)
         {
-            var collection = new RollCollection();
-            var collections = GetRollCollectionsRecursive(lower, upper, collection);
+            var newLower = lower - baseQuantity;
+            var newUpper = upper - baseQuantity;
 
-            var bestMatchingRanking = collections.Min(c => c.GetRanking(lower, upper));
-            var bestMatchingCollection = collections.First(c => c.GetRanking(lower, upper) == bestMatchingRanking);
-
-            return bestMatchingCollection;
+            return GetRollWithMostEvenDistribution(newLower, newUpper);
         }
 
-        private static IEnumerable<RollCollection> GetRollCollectionsRecursive(int lower, int upper, RollCollection existingCollection)
+        public static string GetRollWithMostEvenDistribution(int lower, int upper)
         {
+            var collections = GetRollCollections(lower, upper);
+            if (!collections.Any())
+                throw new ArgumentException($"Cannot generate a valid roll for range [{lower},{upper}]");
+
+            var bestMatchingRanking = collections.Min(c => c.GetRankingForMostEvenDistribution(lower, upper));
+            var bestMatchingCollection = collections.First(c => c.GetRankingForMostEvenDistribution(lower, upper) == bestMatchingRanking);
+
+            return bestMatchingCollection.Build();
+        }
+
+        private static IEnumerable<RollCollection> GetRollCollections(int lower, int upper)
+        {
+            var adjustmentCollection = new RollCollection();
+            adjustmentCollection.Adjustment = upper;
+
+            if (adjustmentCollection.Matches(lower, upper))
+            {
+                return new[] { adjustmentCollection };
+            }
+
+            var range = upper - lower + 1;
+            var dice = RollCollection.StandardDice
+                .Where(d => d <= range)
+                .OrderByDescending(d => d);
+
             var collections = new List<RollCollection>();
-            var initialCollections = GetCollectionsFromPrototypes(lower, upper, existingCollection);
+            var canBeCloned = collections.Where(c => !c.Matches(lower, upper));
 
-            if (initialCollections.Count() == 1 && initialCollections.Single() == existingCollection)
-                return initialCollections;
-
-            var tooHigh = initialCollections.Where(c => c.Upper > upper);
-            var validCollections = initialCollections.Except(tooHigh);
-
-            foreach (var collection in validCollections)
+            foreach (var die in dice)
             {
-                var newCollections = GetRollCollectionsRecursive(lower, upper, collection);
-                collections.AddRange(newCollections);
+                var clones = new List<RollCollection>();
+
+                foreach (var collection in canBeCloned)
+                {
+                    var remainingUpper = upper - collection.Upper;
+                    var remainingLower = lower - collection.Lower;
+                    var remainingRange = remainingUpper - remainingLower + 1;
+
+                    if (remainingRange < die)
+                        continue;
+
+                    var clone = new RollCollection();
+                    clone.Rolls.AddRange(collection.Rolls);
+
+                    var additionalPrototype = BuildRollPrototype(remainingLower, remainingUpper, die);
+                    if (additionalPrototype.Quantity > Limits.Quantity)
+                        continue;
+
+                    clone.Rolls.Add(additionalPrototype);
+                    clone.Adjustment = lower - clone.Quantities;
+
+                    clones.Add(clone);
+                }
+
+                collections.AddRange(clones);
+
+                var dieCollection = new RollCollection();
+                var diePrototype = BuildRollPrototype(lower, upper, die);
+
+                if (diePrototype.Quantity <= Limits.Quantity)
+                {
+                    dieCollection.Rolls.Add(diePrototype);
+                    dieCollection.Adjustment = lower - dieCollection.Quantities;
+
+                    collections.Add(dieCollection);
+                }
             }
 
-            return collections;
+            var matchingCollections = collections.Where(c => c.Matches(lower, upper));
+
+            return matchingCollections;
         }
 
-        private static IEnumerable<RollCollection> GetCollectionsFromPrototypes(int lower, int upper, RollCollection existingCollection)
+        private static RollPrototype BuildRollPrototype(int lower, int upper, int die)
         {
-            var collections = new List<RollCollection>();
+            var newQuantity = (upper - lower) / (die - 1);
 
-            var newLower = lower - existingCollection.Lower;
-            var newUpper = upper - existingCollection.Upper;
-
-            if (newLower >= newUpper)
+            return new RollPrototype
             {
-                existingCollection.Adjustment = lower - existingCollection.Quantities;
-
-                return new[] { existingCollection };
-            }
-
-            var diceToIgnore = existingCollection.Rolls.Select(r => r.Die).ToArray();
-            var prototypes = GetSingleRollPrototypes(newLower, newUpper, diceToIgnore);
-
-            if (!prototypes.Any())
-                return new[] { existingCollection };
-
-            foreach (var prototype in prototypes)
-            {
-                var collection = new RollCollection();
-                collection.Rolls.Add(prototype);
-                collection.Rolls.AddRange(existingCollection.Rolls);
-
-                collection.Adjustment = lower - collection.Quantities;
-
-                collections.Add(collection);
-            }
-
-            return collections;
-        }
-
-        private static IEnumerable<RollPrototype> GetSingleRollPrototypes(int lower, int upper, params int[] diceToIgnore)
-        {
-            if (upper <= lower)
-                return Enumerable.Empty<RollPrototype>();
-
-            var dieCap = upper - lower + 1;
-            var possibleDice = RollCollection.StandardDice
-                .Where(d => d <= upper || d <= dieCap)
-                .Where(d => !diceToIgnore.Contains(d));
-
-            var prototypes = new List<RollPrototype>();
-
-            foreach (var die in possibleDice)
-            {
-                var quantity = dieCap / die;
-
-                var lowerPrototype = GetRollPrototype(quantity, die);
-                prototypes.Add(lowerPrototype);
-
-                var upperPrototype = GetRollPrototype(quantity + 1, die);
-                prototypes.Add(upperPrototype);
-            }
-
-            return prototypes;
-        }
-
-        private static RollPrototype GetRollPrototype(int quantity, int die)
-        {
-            var prototype = new RollPrototype
-            {
-                Quantity = quantity,
-                Die = die
+                Die = die,
+                Quantity = newQuantity
             };
-
-            return prototype;
         }
     }
 }

@@ -19,17 +19,40 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
             stressor.Stress(AssertExplode);
         }
 
-        private void AssertExplode()
+        protected void AssertExplode()
         {
-            var quantity = Random.Next(1000) + 1;
-            var die = Random.Next(100_000) + 2; //INFO: Can't allow d1, as explode fails on that
+            var quantity = Random.Next(Limits.Quantity) + 1;
+            var die = Random.Next(Limits.Die - 1) + 2; //INFO: Can't allow d1, as explode fails on that
+            var percentageThreshold = Random.NextDouble();
+            var rollThreshold = Random.Next(quantity * die) + 1;
 
-            var rolls = Dice.Roll(quantity).d(die).Explode().AsIndividualRolls();
-            var maxCount = rolls.Count(r => r == die);
+            Assert.That(die, Is.InRange(2, Limits.Die));
 
-            Assert.That(rolls.Count(), Is.AtLeast(quantity)
-                .And.EqualTo(quantity + maxCount));
+            var roll = GetRoll(quantity, die);
+
+            AssertRoll(roll, quantity, die, percentageThreshold, rollThreshold);
+        }
+
+        private void AssertRoll(PartialRoll roll, int quantity, int die, double percentageThreshold, int rollThreshold)
+        {
+            var average = quantity * (die + 1) / 2.0d;
+            var min = quantity;
+            var max = quantity * die;
+
+            Assert.That(roll.AsSum(), Is.InRange(min, max * 10));
+            Assert.That(roll.AsPotentialMinimum(), Is.EqualTo(min));
+            Assert.That(roll.AsPotentialMaximum(false), Is.EqualTo(max));
+            Assert.That(roll.AsPotentialMaximum(), Is.EqualTo(max * 10));
+            Assert.That(roll.AsPotentialAverage(), Is.EqualTo(average));
+            Assert.That(roll.AsTrueOrFalse(percentageThreshold), Is.True.Or.False, "Percentage");
+            Assert.That(roll.AsTrueOrFalse(rollThreshold), Is.True.Or.False, "Roll");
+
+            var rolls = roll.AsIndividualRolls();
+
+            Assert.That(rolls.Count(), Is.AtLeast(quantity));
             Assert.That(rolls, Has.All.InRange(1, die));
         }
+
+        private PartialRoll GetRoll(int quantity, int die) => Dice.Roll(quantity).d(die).Explode();
     }
 }

@@ -22,7 +22,7 @@ namespace DnDGen.RollGen.PartialRolls
             booleanExpressionRegex = new Regex(RegexConstants.BooleanExpressionPattern);
         }
 
-        public DomainPartialRoll(int quantity, Random random, ExpressionEvaluator expressionEvaluator)
+        public DomainPartialRoll(double quantity, Random random, ExpressionEvaluator expressionEvaluator)
             : this(random, expressionEvaluator)
         {
             CurrentRollExpression = $"{quantity}";
@@ -34,15 +34,18 @@ namespace DnDGen.RollGen.PartialRolls
             CurrentRollExpression = $"({quantity})";
         }
 
-        public override int AsSum()
+        public override T AsSum<T>()
         {
-            var rolls = GetIndividualRolls(CurrentRollExpression);
-            return rolls.Sum();
+            var rolls = GetIndividualRolls<T>(CurrentRollExpression);
+            var values = rolls.Select(r => Utils.ChangeType<double>(r));
+            var sum = values.Sum();
+
+            return Utils.ChangeType<T>(sum);
         }
 
-        public override IEnumerable<int> AsIndividualRolls()
+        public override IEnumerable<T> AsIndividualRolls<T>()
         {
-            var rolls = GetIndividualRolls(CurrentRollExpression);
+            var rolls = GetIndividualRolls<T>(CurrentRollExpression);
             return rolls;
         }
 
@@ -52,15 +55,15 @@ namespace DnDGen.RollGen.PartialRolls
             return average;
         }
 
-        public override int AsPotentialMinimum()
+        public override T AsPotentialMinimum<T>()
         {
-            var minimum = GetMinimumRoll(CurrentRollExpression);
+            var minimum = GetMinimumRoll<T>(CurrentRollExpression);
             return minimum;
         }
 
-        public override int AsPotentialMaximum(bool includeExplode = true)
+        public override T AsPotentialMaximum<T>(bool includeExplode = true)
         {
-            var maximum = GetMaximumRoll(CurrentRollExpression, includeExplode);
+            var maximum = GetMaximumRoll<T>(CurrentRollExpression, includeExplode);
             return maximum;
         }
 
@@ -69,18 +72,28 @@ namespace DnDGen.RollGen.PartialRolls
             if (booleanExpressionRegex.IsMatch(CurrentRollExpression))
                 return EvaluateExpressionWithRollsAsTrueOrFalse(CurrentRollExpression);
 
-            var minimumAdjustment = AsPotentialMinimum() - 1;
-            var range = AsPotentialMaximum(false) - minimumAdjustment;
-            var product = range * threshold;
-            var ceiling = Math.Ceiling(product);
-            var rollThreshold = Convert.ToInt32(ceiling) + minimumAdjustment;
+            var minimumAdjustment = AsPotentialMinimum<double>() - 1;
+            var range = AsPotentialMaximum<double>(false) - minimumAdjustment;
 
-            if (ceiling == product)
+            if (range == 1)
             {
-                rollThreshold++;
+                return threshold < 1;
             }
 
-            return AsTrueOrFalse(rollThreshold);
+            var product = range * threshold;
+            var rollThreshold = product + minimumAdjustment;
+
+            if (IsInteger(rollThreshold))
+                rollThreshold += .5;
+
+            rollThreshold = Math.Ceiling(rollThreshold);
+            var roll = Convert.ToInt32(rollThreshold);
+            return AsTrueOrFalse(roll);
+        }
+
+        private bool IsInteger(double value)
+        {
+            return Math.Abs(value % 1) <= (double.Epsilon * 100);
         }
 
         public override bool AsTrueOrFalse(int threshold)
@@ -88,13 +101,13 @@ namespace DnDGen.RollGen.PartialRolls
             if (booleanExpressionRegex.IsMatch(CurrentRollExpression))
                 return EvaluateExpressionWithRollsAsTrueOrFalse(CurrentRollExpression);
 
-            var sum = AsSum();
+            var sum = AsSum<double>();
             return sum >= threshold;
         }
 
         private bool EvaluateExpressionWithRollsAsTrueOrFalse(string rollExpression)
         {
-            var expression = ReplaceRollsInExpression(rollExpression, GetTotalOfRolls);
+            var expression = ReplaceRollsInExpression(rollExpression, e => GetTotalOfRolls<double>(e));
             var evaluatedExpression = expressionEvaluator.Evaluate<bool>(expression);
             return evaluatedExpression;
         }
@@ -129,19 +142,19 @@ namespace DnDGen.RollGen.PartialRolls
             return this;
         }
 
-        private IEnumerable<int> GetIndividualRolls(string rollExpression)
+        private IEnumerable<T> GetIndividualRolls<T>(string rollExpression)
         {
             //INFO: Not sure how to evaluate individual rolls from genuine expressions (6d5d4k3d2k1), so will compute those as 1 roll
             if (!Roll.CanParse(rollExpression))
             {
-                var evaluatedExpression = EvaluateExpression(rollExpression, GetTotalOfRolls);
+                var evaluatedExpression = EvaluateExpression(rollExpression, e => GetTotalOfRolls<T>(e));
                 return new[] { evaluatedExpression };
             }
 
             var roll = new Roll(rollExpression);
             var rolls = roll.GetRolls(random);
 
-            return rolls;
+            return rolls.Select(r => Utils.ChangeType<T>(r));
         }
 
         private T EvaluateExpression<T>(string rollExpression, Func<string, T> getRoll)
@@ -183,6 +196,15 @@ namespace DnDGen.RollGen.PartialRolls
 
             while (match.Success)
             {
+                var matchIndex = expressionWithReplacedRolls.IndexOf(match.Value);
+                if ((matchIndex > 0
+                        && expressionWithReplacedRolls[matchIndex - 1] == '.')
+                    || (expressionWithReplacedRolls.Length > matchIndex + match.Value.Length
+                        && expressionWithReplacedRolls[matchIndex + match.Value.Length] == '.'))
+                {
+                    throw new ArgumentException($"Cannot have decimal values for die rolls");
+                }
+
                 var matchValue = match.Value.Trim();
                 var replacement = getRoll(matchValue);
 
@@ -251,15 +273,16 @@ namespace DnDGen.RollGen.PartialRolls
             return closingIndex - openingIndex - 1;
         }
 
-        private int GetTotalOfRolls(string rollExpression)
+        private T GetTotalOfRolls<T>(string rollExpression)
         {
-            var rolls = GetIndividualRolls(rollExpression);
-            return rolls.Sum();
+            var rolls = GetIndividualRolls<int>(rollExpression);
+            var sum = rolls.Sum();
+            return Utils.ChangeType<T>(sum);
         }
 
         private double GetAverageRoll(string rollExpression)
         {
-            if (Roll.CanParse(rollExpression) == false)
+            if (!Roll.CanParse(rollExpression))
                 return EvaluateExpression(rollExpression, GetAverageRoll);
 
             var roll = new Roll(rollExpression);
@@ -268,26 +291,26 @@ namespace DnDGen.RollGen.PartialRolls
             return average;
         }
 
-        private int GetMinimumRoll(string rollExpression)
+        private T GetMinimumRoll<T>(string rollExpression)
         {
-            if (Roll.CanParse(rollExpression) == false)
-                return EvaluateExpression(rollExpression, GetMinimumRoll);
+            if (!Roll.CanParse(rollExpression))
+                return EvaluateExpression<T>(rollExpression, e => GetMinimumRoll<T>(e));
 
             var roll = new Roll(rollExpression);
             var minimum = roll.GetPotentialMinimum();
 
-            return minimum;
+            return Utils.ChangeType<T>(minimum);
         }
 
-        private int GetMaximumRoll(string rollExpression, bool includeExplode)
+        private T GetMaximumRoll<T>(string rollExpression, bool includeExplode)
         {
-            if (Roll.CanParse(rollExpression) == false)
-                return EvaluateExpression(rollExpression, e => GetMaximumRoll(e, includeExplode));
+            if (!Roll.CanParse(rollExpression))
+                return EvaluateExpression<T>(rollExpression, e => GetMaximumRoll<T>(e, includeExplode));
 
             var roll = new Roll(rollExpression);
             var maximum = roll.GetPotentialMaximum(includeExplode);
 
-            return maximum;
+            return Utils.ChangeType<T>(maximum);
         }
 
         private string ReplaceFirst(string source, string target, string replacement)
@@ -296,6 +319,66 @@ namespace DnDGen.RollGen.PartialRolls
             source = source.Remove(index, target.Length);
             source = source.Insert(index, replacement);
             return source;
+        }
+
+        public override PartialRoll Plus(string expression)
+        {
+            CurrentRollExpression += $"+({expression})";
+            return this;
+        }
+
+        public override PartialRoll Plus(double value)
+        {
+            CurrentRollExpression += $"+{value}";
+            return this;
+        }
+
+        public override PartialRoll Minus(string expression)
+        {
+            CurrentRollExpression += $"-({expression})";
+            return this;
+        }
+
+        public override PartialRoll Minus(double value)
+        {
+            CurrentRollExpression += $"-{value}";
+            return this;
+        }
+
+        public override PartialRoll Times(string expression)
+        {
+            CurrentRollExpression += $"*({expression})";
+            return this;
+        }
+
+        public override PartialRoll Times(double value)
+        {
+            CurrentRollExpression += $"*{value}";
+            return this;
+        }
+
+        public override PartialRoll DividedBy(string expression)
+        {
+            CurrentRollExpression += $"/({expression})";
+            return this;
+        }
+
+        public override PartialRoll DividedBy(double value)
+        {
+            CurrentRollExpression += $"/{value}";
+            return this;
+        }
+
+        public override PartialRoll Modulos(string expression)
+        {
+            CurrentRollExpression += $"%({expression})";
+            return this;
+        }
+
+        public override PartialRoll Modulos(double value)
+        {
+            CurrentRollExpression += $"%{value}";
+            return this;
         }
     }
 }
