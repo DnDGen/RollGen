@@ -15,7 +15,7 @@
     <PackageIconUrl />
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageReleaseNotes>Refine Roll Helper
-Feature #49</PackageReleaseNotes>
+Feature #29, #49</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
