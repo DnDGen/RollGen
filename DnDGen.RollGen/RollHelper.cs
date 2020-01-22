@@ -1,33 +1,59 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace DnDGen.RollGen
 {
     public static class RollHelper
     {
-        public static string GetRoll(int baseQuantity, int lower, int upper)
+        public static string GetRollWithFewestDice(int baseQuantity, int lower, int upper)
         {
             var newLower = lower - baseQuantity;
             var newUpper = upper - baseQuantity;
 
-            return GetRoll(newLower, newUpper);
+            return GetRollWithFewestDice(newLower, newUpper);
         }
 
-        public static string GetRoll(int lower, int upper)
+        public static string GetRollWithFewestDice(int lower, int upper)
         {
-            var collection = GetRollCollection(lower, upper);
+            var collections = GetRollCollections(lower, upper);
+            if (!collections.Any())
+                throw new ArgumentException($"Cannot generate a valid roll for range [{lower},{upper}]");
 
-            return collection.Build();
+            var bestMatchingRanking = collections.Min(c => c.GetRankingForFewestDice(lower, upper));
+            var bestMatchingCollection = collections.First(c => c.GetRankingForFewestDice(lower, upper) == bestMatchingRanking);
+
+            return bestMatchingCollection.Build();
         }
 
-        internal static RollCollection GetRollCollection(int lower, int upper)
+        public static string GetRollWithMostEvenDistribution(int baseQuantity, int lower, int upper)
+        {
+            var newLower = lower - baseQuantity;
+            var newUpper = upper - baseQuantity;
+
+            return GetRollWithMostEvenDistribution(newLower, newUpper);
+        }
+
+        public static string GetRollWithMostEvenDistribution(int lower, int upper)
+        {
+            var collections = GetRollCollections(lower, upper);
+            if (!collections.Any())
+                throw new ArgumentException($"Cannot generate a valid roll for range [{lower},{upper}]");
+
+            var bestMatchingRanking = collections.Min(c => c.GetRankingForMostEvenDistribution(lower, upper));
+            var bestMatchingCollection = collections.First(c => c.GetRankingForMostEvenDistribution(lower, upper) == bestMatchingRanking);
+
+            return bestMatchingCollection.Build();
+        }
+
+        private static IEnumerable<RollCollection> GetRollCollections(int lower, int upper)
         {
             var adjustmentCollection = new RollCollection();
             adjustmentCollection.Adjustment = upper;
 
             if (adjustmentCollection.Matches(lower, upper))
             {
-                return adjustmentCollection;
+                return new[] { adjustmentCollection };
             }
 
             var range = upper - lower + 1;
@@ -55,6 +81,8 @@ namespace DnDGen.RollGen
                     clone.Rolls.AddRange(collection.Rolls);
 
                     var additionalPrototype = BuildRollPrototype(remainingLower, remainingUpper, die);
+                    if (additionalPrototype.Quantity > Limits.Quantity)
+                        continue;
 
                     clone.Rolls.Add(additionalPrototype);
                     clone.Adjustment = lower - clone.Quantities;
@@ -67,17 +95,18 @@ namespace DnDGen.RollGen
                 var dieCollection = new RollCollection();
                 var diePrototype = BuildRollPrototype(lower, upper, die);
 
-                dieCollection.Rolls.Add(diePrototype);
-                dieCollection.Adjustment = lower - dieCollection.Quantities;
+                if (diePrototype.Quantity <= Limits.Quantity)
+                {
+                    dieCollection.Rolls.Add(diePrototype);
+                    dieCollection.Adjustment = lower - dieCollection.Quantities;
 
-                collections.Add(dieCollection);
+                    collections.Add(dieCollection);
+                }
             }
 
             var matchingCollections = collections.Where(c => c.Matches(lower, upper));
-            var bestMatchingRanking = matchingCollections.Min(c => c.GetRanking(lower, upper));
-            var bestMatchingCollection = matchingCollections.First(c => c.GetRanking(lower, upper) == bestMatchingRanking);
 
-            return bestMatchingCollection;
+            return matchingCollections;
         }
 
         private static RollPrototype BuildRollPrototype(int lower, int upper, int die)

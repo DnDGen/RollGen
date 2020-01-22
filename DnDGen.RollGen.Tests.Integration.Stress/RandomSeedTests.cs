@@ -29,32 +29,18 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
         {
             stressor.Stress(() => PopulateRolls(Dice1, Dice2));
 
-            var different = false;
-            for (var i = 0; i < dice1Rolls.Count; i++)
-                different |= dice1Rolls[i] != dice2Rolls[i];
-
-            Assert.That(different, Is.True);
+            Assert.That(dice1Rolls, Is.Not.EqualTo(dice2Rolls));
+            Assert.That(dice1Rolls.Distinct().Count(), Is.InRange(1000, Limits.Die));
+            Assert.That(dice2Rolls.Distinct().Count(), Is.InRange(1000, Limits.Die));
         }
 
         private void PopulateRolls(Dice dice1, Dice dice2)
         {
-            var firstRoll = dice1.Roll().Percentile().AsSum();
+            var firstRoll = dice1.Roll().d(Limits.Die).AsSum();
             dice1Rolls.Add(firstRoll);
 
-            var secondRoll = dice2.Roll().Percentile().AsSum();
+            var secondRoll = dice2.Roll().d(Limits.Die).AsSum();
             dice2Rolls.Add(secondRoll);
-        }
-
-        [Test]
-        public void RollsAreDifferentBetweenRolls()
-        {
-            stressor.Stress(() => PopulateRolls(Dice1, Dice2));
-
-            var distinctRolls = dice1Rolls.Distinct();
-            Assert.That(distinctRolls.Count(), Is.EqualTo(100));
-
-            distinctRolls = dice2Rolls.Distinct();
-            Assert.That(distinctRolls.Count(), Is.EqualTo(100));
         }
 
         [Test]
@@ -65,26 +51,9 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 
             stressor.Stress(() => PopulateRolls(dice1, dice2));
 
-            var different = false;
-            for (var i = 0; i < dice1Rolls.Count; i++)
-                different |= dice1Rolls[i] != dice2Rolls[i];
-
-            Assert.That(different, Is.True);
-        }
-
-        [Test]
-        public void RollsAreDifferentBetweenRollsForDiceFromFactory()
-        {
-            var dice1 = DiceFactory.Create();
-            var dice2 = DiceFactory.Create();
-
-            stressor.Stress(() => PopulateRolls(dice1, dice2));
-
-            var distinctRolls = dice1Rolls.Distinct();
-            Assert.That(distinctRolls.Count(), Is.EqualTo(100));
-
-            distinctRolls = dice2Rolls.Distinct();
-            Assert.That(distinctRolls.Count(), Is.EqualTo(100));
+            Assert.That(dice1Rolls, Is.Not.EqualTo(dice2Rolls));
+            Assert.That(dice1Rolls.Distinct().Count(), Is.InRange(1000, Limits.Die));
+            Assert.That(dice2Rolls.Distinct().Count(), Is.InRange(1000, Limits.Die));
         }
     }
 }

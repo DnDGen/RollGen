@@ -1,6 +1,8 @@
-﻿using DnDGen.RollGen.PartialRolls;
+﻿using DnDGen.RollGen.Expressions;
+using DnDGen.RollGen.PartialRolls;
 using Moq;
 using NUnit.Framework;
+using System;
 using System.Linq;
 
 namespace DnDGen.RollGen.Tests.Unit
@@ -58,12 +60,25 @@ namespace DnDGen.RollGen.Tests.Unit
         }
 
         [Test]
+        public void RollAnotherRoll()
+        {
+            var otherRoll = new DomainPartialRoll("92d66", new Mock<Random>().Object, new Mock<ExpressionEvaluator>().Object);
+
+            var mockPartialRollWithQuantity = new Mock<PartialRoll>();
+            mockPartialRollFactory.Setup(f => f.Build("(92d66)")).Returns(mockPartialRollWithQuantity.Object);
+
+            var partialRoll = dice.Roll(otherRoll);
+            Assert.That(partialRoll, Is.InstanceOf<PartialRoll>());
+            Assert.That(partialRoll, Is.EqualTo(mockPartialRollWithQuantity.Object));
+        }
+
+        [Test]
         public void TrimExpressionWithReplacedRolls()
         {
             var mockPartialRollWithQuantity = new Mock<PartialRoll>();
             mockPartialRollFactory.Setup(f => f.Build("92    d  66")).Returns(mockPartialRollWithQuantity.Object);
 
-            mockPartialRollWithQuantity.Setup(r => r.AsIndividualRolls()).Returns(new[] { 90210 });
+            mockPartialRollWithQuantity.Setup(r => r.AsIndividualRolls<int>()).Returns(new[] { 90210 });
 
             var expression = dice.ReplaceRollsWithSumExpression("  92    d  66   ");
             Assert.That(expression, Is.EqualTo("90210"));
@@ -75,7 +90,7 @@ namespace DnDGen.RollGen.Tests.Unit
             var mockPartialRollWithQuantity = new Mock<PartialRoll>();
             mockPartialRollFactory.Setup(f => f.Build("92    d  66")).Returns(mockPartialRollWithQuantity.Object);
 
-            mockPartialRollWithQuantity.Setup(r => r.AsIndividualRolls()).Returns(new[] { 90210, 42 });
+            mockPartialRollWithQuantity.Setup(r => r.AsIndividualRolls<int>()).Returns(new[] { 90210, 42 });
 
             var expression = dice.ReplaceRollsWithSumExpression("  92    d  66   ");
             Assert.That(expression, Is.EqualTo("(90210 + 42)"));
@@ -122,8 +137,8 @@ namespace DnDGen.RollGen.Tests.Unit
             mockPartialRollFactory.Setup(f => f.Build("92d66")).Returns(mockFirstPartialRoll.Object);
             mockPartialRollFactory.Setup(f => f.Build("42d600")).Returns(mockSecondPartialRoll.Object);
 
-            mockFirstPartialRoll.Setup(r => r.AsIndividualRolls()).Returns(new[] { 9266, 90210 });
-            mockSecondPartialRoll.Setup(r => r.AsIndividualRolls()).Returns(new[] { 42, 600 });
+            mockFirstPartialRoll.Setup(r => r.AsIndividualRolls<int>()).Returns(new[] { 9266, 90210 });
+            mockSecondPartialRoll.Setup(r => r.AsIndividualRolls<int>()).Returns(new[] { 42, 600 });
 
             var expression = dice.ReplaceRollsWithSumExpression("92d66+42d600");
             Assert.That(expression, Is.EqualTo("(9266 + 90210)+(42 + 600)"));
@@ -136,8 +151,8 @@ namespace DnDGen.RollGen.Tests.Unit
             var mockSecondPartialRoll = new Mock<PartialRoll>();
             mockPartialRollFactory.SetupSequence(f => f.Build("7d629")).Returns(mockFirstPartialRoll.Object).Returns(mockSecondPartialRoll.Object);
 
-            mockFirstPartialRoll.Setup(r => r.AsIndividualRolls()).Returns(new[] { 9266, 90210 });
-            mockSecondPartialRoll.Setup(r => r.AsIndividualRolls()).Returns(new[] { 42, 600 });
+            mockFirstPartialRoll.Setup(r => r.AsIndividualRolls<int>()).Returns(new[] { 9266, 90210 });
+            mockSecondPartialRoll.Setup(r => r.AsIndividualRolls<int>()).Returns(new[] { 42, 600 });
 
             var roll = dice.ReplaceRollsWithSumExpression("7d629%7d629");
             Assert.That(roll, Is.EqualTo("(9266 + 90210)%(42 + 600)"));
@@ -188,7 +203,7 @@ namespace DnDGen.RollGen.Tests.Unit
             mockPartialRollFactory.Setup(f => f.Build(It.IsAny<string>())).Returns(mockPartialRoll.Object);
 
             var count = 1;
-            mockPartialRoll.Setup(r => r.AsIndividualRolls()).Returns(() => Enumerable.Range(count, count++));
+            mockPartialRoll.Setup(r => r.AsIndividualRolls<int>()).Returns(() => Enumerable.Range(count, count++));
 
             var result = dice.ReplaceRollsWithSumExpression(roll);
             Assert.That(result, Is.EqualTo(rolled));
@@ -272,7 +287,7 @@ namespace DnDGen.RollGen.Tests.Unit
             mockPartialRollFactory.Setup(f => f.Build(It.IsAny<string>())).Returns(mockPartialRoll.Object);
 
             var count = 1;
-            mockPartialRoll.Setup(r => r.AsSum()).Returns(() => count++);
+            mockPartialRoll.Setup(r => r.AsSum<int>()).Returns(() => count++);
 
             var newExpression = dice.ReplaceWrappedExpressions<int>(roll);
             Assert.That(newExpression, Is.EqualTo(rolled));
@@ -285,7 +300,7 @@ namespace DnDGen.RollGen.Tests.Unit
 
             var mockPartialRoll = new Mock<PartialRoll>();
             mockPartialRollFactory.Setup(f => f.Build(" 1d8 + min(4 / 2, 10)")).Returns(mockPartialRoll.Object);
-            mockPartialRoll.Setup(r => r.AsSum()).Returns(9266);
+            mockPartialRoll.Setup(r => r.AsSum<int>()).Returns(9266);
 
             var result = dice.ReplaceWrappedExpressions<int>(expression);
             Assert.That(result, Is.EqualTo("The druid attacks with his Flame Blade, dealing 9266 damage."));
@@ -337,7 +352,7 @@ namespace DnDGen.RollGen.Tests.Unit
         {
             var mockPartialRoll = new Mock<PartialRoll>();
             mockPartialRollFactory.Setup(f => f.Build("1d4+4")).Returns(mockPartialRoll.Object);
-            mockPartialRoll.Setup(r => r.AsSum()).Returns(9266);
+            mockPartialRoll.Setup(r => r.AsSum<int>()).Returns(9266);
 
             var result = dice.ReplaceWrappedExpressions<int>(roll, openexpr, closeexpr);
             Assert.That(result, Is.EqualTo(rolled));
@@ -350,7 +365,7 @@ namespace DnDGen.RollGen.Tests.Unit
 
             var mockPartialRoll = new Mock<PartialRoll>();
             mockPartialRollFactory.Setup(f => f.Build("1d4+4")).Returns(mockPartialRoll.Object);
-            mockPartialRoll.Setup(r => r.AsSum()).Returns(9266);
+            mockPartialRoll.Setup(r => r.AsSum<int>()).Returns(9266);
 
             var result = dice.ReplaceWrappedExpressions<int>(expression, openexprescape: null);
             Assert.That(result, Is.EqualTo("Bark \\9266"));
@@ -400,7 +415,7 @@ namespace DnDGen.RollGen.Tests.Unit
             mockPartialRollFactory.Setup(f => f.Build(It.IsAny<string>())).Returns(mockPartialRoll.Object);
 
             var count = 1;
-            mockPartialRoll.Setup(r => r.AsSum()).Returns(() => count++);
+            mockPartialRoll.Setup(r => r.AsSum<int>()).Returns(() => count++);
 
             var newExpression = dice.ReplaceExpressionWithTotal(expression);
             Assert.That(newExpression, Is.EqualTo(expectedExpression));
@@ -454,7 +469,7 @@ namespace DnDGen.RollGen.Tests.Unit
             mockPartialRollFactory.Setup(f => f.Build(It.IsAny<string>())).Returns(mockPartialRoll.Object);
 
             var count = 1;
-            mockPartialRoll.Setup(r => r.AsSum()).Returns(() => count++);
+            mockPartialRoll.Setup(r => r.AsSum<int>()).Returns(() => count++);
 
             var newExpression = dice.ReplaceExpressionWithTotal(expression, true);
             Assert.That(newExpression, Is.EqualTo(expectedExpression));

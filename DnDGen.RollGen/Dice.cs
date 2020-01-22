@@ -10,6 +10,7 @@ namespace DnDGen.RollGen
     {
         PartialRoll Roll(int quantity = 1);
         PartialRoll Roll(string rollExpression);
+        PartialRoll Roll(PartialRoll roll);
         /// <summary>Replaces dice rolls and other evaluatable expressions in a string that are wrapped by special strings.</summary>
         /// <typeparam name="T">Type to return Evaluated expressions in</typeparam>
         /// <param name="str">Contains expressions to replace and other text.</param>

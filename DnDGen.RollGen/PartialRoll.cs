@@ -30,11 +30,15 @@ namespace DnDGen.RollGen
         public PartialRoll Keeping(PartialRoll roll) => Keeping(roll.CurrentRollExpression);
         public abstract PartialRoll Explode();
 
-        public abstract int AsSum();
-        public abstract IEnumerable<int> AsIndividualRolls();
+        public int AsSum() => AsSum<int>();
+        public abstract T AsSum<T>();
+        public IEnumerable<int> AsIndividualRolls() => AsIndividualRolls<int>();
+        public abstract IEnumerable<T> AsIndividualRolls<T>();
         public abstract double AsPotentialAverage();
-        public abstract int AsPotentialMinimum();
-        public abstract int AsPotentialMaximum(bool includeExplode = true);
+        public int AsPotentialMinimum() => AsPotentialMinimum<int>();
+        public abstract T AsPotentialMinimum<T>();
+        public int AsPotentialMaximum(bool includeExplode = true) => AsPotentialMaximum<int>(includeExplode);
+        public abstract T AsPotentialMaximum<T>(bool includeExplode = true);
         public abstract bool AsTrueOrFalse(double threshold = .5);
         public abstract bool AsTrueOrFalse(int threshold);
 

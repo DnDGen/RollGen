@@ -16,5 +16,9 @@
         }
 
         public int Range => Die * Quantity - Quantity + 1;
+        public bool IsValid => Quantity > 0
+            && Quantity <= Limits.Quantity
+            && Die > 0
+            && Die <= Limits.Die;
     }
 }
