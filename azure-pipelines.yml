@@ -1,0 +1,49 @@
+# ASP.NET Core (.NET Framework)
+# Build and test ASP.NET Core projects targeting the full .NET Framework.
+# Add steps that publish symbols, save build artifacts, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+
+trigger:
+- main
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+
+steps:
+- task: DotNetCoreCLI@2
+  displayName: Build
+  inputs:
+    command: build
+    projects: './DnDGen.RollGen/DnDGen.RollGen.csproj'
+    arguments: '--configuration $(buildConfiguration)'
+- task: DotNetCoreCLI@2
+  displayName: Unit Tests
+  inputs:
+    command: test
+    projects: './DnDGen.RollGen.Tests.Unit/DnDGen.RollGen.Tests.Unit.csproj'
+    arguments: '-v normal'
+- task: DotNetCoreCLI@2
+  displayName: IoC Tests
+  inputs:
+    command: test
+    projects: './DnDGen.RollGen.Tests.Integration.IoC/DnDGen.RollGen.Tests.Integration.IoC.csproj'
+    arguments: '-v normal'
+- task: DotNetCoreCLI@2
+  displayName: Integration Tests
+  inputs:
+    command: test
+    projects: './DnDGen.RollGen.Tests.Integration/DnDGen.RollGen.Tests.Integration.csproj'
+    arguments: '-v normal'
+- task: DotNetCoreCLI@2
+  displayName: Stress Tests
+  inputs:
+    command: test
+    projects: './DnDGen.RollGen.Tests.Integration.Stress/DnDGen.RollGen.Tests.Integration.Stress.csproj'
+    arguments: '-v normal --configuration Stress'
+
+# Need to add nuget push from master
