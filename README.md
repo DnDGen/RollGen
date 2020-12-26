@@ -2,7 +2,7 @@
 
 Rolls a set of dice, as determined by the D20 die system.
 
-[![Build Status](https://travis-ci.org/DnDGen/RollGen.svg?branch=master)](https://travis-ci.org/DnDGen/RollGen)
+[![Build Status](https://dev.azure.com/dndgen/DnDGen/_apis/build/status/DnDGen.RollGen?branchName=master)](https://dev.azure.com/dndgen/DnDGen/_build/latest?definitionId=1&branchName=master)
 
 ## Syntax
 
