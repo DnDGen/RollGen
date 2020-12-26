@@ -6,8 +6,13 @@ namespace DnDGen.RollGen.Tests.Integration
     [TestFixture]
     public class ParantheticalRollTests : IntegrationTests
     {
-        [Inject]
-        public Dice Dice { get; set; }
+        private Dice dice;
+
+        [SetUp]
+        public void Setup()
+        {
+            dice = GetNewInstanceOf<Dice>();
+        }
 
         [TestCase("1d2", 1, 2)]
         [TestCase("(1d2)", 1, 2)]
@@ -55,7 +60,7 @@ namespace DnDGen.RollGen.Tests.Integration
         [TestCase("(9d8!k7)d(6d4!)!k(3d2k1)", 1, 4800)]
         public void ParantheticalQuantity(string quantity, int lower, int upper)
         {
-            var roll = Dice.Roll(quantity);
+            var roll = dice.Roll(quantity);
             var sum = roll.AsSum();
             var min = roll.AsPotentialMinimum();
             var max = roll.AsPotentialMaximum();
@@ -111,7 +116,7 @@ namespace DnDGen.RollGen.Tests.Integration
         [TestCase("(9d8!k7)d(6d4!)!k(3d2k1)", 1, 4800)]
         public void ParantheticalDie(string quantity, int lower, int upper)
         {
-            var roll = Dice.Roll().d(quantity);
+            var roll = dice.Roll().d(quantity);
             var sum = roll.AsSum();
             var min = roll.AsPotentialMinimum();
             var max = roll.AsPotentialMaximum();
@@ -167,7 +172,7 @@ namespace DnDGen.RollGen.Tests.Integration
         [TestCase("(9d8!k7)d(6d4!)!k(3d2k1)", 1, 9600)]
         public void ParantheticalKeep(string keep, int lower, int upper)
         {
-            var roll = Dice.Roll(Limits.Quantity).d2().Keeping(keep);
+            var roll = dice.Roll(Limits.Quantity).d2().Keeping(keep);
             var sum = roll.AsSum();
             var min = roll.AsPotentialMinimum();
             var max = roll.AsPotentialMaximum();
@@ -180,7 +185,7 @@ namespace DnDGen.RollGen.Tests.Integration
         [Test]
         public void ParantheticalQuantityAndDie()
         {
-            var roll = Dice.Roll("1d2").d("3d4");
+            var roll = dice.Roll("1d2").d("3d4");
             var sum = roll.AsSum();
             var min = roll.AsPotentialMinimum();
             var max = roll.AsPotentialMaximum();
@@ -193,7 +198,7 @@ namespace DnDGen.RollGen.Tests.Integration
         [Test]
         public void ParantheticalQuantityAndDieAndKeep()
         {
-            var roll = Dice.Roll("5d6").d("3d4").Keeping("1d2");
+            var roll = dice.Roll("5d6").d("3d4").Keeping("1d2");
             var sum = roll.AsSum();
             var min = roll.AsPotentialMinimum();
             var max = roll.AsPotentialMaximum();

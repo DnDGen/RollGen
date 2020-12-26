@@ -1,5 +1,4 @@
-﻿using Ninject;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using System;
 using System.Linq;
 
@@ -8,10 +7,15 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
     [TestFixture]
     public class ChainTests : StressTests
     {
-        [Inject]
-        public Dice Dice { get; set; }
-        [Inject]
-        public Random Random { get; set; }
+        private Dice dice;
+        private Random random;
+
+        [SetUp]
+        public void Setup()
+        {
+            dice = GetNewInstanceOf<Dice>();
+            random = GetNewInstanceOf<Random>();
+        }
 
         [Test]
         public void StressNumericChain()
@@ -41,8 +45,8 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
             var t = GetRandomNumber();
             var db = GetRandomNumber();
             var md = GetRandomNumber();
-            var percentageThreshold = Random.NextDouble();
-            var rollThreshold = Random.Next();
+            var percentageThreshold = random.NextDouble();
+            var rollThreshold = random.Next();
 
             var roll = GetRoll(q, d, k, p, m, t, db, md);
 
@@ -51,7 +55,7 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 
         private int GetRandomNumber()
         {
-            return Random.Next(2) + 1;
+            return random.Next(2) + 1;
         }
 
         private void AssertRoll(PartialRoll roll, string q, string d, string k, string p, string m, string t, string db, string md, double percentageThreshold, int rollThreshold)
@@ -96,12 +100,12 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 
         private double ComputeMinimum(string expression)
         {
-            return Dice.Roll(expression).AsPotentialMinimum();
+            return dice.Roll(expression).AsPotentialMinimum();
         }
 
         private double ComputeMaximum(string expression)
         {
-            return Dice.Roll(expression).AsPotentialMaximum();
+            return dice.Roll(expression).AsPotentialMaximum();
         }
 
         protected void AssertExpressionChain()
@@ -114,8 +118,8 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
             var t = $"{GetRandomNumber()}d{GetRandomNumber()}";
             var db = $"{GetRandomNumber()}d{GetRandomNumber()}";
             var md = $"{GetRandomNumber()}d{GetRandomNumber()}";
-            var percentageThreshold = Random.NextDouble();
-            var rollThreshold = Random.Next();
+            var percentageThreshold = random.NextDouble();
+            var rollThreshold = random.Next();
 
             var roll = GetRoll(q, d, k, p, m, t, db, md);
 
@@ -124,16 +128,16 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 
         protected void AssertRollChain()
         {
-            var q = Dice.Roll($"{GetRandomNumber()}d{GetRandomNumber()}");
-            var d = Dice.Roll($"{GetRandomNumber()}d{GetRandomNumber()}");
-            var k = Dice.Roll($"{GetRandomNumber()}d{GetRandomNumber()}");
-            var p = Dice.Roll($"{GetRandomNumber()}d{GetRandomNumber()}");
-            var m = Dice.Roll($"{GetRandomNumber()}d{GetRandomNumber()}");
-            var t = Dice.Roll($"{GetRandomNumber()}d{GetRandomNumber()}");
-            var db = Dice.Roll($"{GetRandomNumber()}d{GetRandomNumber()}");
-            var md = Dice.Roll($"{GetRandomNumber()}d{GetRandomNumber()}");
-            var percentageThreshold = Random.NextDouble();
-            var rollThreshold = Random.Next();
+            var q = dice.Roll($"{GetRandomNumber()}d{GetRandomNumber()}");
+            var d = dice.Roll($"{GetRandomNumber()}d{GetRandomNumber()}");
+            var k = dice.Roll($"{GetRandomNumber()}d{GetRandomNumber()}");
+            var p = dice.Roll($"{GetRandomNumber()}d{GetRandomNumber()}");
+            var m = dice.Roll($"{GetRandomNumber()}d{GetRandomNumber()}");
+            var t = dice.Roll($"{GetRandomNumber()}d{GetRandomNumber()}");
+            var db = dice.Roll($"{GetRandomNumber()}d{GetRandomNumber()}");
+            var md = dice.Roll($"{GetRandomNumber()}d{GetRandomNumber()}");
+            var percentageThreshold = random.NextDouble();
+            var rollThreshold = random.Next();
 
             var roll = GetRoll(q, d, k, p, m, t, db, md);
 
@@ -150,7 +154,7 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
                 rollThreshold);
         }
 
-        private PartialRoll GetRoll(int q, int d, int k, double p, double m, double t, double db, double md) => Dice.Roll(q)
+        private PartialRoll GetRoll(int q, int d, int k, double p, double m, double t, double db, double md) => dice.Roll(q)
             .d(d)
             .d2()
             .d3()
@@ -172,7 +176,7 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
             .Times(t)
             .DividedBy(db)
             .Modulos(md);
-        private PartialRoll GetRoll(string q, string d, string k, string p, string m, string t, string db, string md) => Dice.Roll(q)
+        private PartialRoll GetRoll(string q, string d, string k, string p, string m, string t, string db, string md) => dice.Roll(q)
             .d(d)
             .d2()
             .d3()
@@ -194,7 +198,7 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
             .Times(t)
             .DividedBy(db)
             .Modulos(md);
-        private PartialRoll GetRoll(PartialRoll q, PartialRoll d, PartialRoll k, PartialRoll p, PartialRoll m, PartialRoll t, PartialRoll db, PartialRoll md) => Dice.Roll(q)
+        private PartialRoll GetRoll(PartialRoll q, PartialRoll d, PartialRoll k, PartialRoll p, PartialRoll m, PartialRoll t, PartialRoll db, PartialRoll md) => dice.Roll(q)
             .d(d)
             .d2()
             .d3()
