@@ -4,17 +4,21 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
 
 trigger:
-- main
+- master
+- develop
 
 pool:
   vmImage: 'windows-latest'
 
 variables:
-  solution: '**/*.sln'
+  solution: 'DnDGen.RollGen.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
 
 steps:
+- checkout: self
+  displayName: 'Checkout Code'
+  persistCredentials: true
 - task: DotNetCoreCLI@2
   displayName: Build
   inputs:
@@ -46,4 +50,23 @@ steps:
     projects: './DnDGen.RollGen.Tests.Integration.Stress/DnDGen.RollGen.Tests.Integration.Stress.csproj'
     arguments: '-v normal --configuration Stress'
 
-# Need to add nuget push from master
+- task: tmarkovski.projectversionasvariable.versionintovariable.projectversionasvariable@1
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+  displayName: 'Get Project Version'
+  inputs:
+    path: ./DnDGen.RollGen/DnDGen.RollGen.csproj
+    
+- script: |
+     echo "Tagging with version $(Version.MajorMinorBuild)"
+     git tag $(Version.MajorMinorBuild)
+     git push origin $(Version.MajorMinorBuild)
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+  displayName: 'Tag Version'
+  workingDirectory: $(Build.SourcesDirectory)
+
+- task: PublishBuildArtifacts@1
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+  displayName: Publish Artifacts
+  inputs:
+    pathtoPublish: './DnDGen.RollGen' 
+    artifactName: 'dndgen-rollgen'
