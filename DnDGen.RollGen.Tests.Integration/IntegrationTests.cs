@@ -7,21 +7,25 @@ namespace DnDGen.RollGen.Tests.Integration
     [TestFixture]
     public abstract class IntegrationTests
     {
-        private readonly IKernel kernel;
+        private IKernel kernel;
 
-        public IntegrationTests()
+        [OneTimeSetUp]
+        public void IntegrationTestsFixtureSetup()
         {
-            kernel = new StandardKernel();
+            kernel = new StandardKernel(new NinjectSettings() { InjectNonPublic = true });
 
-            var rollGenModuleLoader = new RollGenModuleLoader();
-            rollGenModuleLoader.LoadModules(kernel);
-
-            kernel.Inject(this);
+            var rollGenLoader = new RollGenModuleLoader();
+            rollGenLoader.LoadModules(kernel);
         }
 
         protected T GetNewInstanceOf<T>()
         {
             return kernel.Get<T>();
+        }
+
+        protected T GetNewInstanceOf<T>(string name)
+        {
+            return kernel.Get<T>(name);
         }
     }
 }

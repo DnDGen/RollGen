@@ -1,5 +1,4 @@
-﻿using Ninject;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using System;
 using System.Linq;
 
@@ -8,10 +7,15 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
     [TestFixture]
     public class KeepTests : StressTests
     {
-        [Inject]
-        public Dice Dice { get; set; }
-        [Inject]
-        public Random Random { get; set; }
+        private Dice dice;
+        private Random random;
+
+        [SetUp]
+        public void Setup()
+        {
+            dice = GetNewInstanceOf<Dice>();
+            random = GetNewInstanceOf<Random>();
+        }
 
         [Test]
         public void StressKeep()
@@ -21,11 +25,11 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 
         protected void AssertKeep()
         {
-            var quantity = Random.Next(Limits.Quantity) + 1;
-            var die = Random.Next(Limits.Die) + 1;
-            var keep = Random.Next(quantity - 1) + 1;
-            var percentageThreshold = Random.NextDouble();
-            var rollThreshold = Random.Next(quantity * die) + 1;
+            var quantity = random.Next(Limits.Quantity) + 1;
+            var die = random.Next(Limits.Die) + 1;
+            var keep = random.Next(quantity - 1) + 1;
+            var percentageThreshold = random.NextDouble();
+            var rollThreshold = random.Next(quantity * die) + 1;
 
             var roll = GetRoll(quantity, die, keep);
 
@@ -53,6 +57,6 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
             Assert.That(rolls, Has.All.InRange(1, max));
         }
 
-        private PartialRoll GetRoll(int quantity, int die, int keep) => Dice.Roll(quantity).d(die).Keeping(keep);
+        private PartialRoll GetRoll(int quantity, int die, int keep) => dice.Roll(quantity).d(die).Keeping(keep);
     }
 }
