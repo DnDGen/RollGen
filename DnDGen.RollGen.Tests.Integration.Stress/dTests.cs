@@ -1,5 +1,4 @@
-﻿using Ninject;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using System;
 using System.Linq;
 
@@ -8,10 +7,15 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
     [TestFixture]
     public class dTests : StressTests
     {
-        [Inject]
-        public Dice Dice { get; set; }
-        [Inject]
-        public Random Random { get; set; }
+        private Dice dice;
+        private Random random;
+
+        [SetUp]
+        public void Setup()
+        {
+            dice = GetNewInstanceOf<Dice>();
+            random = GetNewInstanceOf<Random>();
+        }
 
         [Test]
         public void StressDie()
@@ -21,10 +25,10 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 
         protected void AssertDie()
         {
-            var quantity = Random.Next(Limits.Quantity) + 1;
-            var die = Random.Next(Limits.Die) + 1;
-            var percentageThreshold = Random.NextDouble();
-            var rollThreshold = Random.Next(quantity * die) + 1;
+            var quantity = random.Next(Limits.Quantity) + 1;
+            var die = random.Next(Limits.Die) + 1;
+            var percentageThreshold = random.NextDouble();
+            var rollThreshold = random.Next(quantity * die) + 1;
 
             var roll = GetRoll(quantity, die);
 
@@ -51,6 +55,6 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
             Assert.That(rolls, Has.All.InRange(1, max));
         }
 
-        private PartialRoll GetRoll(int quantity, int die) => Dice.Roll(quantity).d(die);
+        private PartialRoll GetRoll(int quantity, int die) => dice.Roll(quantity).d(die);
     }
 }

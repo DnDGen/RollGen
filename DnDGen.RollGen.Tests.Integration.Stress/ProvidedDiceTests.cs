@@ -1,5 +1,4 @@
-﻿using Ninject;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using System;
 using System.Linq;
 
@@ -8,10 +7,15 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
     [TestFixture]
     public abstract class ProvidedDiceTests : StressTests
     {
-        [Inject]
-        public Dice Dice { get; set; }
-        [Inject]
-        public Random Random { get; set; }
+        protected Dice Dice;
+        private Random random;
+
+        [SetUp]
+        public void Setup()
+        {
+            Dice = GetNewInstanceOf<Dice>();
+            random = GetNewInstanceOf<Random>();
+        }
 
         protected abstract int die { get; }
 
@@ -19,9 +23,9 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 
         protected void AssertRoll()
         {
-            var quantity = Random.Next(Limits.Quantity) + 1;
-            var percentageThreshold = Random.NextDouble();
-            var rollThreshold = Random.Next(quantity * die) + 1;
+            var quantity = random.Next(Limits.Quantity) + 1;
+            var percentageThreshold = random.NextDouble();
+            var rollThreshold = random.Next(quantity * die) + 1;
 
             var roll = GetRoll(quantity);
 
