@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1;net45</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.1;netstandard2.1</TargetFrameworks>
     <Version>15.2.1</Version>
     <Authors>Karl M. Speer</Authors>
     <Company>DnDGen</Company>
@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Albatross.Expression" Version="2.0.4" />
+    <PackageReference Include="Albatross.Expression" Version="3.0.2" />
     <PackageReference Include="Ninject" Version="3.3.4" />
   </ItemGroup>
 

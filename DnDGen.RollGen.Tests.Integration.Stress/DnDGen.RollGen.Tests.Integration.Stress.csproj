@@ -9,7 +9,7 @@
   <ItemGroup>
     <PackageReference Include="DnDGen.Stress" Version="3.2.3" />
     <PackageReference Include="Ninject" Version="3.3.4" />
-    <PackageReference Include="nunit" Version="3.12.0" />
+    <PackageReference Include="nunit" Version="3.13.1" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.3" />
   </ItemGroup>
