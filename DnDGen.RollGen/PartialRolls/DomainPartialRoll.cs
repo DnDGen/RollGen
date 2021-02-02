@@ -67,6 +67,14 @@ namespace DnDGen.RollGen.PartialRolls
             return maximum;
         }
 
+        /// <summary>
+        /// Return the value as True or False, depending on if it is higher or lower then the threshold.
+        /// A value less than or equal to the threshold is false.
+        /// A value higher than the threshold is true.
+        /// As an example, on a roll of a 1d10 with threshold = .7, rolling a 7 produces False, while 8 produces True.
+        /// </summary>
+        /// <param name="threshold">The non-inclusive lower-bound percentage of success</param>
+        /// <returns></returns>
         public override bool AsTrueOrFalse(double threshold = .5)
         {
             if (booleanExpressionRegex.IsMatch(CurrentRollExpression))
@@ -96,6 +104,14 @@ namespace DnDGen.RollGen.PartialRolls
             return Math.Abs(value % 1) <= (double.Epsilon * 100);
         }
 
+        /// <summary>
+        /// Return the value as True or False, depending on if it is higher or lower then the threshold.
+        /// A value less than or equal to the threshold is false.
+        /// A value higher than the threshold is true.
+        /// As an example, on a roll of a 1d10 with threshold = 7, rolling a 7 produces False, while 8 produces True.
+        /// </summary>
+        /// <param name="threshold">The non-inclusive lower-bound roll value of success</param>
+        /// <returns></returns>
         public override bool AsTrueOrFalse(int threshold)
         {
             if (booleanExpressionRegex.IsMatch(CurrentRollExpression))

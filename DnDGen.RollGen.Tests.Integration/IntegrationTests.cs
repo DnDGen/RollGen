@@ -7,7 +7,7 @@ namespace DnDGen.RollGen.Tests.Integration
     [TestFixture]
     public abstract class IntegrationTests
     {
-        private IKernel kernel;
+        protected IKernel kernel;
 
         [OneTimeSetUp]
         public void IntegrationTestsFixtureSetup()
