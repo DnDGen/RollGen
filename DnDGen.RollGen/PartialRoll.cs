@@ -54,9 +54,9 @@ namespace DnDGen.RollGen
         /// Return the value as True or False, depending on if it is higher or lower then the threshold.
         /// A value less than or equal to the threshold is false.
         /// A value higher than the threshold is true.
-        /// As an example, on a roll of a 1d10 with threshold = 7, rolling a 7 produces False, while 8 produces True.
+        /// As an example, on a roll of a 1d10 with threshold = 7, rolling a 6 produces False, while 7 produces True.
         /// </summary>
-        /// <param name="threshold">The non-inclusive lower-bound roll value of success</param>
+        /// <param name="threshold">The inclusive lower-bound roll value of success</param>
         /// <returns></returns>
         public abstract bool AsTrueOrFalse(int threshold);
 
