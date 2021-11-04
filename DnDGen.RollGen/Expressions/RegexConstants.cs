@@ -3,9 +3,9 @@
     internal static class RegexConstants
     {
         public const string CommonRollRegexPattern = "d *\\d+(?: *("
-            + "(! *(t *\\d+)* *(k *\\d+)?)" //etk
+            + "(! *(t *\\d+)+ *(k *\\d+)?)" //etk
             + "|(! *(k *\\d+)? *(t *\\d+)*)" //ekt
-            + "|((t *\\d+)+ *!? *(k *\\d+)?)" //tek
+            + "|((t *\\d+)+ *! *(k *\\d+)?)" //tek
             + "|((t *\\d+)+ *(k *\\d+)? *!?)" //tke
             + "|((k *\\d+)? *! *(t *\\d+)*)" //ket
             + "|((k *\\d+)? *(t *\\d+)* *!?)" //kte or nothing

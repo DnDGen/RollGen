@@ -20,15 +20,40 @@ namespace DnDGen.RollGen.Tests.Integration
         [TestCase("1d2+9", 10, 11)]
         [TestCase("2d10", 2, 20)]
         [TestCase("3d6", 3, 18)]
-        [TestCase("3d6t1", 6, 18)]
         [TestCase("4d5!t1t2k3", 9, 150)]
         [TestCase("4d6k3", 3, 18)]
         [TestCase("6d5d4k3d2k1", 1, 2)]
         [TestCase("7d6k5", 5, 30)]
+        [TestCase("7d8", 7, 56)]
         [TestCase("7d8!", 7, 560)]
-        public void RollRange(string quantity, int lower, int upper)
+        //From README
+        [TestCase("4d6", 4, 24)]
+        [TestCase("92d66", 92, 92 * 66)]
+        [TestCase("5+3d4*2", 11, 29)]
+        [TestCase("((1d2)d5k1)d6", 1, 30)]
+        [TestCase("4d6k3", 3, 18)]
+        [TestCase("3d4k2", 2, 8)]
+        [TestCase("5+3d4*3", 14, 41)]
+        [TestCase("1d6+3", 4, 9)]
+        [TestCase("1d8+1d2-1", 1, 9)]
+        [TestCase("4d3-3", 1, 9)]
+        [TestCase("4d6!", 4, 240)]
+        [TestCase("3d4!", 3, 120)]
+        [TestCase("3d4!k2", 2, 80)]
+        [TestCase("3d6t1", 6, 18)]
+        [TestCase("3d6t1t5", 6, 18)]
+        [TestCase("3d6!t1k2", 4, 120)]
+        [TestCase("4d3t2k1", 1, 3)]
+        [TestCase("4d3k1t2", 1, 3)]
+        [TestCase("4d3!t2k1", 1, 30)]
+        [TestCase("4d3!k1t2", 1, 30)]
+        [TestCase("4d3t2!k1", 1, 30)]
+        [TestCase("4d3k1!t2", 1, 30)]
+        [TestCase("4d3t2k1!", 1, 30)]
+        [TestCase("4d3k1t2!", 1, 30)]
+        public void RollRange(string rollExpression, int lower, int upper)
         {
-            var roll = dice.Roll(quantity);
+            var roll = dice.Roll(rollExpression);
             var sum = roll.AsSum();
             var min = roll.AsPotentialMinimum();
             var max = roll.AsPotentialMaximum();

@@ -8,9 +8,9 @@ namespace DnDGen.RollGen.Tests.Unit.Expressions
     public class RegexConstantsTests
     {
         [TestCase(RegexConstants.CommonRollRegexPattern, "d *\\d+(?: *("
-            + "(! *(t *\\d+)* *(k *\\d+)?)" //etk
+            + "(! *(t *\\d+)+ *(k *\\d+)?)" //etk
             + "|(! *(k *\\d+)? *(t *\\d+)*)" //ekt
-            + "|((t *\\d+)+ *!? *(k *\\d+)?)" //tek
+            + "|((t *\\d+)+ *! *(k *\\d+)?)" //tek
             + "|((t *\\d+)+ *(k *\\d+)? *!?)" //tke
             + "|((k *\\d+)? *! *(t *\\d+)*)" //ket
             + "|((k *\\d+)? *(t *\\d+)* *!?)" //kte or nothing
@@ -47,6 +47,14 @@ namespace DnDGen.RollGen.Tests.Unit.Expressions
         [TestCase("3d6t1t2", true)]
         [TestCase("2d4!t1t2k3", true)]
         [TestCase(" 2 d 4 ! t 1 k 3 ", true)]
+        [TestCase("4d3t2k1", true)]
+        [TestCase("4d3k1t2", true)]
+        [TestCase("4d3!t2k1", true)]
+        [TestCase("4d3!k1t2", true)]
+        [TestCase("4d3t2!k1", true)]
+        [TestCase("4d3k1!t2", true)]
+        [TestCase("4d3t2k1!", true)]
+        [TestCase("4d3k1t2!", true)]
         public void StrictRollRegexMatches(string source, bool isMatch)
         {
             VerifyMatch(RegexConstants.StrictRollPattern, source, isMatch);
