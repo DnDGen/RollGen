@@ -43,24 +43,54 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
             var p = GetRandomNumber();
             var m = GetRandomNumber();
             var t = GetRandomNumber();
+            var tr1 = GetRandomNumber(10);
+            var tr2 = GetRandomNumber(10);
             var db = GetRandomNumber();
             var md = GetRandomNumber();
             var percentageThreshold = random.NextDouble();
             var rollThreshold = random.Next();
 
-            var roll = GetRoll(q, d, k, p, m, t, db, md);
+            var roll = GetRoll(q, d, k, p, m, t, db, md, tr1, tr2);
 
-            AssertRoll(roll, q.ToString(), d.ToString(), k.ToString(), p.ToString(), m.ToString(), t.ToString(), db.ToString(), md.ToString(), percentageThreshold, rollThreshold);
+            AssertRoll(
+                roll,
+                q.ToString(),
+                d.ToString(),
+                k.ToString(),
+                p.ToString(),
+                m.ToString(),
+                t.ToString(),
+                db.ToString(),
+                md.ToString(),
+                percentageThreshold,
+                rollThreshold,
+                tr1.ToString(),
+                tr2.ToString());
         }
 
-        private int GetRandomNumber()
+        private int GetRandomNumber(int top = 2)
         {
-            return random.Next(2) + 1;
+            return random.Next(top) + 1;
         }
 
-        private void AssertRoll(PartialRoll roll, string q, string d, string k, string p, string m, string t, string db, string md, double percentageThreshold, int rollThreshold)
+        private void AssertRoll(
+            PartialRoll roll,
+            string q,
+            string d,
+            string k,
+            string p,
+            string m,
+            string t,
+            string db,
+            string md,
+            double percentageThreshold,
+            int rollThreshold,
+            string tr1,
+            string tr2)
         {
-            var min = Math.Min(ComputeMinimum(q), ComputeMinimum(k)) * 3
+            var rollMin = GetRollMin(tr1, tr2);
+            var min = Math.Min(ComputeMinimum(q), ComputeMinimum(k)) * 2
+                + Math.Min(ComputeMinimum(q), ComputeMinimum(k)) * rollMin
                 + ComputeMinimum(p)
                 - ComputeMinimum(m)
                 * ComputeMinimum(t)
@@ -98,6 +128,17 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
             Assert.That(rolls, Has.All.InRange(min, explodeMax), roll.CurrentRollExpression);
         }
 
+        private int GetRollMin(params string[] transforms)
+        {
+            var minimums = transforms.Select(ComputeMinimum);
+
+            var minimum = 1;
+            while (minimums.Contains(minimum))
+                minimum++;
+
+            return minimum;
+        }
+
         private double ComputeMinimum(string expression)
         {
             return dice.Roll(expression).AsPotentialMinimum();
@@ -118,12 +159,27 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
             var t = $"{GetRandomNumber()}d{GetRandomNumber()}";
             var db = $"{GetRandomNumber()}d{GetRandomNumber()}";
             var md = $"{GetRandomNumber()}d{GetRandomNumber()}";
+            var tr1 = $"{GetRandomNumber()}d{GetRandomNumber(10)}";
+            var tr2 = $"{GetRandomNumber()}d{GetRandomNumber(10)}";
             var percentageThreshold = random.NextDouble();
             var rollThreshold = random.Next();
 
-            var roll = GetRoll(q, d, k, p, m, t, db, md);
+            var roll = GetRoll(q, d, k, p, m, t, db, md, tr1, tr2);
 
-            AssertRoll(roll, q.ToString(), d.ToString(), k.ToString(), p.ToString(), m.ToString(), t.ToString(), db.ToString(), md.ToString(), percentageThreshold, rollThreshold);
+            AssertRoll(
+                roll,
+                q.ToString(),
+                d.ToString(),
+                k.ToString(),
+                p.ToString(),
+                m.ToString(),
+                t.ToString(),
+                db.ToString(),
+                md.ToString(),
+                percentageThreshold,
+                rollThreshold,
+                tr1,
+                tr2);
         }
 
         protected void AssertRollChain()
@@ -136,10 +192,12 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
             var t = dice.Roll($"{GetRandomNumber()}d{GetRandomNumber()}");
             var db = dice.Roll($"{GetRandomNumber()}d{GetRandomNumber()}");
             var md = dice.Roll($"{GetRandomNumber()}d{GetRandomNumber()}");
+            var tr1 = dice.Roll($"{GetRandomNumber()}d{GetRandomNumber(10)}");
+            var tr2 = dice.Roll($"{GetRandomNumber()}d{GetRandomNumber(10)}");
             var percentageThreshold = random.NextDouble();
             var rollThreshold = random.Next();
 
-            var roll = GetRoll(q, d, k, p, m, t, db, md);
+            var roll = GetRoll(q, d, k, p, m, t, db, md, tr1, tr2);
 
             AssertRoll(roll,
                 q.CurrentRollExpression,
@@ -151,69 +209,87 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
                 db.CurrentRollExpression,
                 md.CurrentRollExpression,
                 percentageThreshold,
-                rollThreshold);
+                rollThreshold,
+                tr1.CurrentRollExpression,
+                tr2.CurrentRollExpression);
         }
 
-        private PartialRoll GetRoll(int q, int d, int k, double p, double m, double t, double db, double md) => dice.Roll(q)
+        private PartialRoll GetRoll(int q, int d, int k, double p, double m, double t, double db, double md, int tr1, int tr2) => dice.Roll(q)
             .d(d)
             .d2()
             .d3()
             .d4()
-            .Keeping(k)
+            .Keeping(k) //HACK: Keeping quantity from getting too high
             .Plus(q)
             .d6()
             .d8()
             .d10()
-            .Keeping(k)
+            .Keeping(k) //HACK: Keeping quantity from getting too high
             .Plus(q)
             .d12()
             .d20()
             .Percentile()
             .Explode()
+            .Transforming(tr1)
+            .Transforming(tr2)
             .Keeping(k)
             .Plus(p)
             .Minus(m)
             .Times(t)
             .DividedBy(db)
             .Modulos(md);
-        private PartialRoll GetRoll(string q, string d, string k, string p, string m, string t, string db, string md) => dice.Roll(q)
+        private PartialRoll GetRoll(string q, string d, string k, string p, string m, string t, string db, string md, string tr1, string tr2) => dice.Roll(q)
             .d(d)
             .d2()
             .d3()
             .d4()
-            .Keeping(k)
+            .Keeping(k) //HACK: Keeping quantity from getting too high
             .Plus(q)
             .d6()
             .d8()
             .d10()
-            .Keeping(k)
+            .Keeping(k) //HACK: Keeping quantity from getting too high
             .Plus(q)
             .d12()
             .d20()
             .Percentile()
             .Explode()
+            .Transforming(tr1)
+            .Transforming(tr2)
             .Keeping(k)
             .Plus(p)
             .Minus(m)
             .Times(t)
             .DividedBy(db)
             .Modulos(md);
-        private PartialRoll GetRoll(PartialRoll q, PartialRoll d, PartialRoll k, PartialRoll p, PartialRoll m, PartialRoll t, PartialRoll db, PartialRoll md) => dice.Roll(q)
+        private PartialRoll GetRoll(
+                PartialRoll q,
+                PartialRoll d,
+                PartialRoll k,
+                PartialRoll p,
+                PartialRoll m,
+                PartialRoll t,
+                PartialRoll db,
+                PartialRoll md,
+                PartialRoll tr1,
+                PartialRoll tr2) => dice.Roll(q)
             .d(d)
             .d2()
             .d3()
             .d4()
-            .Keeping(k)
+            .Keeping(k) //HACK: Keeping quantity from getting too high
             .Plus(q)
             .d6()
             .d8()
             .d10()
-            .Keeping(k)
+            .Keeping(k) //HACK: Keeping quantity from getting too high
             .Plus(q)
             .d12()
             .d20()
             .Percentile()
             .Explode()
+            .Transforming(tr1)
+            .Transforming(tr2)
             .Keeping(k)
             .Plus(p)
             .Minus(m)

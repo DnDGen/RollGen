@@ -25,13 +25,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Albatross.Expression" Version="3.0.2" />
+    <PackageReference Include="Albatross.Expression" Version="3.0.3" />
     <PackageReference Include="Ninject" Version="3.3.4" />
   </ItemGroup>
 
   <!--Needed for Framework compatibility when building in Travis-->
   <ItemGroup>
-    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" PrivateAssets="All" Version="1.0.0" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" PrivateAssets="All" Version="1.0.2" />
   </ItemGroup>
 
 </Project>

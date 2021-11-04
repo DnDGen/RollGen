@@ -12,14 +12,19 @@ namespace DnDGen.RollGen.PartialRolls
         public int Die { get; set; }
         public int AmountToKeep { get; set; }
         public bool Explode { get; set; }
+        public readonly List<int> TransformToMax;
 
-        public bool IsValid => QuantityValid && DieValid && KeepValid && ExplodeValid;
+        public bool IsValid => QuantityValid && DieValid && KeepValid && ExplodeValid && TransformValid;
         private bool QuantityValid => Quantity > 0 && Quantity <= Limits.Quantity;
         private bool DieValid => Die > 0 && Die <= Limits.Die;
         private bool KeepValid => AmountToKeep > -1 && AmountToKeep <= Limits.Quantity;
         private bool ExplodeValid => !Explode || Die > 1;
+        private bool TransformValid => !TransformToMax.Any() || TransformToMax.All(t => t > 0 && t <= Die);
 
-        public Roll() { }
+        public Roll()
+        {
+            TransformToMax = new List<int>();
+        }
 
         public Roll(string toParse)
         {
@@ -27,16 +32,51 @@ namespace DnDGen.RollGen.PartialRolls
             Explode = toParse.Contains("!");
             toParse = toParse.Replace("!", string.Empty);
 
-            var sections = toParse.Split('d', 'k');
+            var sections = new Dictionary<char, List<int>>();
+            sections['q'] = new List<int>();
+            sections['d'] = new List<int>();
+            sections['t'] = new List<int>();
+            sections['k'] = new List<int>();
 
-            Die = Convert.ToInt32(sections[1]);
-            Quantity = 1;
+            var key = 'q';
+            var number = string.Empty;
+            for (var i = 0; i < toParse.Length; i++)
+            {
+                if (char.IsWhiteSpace(toParse[i]))
+                    continue;
 
-            if (!string.IsNullOrEmpty(sections[0]))
-                Quantity = Convert.ToInt32(sections[0]);
+                if (!char.IsDigit(toParse[i]) && !number.Any())
+                {
+                    key = toParse[i];
+                    continue;
+                }
+                else if (char.IsDigit(toParse[i]))
+                {
+                    number += toParse[i];
+                    continue;
+                }
 
-            if (sections.Length == 3 && !string.IsNullOrEmpty(sections[2]))
-                AmountToKeep = Convert.ToInt32(sections[2]);
+                if (!number.Any())
+                    continue;
+
+                sections[key].Add(Convert.ToInt32(number));
+
+                number = string.Empty;
+                key = toParse[i];
+            }
+
+            sections[key].Add(Convert.ToInt32(number));
+
+            if (!sections['q'].Any())
+                sections['q'].Add(1);
+
+            Quantity = sections['q'][0];
+            Die = sections['d'][0];
+
+            if (sections['k'].Any())
+                AmountToKeep = sections['k'][0];
+
+            TransformToMax = sections['t'];
         }
 
         public static bool CanParse(string toParse)
@@ -60,10 +100,17 @@ namespace DnDGen.RollGen.PartialRolls
             for (var i = 0; i < Quantity; i++)
             {
                 var roll = random.Next(Die) + 1;
+
                 if (Explode && roll == Die)
                 {
                     --i; // We're rerolling this die, so Quantity actually stays the same.
                 }
+
+                if (TransformToMax.Contains(roll))
+                {
+                    roll = Die;
+                }
+
                 rolls.Add(roll);
             }
 
@@ -92,6 +139,9 @@ namespace DnDGen.RollGen.PartialRolls
             if (!ExplodeValid)
                 message += $"\n\tExplode: Cannot explode die {Die}, must be > 1";
 
+            if (!TransformValid)
+                message += $"\n\tTransform: 0 < [{string.Join(',', TransformToMax)}] <= {Die}";
+
             throw new InvalidOperationException(message);
         }
 
@@ -107,8 +157,9 @@ namespace DnDGen.RollGen.PartialRolls
         {
             ValidateRoll();
 
-            var quantity = GetEffectiveQuantity();
-            var average = quantity * (Die + 1) / 2.0d;
+            var min = GetPotentialMinimum();
+            var max = GetPotentialMaximum(false);
+            var average = (min + max) / 2.0d;
 
             return average;
         }
@@ -118,8 +169,14 @@ namespace DnDGen.RollGen.PartialRolls
             ValidateRoll();
 
             var quantity = GetEffectiveQuantity();
+            var min = 1;
 
-            return quantity;
+            while (TransformToMax.Contains(min) && min < Die)
+            {
+                min++;
+            }
+
+            return min * quantity;
         }
 
         private int GetEffectiveQuantity()
@@ -161,6 +218,9 @@ namespace DnDGen.RollGen.PartialRolls
 
             if (Explode)
                 output += "!";
+
+            foreach (var transform in TransformToMax)
+                output += $"t{transform}";
 
             if (AmountToKeep != 0)
                 output += $"k{AmountToKeep}";

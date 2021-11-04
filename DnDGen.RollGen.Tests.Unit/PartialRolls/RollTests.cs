@@ -59,13 +59,19 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         [TestCase("92 d 66 ! k 42 ", 92, 66, 42, true)]
         [TestCase("92 d 66 k 42 ! ", 92, 66, 42, true)]
         [TestCase("92 d 66 ! k 42 ! ", 92, 66, 42, true)]
-        public void ParseExpression(string expression, int quantity, int die, int toKeep, bool explode)
+        [TestCase("3d6", 3, 6, 0, false)]
+        [TestCase("4d6k3", 4, 6, 3, false)]
+        [TestCase("3d6t1", 3, 6, 0, false, 1)]
+        [TestCase("3d6t1t2", 3, 6, 0, false, 1, 2)]
+        [TestCase("4d6!t1t2k3", 4, 6, 3, true, 1, 2)]
+        public void ParseExpression(string expression, int quantity, int die, int toKeep, bool explode, params int[] transforms)
         {
             roll = new Roll(expression);
             Assert.That(roll.Quantity, Is.EqualTo(quantity));
             Assert.That(roll.Die, Is.EqualTo(die));
             Assert.That(roll.Explode, Is.EqualTo(explode));
             Assert.That(roll.AmountToKeep, Is.EqualTo(toKeep));
+            Assert.That(roll.TransformToMax, Is.EqualTo(transforms));
             Assert.That(roll.IsValid, Is.True);
         }
 
@@ -102,6 +108,11 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         [TestCase(" 12 30 d 4 56 k 7 8 9 ", false)]
         [TestCase(" 12 30 d 4 56 ! k 7 8 9 ", false)]
         [TestCase(" 12 30 d 4 56 k 7 8 9 ! ", false)]
+        [TestCase("3d6", true)]
+        [TestCase("4d6k3", true)]
+        [TestCase("3d6t1", true)]
+        [TestCase("3d6t1t2", true)]
+        [TestCase("4d6!t1t2k3", true)]
         public void CanParse(string expression, bool canParse)
         {
             Assert.That(Roll.CanParse(expression), Is.EqualTo(canParse));
@@ -891,12 +902,28 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         [TestCase(Limits.Quantity + 1, Limits.Die + 1, Limits.Quantity, true, false)]
         [TestCase(Limits.Quantity + 1, Limits.Die + 1, Limits.Quantity + 1, false, false)]
         [TestCase(Limits.Quantity + 1, Limits.Die + 1, Limits.Quantity + 1, true, false)]
-        public void IsValid(int quantity, int die, int amountToKeep, bool explode, bool isValid)
+        [TestCase(1, 2, 0, false, true, 1)]
+        [TestCase(1, 2, 0, false, true, 1, 2)]
+        [TestCase(1, 2, 0, false, false, 3)]
+        [TestCase(1, 2, 0, false, false, 1, 3)]
+        [TestCase(1, 2, 0, false, false, Limits.Die)]
+        [TestCase(1, 2, 0, false, false, 1, Limits.Die)]
+        [TestCase(1, 2, 0, false, false, Limits.Die + 1)]
+        [TestCase(1, 2, 0, false, false, 1, Limits.Die + 1)]
+        [TestCase(1, Limits.Die, 0, false, true, Limits.Die)]
+        [TestCase(1, Limits.Die, 0, false, true, 1, Limits.Die)]
+        [TestCase(1, Limits.Die, 0, false, false, Limits.Die + 1)]
+        [TestCase(1, Limits.Die, 0, false, false, 1, Limits.Die + 1)]
+        [TestCase(3, 6, 0, false, true)]
+        [TestCase(4, 6, 3, false, true)]
+        [TestCase(3, 6, 0, false, true, 1)]
+        public void IsValid(int quantity, int die, int amountToKeep, bool explode, bool isValid, params int[] transforms)
         {
             roll.Quantity = quantity;
             roll.Die = die;
             roll.AmountToKeep = amountToKeep;
             roll.Explode = explode;
+            roll.TransformToMax.AddRange(transforms);
 
             Assert.That(roll.IsValid, Is.EqualTo(isValid));
         }
@@ -1012,6 +1039,37 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             Assert.That(() => roll.GetSum(mockRandom.Object), Throws.InstanceOf<InvalidOperationException>().With.Message.EqualTo(message));
         }
 
+        [TestCase(-2)]
+        [TestCase(-1)]
+        [TestCase(0)]
+        [TestCase(43)]
+        public void IfTransformNotValid_ThrowInvalidOperationException(int transform)
+        {
+            roll.Quantity = 9266;
+            roll.Die = 42;
+            roll.TransformToMax.Add(transform);
+
+            var message = $"9266d42t{transform} is not a valid roll.";
+            message += $"\n\tTransform: 0 < [{transform}] <= 42";
+            Assert.That(() => roll.GetSum(mockRandom.Object), Throws.InstanceOf<InvalidOperationException>().With.Message.EqualTo(message));
+        }
+
+        [TestCase(-2)]
+        [TestCase(-1)]
+        [TestCase(0)]
+        [TestCase(43)]
+        public void IfAnyTransformNotValid_ThrowInvalidOperationException(int transform)
+        {
+            roll.Quantity = 9266;
+            roll.Die = 42;
+            roll.TransformToMax.Add(21);
+            roll.TransformToMax.Add(transform);
+
+            var message = $"9266d42t21t{transform} is not a valid roll.";
+            message += $"\n\tTransform: 0 < [21,{transform}] <= 42";
+            Assert.That(() => roll.GetSum(mockRandom.Object), Throws.InstanceOf<InvalidOperationException>().With.Message.EqualTo(message));
+        }
+
         [Test]
         public void IfAllNotValid_ThrowInvalidOperationException()
         {
@@ -1019,12 +1077,14 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             roll.Die = 0;
             roll.AmountToKeep = -1;
             roll.Explode = true;
+            roll.TransformToMax.Add(1);
 
-            var message = $"{Limits.Quantity + 1}d0!k-1 is not a valid roll.";
+            var message = $"{Limits.Quantity + 1}d0!t1k-1 is not a valid roll.";
             message += $"\n\tQuantity: 0 < {Limits.Quantity + 1} < {Limits.Quantity}";
             message += $"\n\tDie: 0 < 0 < {Limits.Die}";
             message += $"\n\tKeep: 0 <= -1 < {Limits.Quantity}";
             message += $"\n\tExplode: Cannot explode die 0, must be > 1";
+            message += $"\n\tTransform: 0 < [1] <= 0";
             Assert.That(() => roll.GetSum(mockRandom.Object), Throws.InstanceOf<InvalidOperationException>().With.Message.EqualTo(message));
         }
 
@@ -1116,44 +1176,82 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void GetRollsAndExplodeAndKeep()
+        public void GetRollsAndTransform()
         {
             roll.Quantity = 92;
             roll.Die = 66;
-            roll.Explode = true;
-            roll.AmountToKeep = 42;
+            roll.TransformToMax.Add(42);
 
             var rolls = roll.GetRolls(mockRandom.Object);
             var countTotal = 0;
 
-            for (var individualRoll = 66; individualRoll > 25; individualRoll--)
+            for (var individualRoll = 66; individualRoll > 0; individualRoll--)
             {
+                if (individualRoll == 42)
+                {
+                    Assert.That(rolls, Does.Not.Contain(individualRoll));
+                    continue;
+                }
+
                 Assert.That(rolls, Contains.Item(individualRoll));
 
-                var expectedCount = individualRoll > 26 && individualRoll < 28 ? 2 : 1;
+                var expectedCount = individualRoll < 27 || individualRoll == 66 ? 2 : 1;
                 Assert.That(rolls.Count(r => r == individualRoll), Is.EqualTo(expectedCount), $"Roll of {individualRoll}");
                 countTotal += expectedCount;
             }
 
-            Assert.That(rolls.Count(), Is.EqualTo(42).And.EqualTo(countTotal));
+            Assert.That(rolls.Count(), Is.EqualTo(92).And.EqualTo(countTotal));
         }
 
         [Test]
-        public void GetRollsAndExplodeAndKeepDuplicates()
+        public void GetRollsAndTransformMultiple()
+        {
+            roll.Quantity = 92;
+            roll.Die = 66;
+            roll.TransformToMax.Add(4);
+            roll.TransformToMax.Add(2);
+
+            var rolls = roll.GetRolls(mockRandom.Object);
+            var countTotal = 0;
+
+            for (var individualRoll = 66; individualRoll > 0; individualRoll--)
+            {
+                if (individualRoll == 4 || individualRoll == 2)
+                {
+                    Assert.That(rolls, Does.Not.Contain(individualRoll));
+                    continue;
+                }
+
+                Assert.That(rolls, Contains.Item(individualRoll));
+
+                var expectedCount = individualRoll < 27 ? 2 :
+                    individualRoll == 66 ? 5 : 1;
+                Assert.That(rolls.Count(r => r == individualRoll), Is.EqualTo(expectedCount), $"Roll of {individualRoll}");
+                countTotal += expectedCount;
+            }
+
+            Assert.That(rolls.Count(), Is.EqualTo(92).And.EqualTo(countTotal));
+        }
+
+        [Test]
+        public void GetRollsWithAllOperations()
         {
             roll.Quantity = 92 * 2;
             roll.Die = 66;
             roll.Explode = true;
             roll.AmountToKeep = 42;
+            roll.TransformToMax.Add(9);
+            roll.TransformToMax.Add(6);
 
             var rolls = roll.GetRolls(mockRandom.Object);
             var countTotal = 0;
 
-            for (var individualRoll = 66; individualRoll > 48; individualRoll--)
+            for (var individualRoll = 66; individualRoll > 50; individualRoll--)
             {
                 Assert.That(rolls, Contains.Item(individualRoll));
 
-                var expectedCount = individualRoll < 55 ? 3 : 2;
+                var expectedCount = individualRoll < 55 ? 3 :
+                    individualRoll == 66 ? 8 : 2;
                 Assert.That(rolls.Count(r => r == individualRoll), Is.EqualTo(expectedCount), $"Roll of {individualRoll}");
                 countTotal += expectedCount;
             }
@@ -1194,15 +1292,40 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void GetSumOfRollsAndExplodeAndKeep()
+        public void GetSumOfRollsAndTransform()
+        {
+            roll.Quantity = 92;
+            roll.Die = 66;
+            roll.TransformToMax.Add(42);
+
+            var sum = roll.GetSum(mockRandom.Object);
+            Assert.That(sum, Is.EqualTo(2586));
+        }
+
+        [Test]
+        public void GetSumOfRollsAndTransformMultiple()
+        {
+            roll.Quantity = 92;
+            roll.Die = 66;
+            roll.TransformToMax.Add(4);
+            roll.TransformToMax.Add(2);
+
+            var sum = roll.GetSum(mockRandom.Object);
+            Assert.That(sum, Is.EqualTo(2814));
+        }
+
+        [Test]
+        public void GetSumOfRollsWithAllOperations()
         {
             roll.Quantity = 92;
             roll.Die = 66;
             roll.Explode = true;
             roll.AmountToKeep = 42;
+            roll.TransformToMax.Add(9);
+            roll.TransformToMax.Add(6);
 
             var sum = roll.GetSum(mockRandom.Object);
-            Assert.That(sum, Is.EqualTo(1913));
+            Assert.That(sum, Is.EqualTo(2069));
         }
 
         [Test]
@@ -1212,7 +1335,7 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             roll.Die = 66;
 
             var average = roll.GetPotentialAverage();
-            Assert.That(average, Is.EqualTo(3082));
+            Assert.That(average, Is.EqualTo((92 + 92 * 66) / 2));
         }
 
         [Test]
@@ -1223,7 +1346,7 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             roll.AmountToKeep = 42;
 
             var average = roll.GetPotentialAverage();
-            Assert.That(average, Is.EqualTo(1407));
+            Assert.That(average, Is.EqualTo((42 + 42 * 66) / 2));
         }
 
         [Test]
@@ -1234,19 +1357,68 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             roll.Explode = true;
 
             var average = roll.GetPotentialAverage();
-            Assert.That(average, Is.EqualTo(3082));
+            Assert.That(average, Is.EqualTo((92 + 92 * 66) / 2));
         }
 
         [Test]
-        public void GetPotentialAverageRollAndExplodeAndKeep()
+        public void GetPotentialAverageRollAndTransform()
+        {
+            roll.Quantity = 92;
+            roll.Die = 66;
+            roll.TransformToMax.Add(42);
+
+            var average = roll.GetPotentialAverage();
+            Assert.That(average, Is.EqualTo((92 + 92 * 66) / 2));
+        }
+
+        [Test]
+        public void GetPotentialAverageRollAndTransform_TransformedMinimum()
+        {
+            roll.Quantity = 92;
+            roll.Die = 66;
+            roll.TransformToMax.Add(1);
+
+            var average = roll.GetPotentialAverage();
+            Assert.That(average, Is.EqualTo((92 * 2 + 92 * 66) / 2));
+        }
+
+        [Test]
+        public void GetPotentialAverageRollAndTransformMultiple()
+        {
+            roll.Quantity = 92;
+            roll.Die = 66;
+            roll.TransformToMax.Add(4);
+            roll.TransformToMax.Add(2);
+
+            var average = roll.GetPotentialAverage();
+            Assert.That(average, Is.EqualTo((92 + 92 * 66) / 2));
+        }
+
+        [Test]
+        public void GetPotentialAverageRollAndTransformMultiple_TransformedMinimums()
+        {
+            roll.Quantity = 92;
+            roll.Die = 66;
+            roll.TransformToMax.Add(1);
+            roll.TransformToMax.Add(2);
+
+            var average = roll.GetPotentialAverage();
+            Assert.That(average, Is.EqualTo((92 * 3 + 92 * 66) / 2));
+        }
+
+        [Test]
+        public void GetPotentialAverageRollWithAllOperations()
         {
             roll.Quantity = 92;
             roll.Die = 66;
             roll.Explode = true;
             roll.AmountToKeep = 42;
+            roll.TransformToMax.Add(9);
+            roll.TransformToMax.Add(6);
+            roll.TransformToMax.Add(1);
 
             var average = roll.GetPotentialAverage();
-            Assert.That(average, Is.EqualTo(1407));
+            Assert.That(average, Is.EqualTo((42 * 2 + 42 * 66) / 2));
         }
 
         [Test]
@@ -1282,15 +1454,88 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void GetPotentialMinimumRollAndExplodeAndKeep()
+        public void GetPotentialMinimumRollAndTransform()
+        {
+            roll.Quantity = 92;
+            roll.Die = 66;
+            roll.TransformToMax.Add(42);
+
+            var minimum = roll.GetPotentialMinimum();
+            Assert.That(minimum, Is.EqualTo(92));
+        }
+
+        [Test]
+        public void GetPotentialMinimumRollAndTransform_MinimumTransformed()
+        {
+            roll.Quantity = 92;
+            roll.Die = 66;
+            roll.TransformToMax.Add(1);
+
+            var minimum = roll.GetPotentialMinimum();
+            Assert.That(minimum, Is.EqualTo(92 * 2));
+        }
+
+        [Test]
+        public void GetPotentialMinimumRollAndTransformMultiple()
+        {
+            roll.Quantity = 92;
+            roll.Die = 66;
+            roll.TransformToMax.Add(4);
+            roll.TransformToMax.Add(2);
+
+            var minimum = roll.GetPotentialMinimum();
+            Assert.That(minimum, Is.EqualTo(92));
+        }
+
+        [Test]
+        public void GetPotentialMinimumRollAndTransformMultiple_MinimumsTransformed()
+        {
+            roll.Quantity = 92;
+            roll.Die = 66;
+            roll.TransformToMax.Add(1);
+            roll.TransformToMax.Add(2);
+
+            var minimum = roll.GetPotentialMinimum();
+            Assert.That(minimum, Is.EqualTo(92 * 3));
+        }
+
+        [Test]
+        public void GetPotentialMinimumRollAndTransformMultiple_AllButMaxTransformed()
+        {
+            roll.Quantity = 2;
+            roll.Die = 3;
+            roll.TransformToMax.Add(1);
+            roll.TransformToMax.Add(2);
+
+            var minimum = roll.GetPotentialMinimum();
+            Assert.That(minimum, Is.EqualTo(6));
+        }
+
+        [Test]
+        public void GetPotentialMinimumRollAndTransformMultiple_AllTransformed()
+        {
+            roll.Quantity = 2;
+            roll.Die = 3;
+            roll.TransformToMax.Add(1);
+            roll.TransformToMax.Add(2);
+            roll.TransformToMax.Add(3);
+
+            var minimum = roll.GetPotentialMinimum();
+            Assert.That(minimum, Is.EqualTo(6));
+        }
+
+        [Test]
+        public void GetPotentialMinimumRollWithAllOperations()
         {
             roll.Quantity = 92;
             roll.Die = 66;
             roll.Explode = true;
             roll.AmountToKeep = 42;
+            roll.TransformToMax.Add(4);
+            roll.TransformToMax.Add(1);
 
             var minimum = roll.GetPotentialMinimum();
-            Assert.That(minimum, Is.EqualTo(42));
+            Assert.That(minimum, Is.EqualTo(42 * 2));
         }
 
         [Test]
@@ -1326,12 +1571,37 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
-        public void GetPotentialMaximumRollAndExplodeAndKeep()
+        public void GetPotentialMaximumRollAndTransform()
+        {
+            roll.Quantity = 92;
+            roll.Die = 66;
+            roll.TransformToMax.Add(42);
+
+            var maximum = roll.GetPotentialMaximum();
+            Assert.That(maximum, Is.EqualTo(92 * 66));
+        }
+
+        [Test]
+        public void GetPotentialMaximumRollAndTransformMultiple()
+        {
+            roll.Quantity = 92;
+            roll.Die = 66;
+            roll.TransformToMax.Add(4);
+            roll.TransformToMax.Add(2);
+
+            var maximum = roll.GetPotentialMaximum();
+            Assert.That(maximum, Is.EqualTo(92 * 66));
+        }
+
+        [Test]
+        public void GetPotentialMaximumRollWithAllOperations()
         {
             roll.Quantity = 92;
             roll.Die = 66;
             roll.Explode = true;
             roll.AmountToKeep = 42;
+            roll.TransformToMax.Add(9);
+            roll.TransformToMax.Add(6);
 
             var maximum = roll.GetPotentialMaximum();
             Assert.That(maximum, Is.EqualTo(42 * 66 * 10));
@@ -1496,6 +1766,40 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             roll.AmountToKeep = -42;
 
             Assert.That(roll.ToString(), Is.EqualTo("92d66!k-42"));
+        }
+
+        [Test]
+        public void RollStringWithTransform()
+        {
+            roll.Quantity = 92;
+            roll.Die = 66;
+            roll.TransformToMax.Add(42);
+
+            Assert.That(roll.ToString(), Is.EqualTo("92d66t42"));
+        }
+
+        [Test]
+        public void RollStringWithMultipleTransforms()
+        {
+            roll.Quantity = 92;
+            roll.Die = 66;
+            roll.TransformToMax.Add(4);
+            roll.TransformToMax.Add(2);
+
+            Assert.That(roll.ToString(), Is.EqualTo("92d66t4t2"));
+        }
+
+        [Test]
+        public void RollStringWithAllOperations()
+        {
+            roll.Quantity = 92;
+            roll.Die = 66;
+            roll.Explode = true;
+            roll.AmountToKeep = 42;
+            roll.TransformToMax.Add(9);
+            roll.TransformToMax.Add(6);
+
+            Assert.That(roll.ToString(), Is.EqualTo("92d66!t9t6k42"));
         }
     }
 }

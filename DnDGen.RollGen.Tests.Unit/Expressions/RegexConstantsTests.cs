@@ -7,7 +7,14 @@ namespace DnDGen.RollGen.Tests.Unit.Expressions
     [TestFixture]
     public class RegexConstantsTests
     {
-        [TestCase(RegexConstants.CommonRollRegexPattern, "d *\\d+(?: *((! *(k *\\d+)?)|((k *\\d+)? *!?)))?")]
+        [TestCase(RegexConstants.CommonRollRegexPattern, "d *\\d+(?: *("
+            + "(! *(t *\\d+)* *(k *\\d+)?)" //etk
+            + "|(! *(k *\\d+)? *(t *\\d+)*)" //ekt
+            + "|((t *\\d+)+ *!? *(k *\\d+)?)" //tek
+            + "|((t *\\d+)+ *(k *\\d+)? *!?)" //tke
+            + "|((k *\\d+)? *! *(t *\\d+)*)" //ket
+            + "|((k *\\d+)? *(t *\\d+)* *!?)" //kte or nothing
+            + "))")]
         [TestCase(RegexConstants.StrictRollPattern, "(?:(?:\\d* +)|(?:\\d+ *)|^)" + RegexConstants.CommonRollRegexPattern)]
         [TestCase(RegexConstants.LenientRollPattern, "\\d* *" + RegexConstants.CommonRollRegexPattern)]
         [TestCase(RegexConstants.ExpressionWithoutDieRollsPattern, "(?:[-+]?\\d*\\.?\\d+[%/\\+\\-\\*])+(?:[-+]?\\d*\\.?\\d+)")]
@@ -21,12 +28,25 @@ namespace DnDGen.RollGen.Tests.Unit.Expressions
         [TestCase(" 1 d 2 ", true)]
         [TestCase("d2", true)]
         [TestCase(" d 2 ", true)]
+        [TestCase("1 and 2", false)]
         [TestCase("1d2k3", true)]
+        [TestCase("1d2k3!", true)]
         [TestCase(" 1 d 2 k 3 ", true)]
+        [TestCase(" 1 d 2 k 3 ! ", true)]
         [TestCase("d2k3", true)]
         [TestCase(" d 2 k 3 ", true)]
-        [TestCase("1 and 2", false)]
         [TestCase("This is not a match", false)]
+        [TestCase("4d6k3", true)]
+        [TestCase(" 4 d 6 k 3 ", true)]
+        [TestCase("1d2!", true)]
+        [TestCase(" 1 d 2 ! ", true)]
+        [TestCase("1d2!k3", true)]
+        [TestCase(" 1 d 2 ! k 3 ", true)]
+        [TestCase("3d6t1", true)]
+        [TestCase(" 3 d 6 t 1 ", true)]
+        [TestCase("3d6t1t2", true)]
+        [TestCase("2d4!t1t2k3", true)]
+        [TestCase(" 2 d 4 ! t 1 k 3 ", true)]
         public void StrictRollRegexMatches(string source, bool isMatch)
         {
             VerifyMatch(RegexConstants.StrictRollPattern, source, isMatch);

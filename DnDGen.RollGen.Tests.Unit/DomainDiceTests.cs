@@ -163,6 +163,7 @@ namespace DnDGen.RollGen.Tests.Unit
         [TestCase("1+2d3", "1+1")]
         [TestCase("1d2+3", "1+3")]
         [TestCase("6d9k5", "1")]
+        [TestCase("6d9k5!", "1")]
         [TestCase("6d9k7", "1")]
         [TestCase("6d9k6", "1")]
         [TestCase("6d9k1", "1")]
