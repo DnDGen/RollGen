@@ -158,15 +158,23 @@ namespace DnDGen.RollGen.PartialRolls
             return this;
         }
 
-        public override PartialRoll Transforming(int rollToTransform)
+        public override PartialRoll Transforming(int rollToTransform, int? transformTarget = null)
         {
             CurrentRollExpression += $"t{rollToTransform}";
+
+            if (transformTarget != null)
+                CurrentRollExpression += $":{transformTarget}";
+
             return this;
         }
 
-        public override PartialRoll Transforming(string rollToTransform)
+        public override PartialRoll Transforming(string rollToTransform, string transformTarget)
         {
             CurrentRollExpression += $"t({rollToTransform})";
+
+            if (transformTarget != null)
+                CurrentRollExpression += $":({transformTarget})";
+
             return this;
         }
 

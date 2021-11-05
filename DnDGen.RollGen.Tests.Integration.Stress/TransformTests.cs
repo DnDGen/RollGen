@@ -32,10 +32,11 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
             var quantity = random.Next(quantityLimit) + 1;
             var die = random.Next(dieLimit) + 1;
             var transform = random.Next(die - 1) + 1;
+            var transformTarget = random.Next(die - 1) + 1;
             var percentageThreshold = random.NextDouble();
             var rollThreshold = random.Next(quantity * die) + 1;
 
-            var roll = GetRoll(quantity, die, transform);
+            var roll = GetRoll(quantity, die, transform, transformTarget);
 
             AssertRoll(roll, quantity, die, transform, percentageThreshold, rollThreshold);
         }
@@ -62,6 +63,6 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
             Assert.That(rolls, Has.All.InRange(rollMin, max));
         }
 
-        private PartialRoll GetRoll(int quantity, int die, int transform) => dice.Roll(quantity).d(die).Transforming(transform);
+        private PartialRoll GetRoll(int quantity, int die, int transform, int target) => dice.Roll(quantity).d(die).Transforming(transform, target);
     }
 }

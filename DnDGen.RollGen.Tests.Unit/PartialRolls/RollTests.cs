@@ -3,6 +3,7 @@ using Moq;
 using NUnit.Framework;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace DnDGen.RollGen.Tests.Unit.PartialRolls
@@ -25,14 +26,14 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [TestCaseSource(nameof(ParsedExpressions))]
-        public void ParseExpression(string expression, int quantity, int die, int toKeep, int[] explodes, int[] transforms)
+        public void ParseExpression(string expression, int quantity, int die, int toKeep, int[] explodes, Dictionary<int, int> transforms)
         {
             roll = new Roll(expression);
             Assert.That(roll.Quantity, Is.EqualTo(quantity));
             Assert.That(roll.Die, Is.EqualTo(die));
             Assert.That(roll.ExplodeOn, Is.EquivalentTo(explodes));
             Assert.That(roll.AmountToKeep, Is.EqualTo(toKeep));
-            Assert.That(roll.TransformToMax, Is.EquivalentTo(transforms));
+            Assert.That(roll.Transforms, Is.EquivalentTo(transforms));
             Assert.That(roll.IsValid, Is.True);
         }
 
@@ -40,73 +41,77 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             get
             {
-                yield return new TestCaseData("1d2!", 1, 2, 0, new[] { 2 }, new int[0]);
-                yield return new TestCaseData("1d2!!", 1, 2, 0, new[] { 2 }, new int[0]);
-                yield return new TestCaseData(" 1 d 2 ", 1, 2, 0, new int[0], new int[0]);
-                yield return new TestCaseData(" 1 d 2 ! ", 1, 2, 0, new[] { 2 }, new int[0]);
-                yield return new TestCaseData(" 1 d 2 ! ! ", 1, 2, 0, new[] { 2 }, new int[0]);
-                yield return new TestCaseData("1d2k3", 1, 2, 3, new int[0], new int[0]);
-                yield return new TestCaseData("1d2!k3", 1, 2, 3, new[] { 2 }, new int[0]);
-                yield return new TestCaseData("1d2k3!", 1, 2, 3, new[] { 2 }, new int[0]);
-                yield return new TestCaseData("1d2!k3!", 1, 2, 3, new[] { 2 }, new int[0]);
-                yield return new TestCaseData(" 1 d 2 k 3 ", 1, 2, 3, new int[0], new int[0]);
-                yield return new TestCaseData(" 1 d 2 ! k 3 ", 1, 2, 3, new[] { 2 }, new int[0]);
-                yield return new TestCaseData(" 1 d 2 k 3 ! ", 1, 2, 3, new[] { 2 }, new int[0]);
-                yield return new TestCaseData(" 1 d 2 ! k 3 ! ", 1, 2, 3, new[] { 2 }, new int[0]);
-                yield return new TestCaseData("d2", 1, 2, 0, new int[0], new int[0]);
-                yield return new TestCaseData("d2!", 1, 2, 0, new[] { 2 }, new int[0]);
-                yield return new TestCaseData("d2!!", 1, 2, 0, new[] { 2 }, new int[0]);
-                yield return new TestCaseData(" d 2 ", 1, 2, 0, new int[0], new int[0]);
-                yield return new TestCaseData(" d 2 ! ", 1, 2, 0, new[] { 2 }, new int[0]);
-                yield return new TestCaseData(" d 2 ! ! ", 1, 2, 0, new[] { 2 }, new int[0]);
-                yield return new TestCaseData("1230d456k789", 1230, 456, 789, new int[0], new int[0]);
-                yield return new TestCaseData("1230d456!k789", 1230, 456, 789, new[] { 456 }, new int[0]);
-                yield return new TestCaseData("1230d456k789!", 1230, 456, 789, new[] { 456 }, new int[0]);
-                yield return new TestCaseData("1230d456!k789!", 1230, 456, 789, new[] { 456 }, new int[0]);
-                yield return new TestCaseData(" 1230 d 456 k 789 ", 1230, 456, 789, new int[0], new int[0]);
-                yield return new TestCaseData(" 1230 d 456 ! k 789 ", 1230, 456, 789, new[] { 456 }, new int[0]);
-                yield return new TestCaseData(" 1230 d 456 k 789 ! ", 1230, 456, 789, new[] { 456 }, new int[0]);
-                yield return new TestCaseData(" 1230 d 456 ! k 789 ! ", 1230, 456, 789, new[] { 456 }, new int[0]);
-                yield return new TestCaseData("92d66k42", 92, 66, 42, new int[0], new int[0]);
-                yield return new TestCaseData("92 d 66 k 42 ", 92, 66, 42, new int[0], new int[0]);
-                yield return new TestCaseData("92d66!k42", 92, 66, 42, new[] { 66 }, new int[0]);
-                yield return new TestCaseData("92d66k42!", 92, 66, 42, new[] { 66 }, new int[0]);
-                yield return new TestCaseData("92d66!k42!", 92, 66, 42, new[] { 66 }, new int[0]);
-                yield return new TestCaseData("92 d 66 ! k 42 ", 92, 66, 42, new[] { 66 }, new int[0]);
-                yield return new TestCaseData("92 d 66 k 42 ! ", 92, 66, 42, new[] { 66 }, new int[0]);
-                yield return new TestCaseData("92 d 66 ! k 42 ! ", 92, 66, 42, new[] { 66 }, new int[0]);
-                yield return new TestCaseData("3d6", 3, 6, 0, new int[0], new int[0]);
-                yield return new TestCaseData("3d6t1t2", 3, 6, 0, new int[0], new[] { 1, 2 });
-                yield return new TestCaseData("4d6!t1t2k3", 4, 6, 3, new[] { 6 }, new[] { 1, 2 });
+                yield return new TestCaseData("1d2!", 1, 2, 0, new[] { 2 }, new Dictionary<int, int>());
+                yield return new TestCaseData("1d2!!", 1, 2, 0, new[] { 2 }, new Dictionary<int, int>());
+                yield return new TestCaseData(" 1 d 2 ", 1, 2, 0, new int[0], new Dictionary<int, int>());
+                yield return new TestCaseData(" 1 d 2 ! ", 1, 2, 0, new[] { 2 }, new Dictionary<int, int>());
+                yield return new TestCaseData(" 1 d 2 ! ! ", 1, 2, 0, new[] { 2 }, new Dictionary<int, int>());
+                yield return new TestCaseData("1d2k3", 1, 2, 3, new int[0], new Dictionary<int, int>());
+                yield return new TestCaseData("1d2!k3", 1, 2, 3, new[] { 2 }, new Dictionary<int, int>());
+                yield return new TestCaseData("1d2k3!", 1, 2, 3, new[] { 2 }, new Dictionary<int, int>());
+                yield return new TestCaseData("1d2!k3!", 1, 2, 3, new[] { 2 }, new Dictionary<int, int>());
+                yield return new TestCaseData(" 1 d 2 k 3 ", 1, 2, 3, new int[0], new Dictionary<int, int>());
+                yield return new TestCaseData(" 1 d 2 ! k 3 ", 1, 2, 3, new[] { 2 }, new Dictionary<int, int>());
+                yield return new TestCaseData(" 1 d 2 k 3 ! ", 1, 2, 3, new[] { 2 }, new Dictionary<int, int>());
+                yield return new TestCaseData(" 1 d 2 ! k 3 ! ", 1, 2, 3, new[] { 2 }, new Dictionary<int, int>());
+                yield return new TestCaseData("d2", 1, 2, 0, new int[0], new Dictionary<int, int>());
+                yield return new TestCaseData("d2!", 1, 2, 0, new[] { 2 }, new Dictionary<int, int>());
+                yield return new TestCaseData("d2!!", 1, 2, 0, new[] { 2 }, new Dictionary<int, int>());
+                yield return new TestCaseData(" d 2 ", 1, 2, 0, new int[0], new Dictionary<int, int>());
+                yield return new TestCaseData(" d 2 ! ", 1, 2, 0, new[] { 2 }, new Dictionary<int, int>());
+                yield return new TestCaseData(" d 2 ! ! ", 1, 2, 0, new[] { 2 }, new Dictionary<int, int>());
+                yield return new TestCaseData("1230d456k789", 1230, 456, 789, new int[0], new Dictionary<int, int>());
+                yield return new TestCaseData("1230d456!k789", 1230, 456, 789, new[] { 456 }, new Dictionary<int, int>());
+                yield return new TestCaseData("1230d456k789!", 1230, 456, 789, new[] { 456 }, new Dictionary<int, int>());
+                yield return new TestCaseData("1230d456!k789!", 1230, 456, 789, new[] { 456 }, new Dictionary<int, int>());
+                yield return new TestCaseData(" 1230 d 456 k 789 ", 1230, 456, 789, new int[0], new Dictionary<int, int>());
+                yield return new TestCaseData(" 1230 d 456 ! k 789 ", 1230, 456, 789, new[] { 456 }, new Dictionary<int, int>());
+                yield return new TestCaseData(" 1230 d 456 k 789 ! ", 1230, 456, 789, new[] { 456 }, new Dictionary<int, int>());
+                yield return new TestCaseData(" 1230 d 456 ! k 789 ! ", 1230, 456, 789, new[] { 456 }, new Dictionary<int, int>());
+                yield return new TestCaseData("92d66k42", 92, 66, 42, new int[0], new Dictionary<int, int>());
+                yield return new TestCaseData("92 d 66 k 42 ", 92, 66, 42, new int[0], new Dictionary<int, int>());
+                yield return new TestCaseData("92d66!k42", 92, 66, 42, new[] { 66 }, new Dictionary<int, int>());
+                yield return new TestCaseData("92d66k42!", 92, 66, 42, new[] { 66 }, new Dictionary<int, int>());
+                yield return new TestCaseData("92d66!k42!", 92, 66, 42, new[] { 66 }, new Dictionary<int, int>());
+                yield return new TestCaseData("92 d 66 ! k 42 ", 92, 66, 42, new[] { 66 }, new Dictionary<int, int>());
+                yield return new TestCaseData("92 d 66 k 42 ! ", 92, 66, 42, new[] { 66 }, new Dictionary<int, int>());
+                yield return new TestCaseData("92 d 66 ! k 42 ! ", 92, 66, 42, new[] { 66 }, new Dictionary<int, int>());
+                yield return new TestCaseData("3d6", 3, 6, 0, new int[0], new Dictionary<int, int>());
+                yield return new TestCaseData("3d6t1t2", 3, 6, 0, new int[0], new Dictionary<int, int> { { 1, 6 }, { 2, 6 } });
+                yield return new TestCaseData("3d6t1:2t3:4k5", 3, 6, 5, new int[0], new Dictionary<int, int> { { 1, 2 }, { 3, 4 } });
+                yield return new TestCaseData("3d6t1t3:4k5", 3, 6, 5, new int[0], new Dictionary<int, int> { { 1, 6 }, { 3, 4 } });
+                yield return new TestCaseData("3d6t1:2t3k5", 3, 6, 5, new int[0], new Dictionary<int, int> { { 1, 2 }, { 3, 6 } });
+                yield return new TestCaseData("4d6!t1t2k3", 4, 6, 3, new[] { 6 }, new Dictionary<int, int> { { 1, 6 }, { 2, 6 } });
                 //From README
-                yield return new TestCaseData("4d6", 4, 6, 0, new int[0], new int[0]);
-                yield return new TestCaseData("92d66", 92, 66, 0, new int[0], new int[0]);
-                yield return new TestCaseData("3d4", 3, 4, 0, new int[0], new int[0]);
-                yield return new TestCaseData("1d6", 1, 6, 0, new int[0], new int[0]);
-                yield return new TestCaseData("2d6", 2, 6, 0, new int[0], new int[0]);
-                yield return new TestCaseData("3d6", 3, 6, 0, new int[0], new int[0]);
-                yield return new TestCaseData("5d6", 5, 6, 0, new int[0], new int[0]);
-                yield return new TestCaseData("4d6k3", 4, 6, 3, new int[0], new int[0]);
-                yield return new TestCaseData("3d4k2", 3, 4, 2, new int[0], new int[0]);
-                yield return new TestCaseData("1d8", 1, 8, 0, new int[0], new int[0]);
-                yield return new TestCaseData("1d2", 1, 2, 0, new int[0], new int[0]);
-                yield return new TestCaseData("4d3", 4, 3, 0, new int[0], new int[0]);
-                yield return new TestCaseData("4d6!", 4, 6, 0, new[] { 6 }, new int[0]);
-                yield return new TestCaseData("3d4!", 3, 4, 0, new[] { 4 }, new int[0]);
-                yield return new TestCaseData("3d4!k2", 3, 4, 2, new[] { 4 }, new int[0]);
-                yield return new TestCaseData("3d4!e3", 3, 4, 0, new[] { 4, 3 }, new int[0]);
-                yield return new TestCaseData("3d4e1e2k2", 3, 4, 2, new[] { 1, 2 }, new int[0]);
-                yield return new TestCaseData("3d6t1", 3, 6, 0, new int[0], new[] { 1 });
-                yield return new TestCaseData("3d6t1t5", 3, 6, 0, new int[0], new[] { 1, 5 });
-                yield return new TestCaseData("3d6!t1k2", 3, 6, 2, new[] { 6 }, new[] { 1 });
-                yield return new TestCaseData("4d3t2k1", 4, 3, 1, new int[0], new[] { 2 });
-                yield return new TestCaseData("4d3k1t2", 4, 3, 1, new int[0], new[] { 2 });
-                yield return new TestCaseData("4d3!t2k1", 4, 3, 1, new[] { 3 }, new[] { 2 });
-                yield return new TestCaseData("4d3!k1t2", 4, 3, 1, new[] { 3 }, new[] { 2 });
-                yield return new TestCaseData("4d3t2!k1", 4, 3, 1, new[] { 3 }, new[] { 2 });
-                yield return new TestCaseData("4d3k1!t2", 4, 3, 1, new[] { 3 }, new[] { 2 });
-                yield return new TestCaseData("4d3t2k1!", 4, 3, 1, new[] { 3 }, new[] { 2 });
-                yield return new TestCaseData("4d3k1t2!", 4, 3, 1, new[] { 3 }, new[] { 2 });
+                yield return new TestCaseData("4d6", 4, 6, 0, new int[0], new Dictionary<int, int>());
+                yield return new TestCaseData("92d66", 92, 66, 0, new int[0], new Dictionary<int, int>());
+                yield return new TestCaseData("3d4", 3, 4, 0, new int[0], new Dictionary<int, int>());
+                yield return new TestCaseData("1d6", 1, 6, 0, new int[0], new Dictionary<int, int>());
+                yield return new TestCaseData("2d6", 2, 6, 0, new int[0], new Dictionary<int, int>());
+                yield return new TestCaseData("3d6", 3, 6, 0, new int[0], new Dictionary<int, int>());
+                yield return new TestCaseData("5d6", 5, 6, 0, new int[0], new Dictionary<int, int>());
+                yield return new TestCaseData("4d6k3", 4, 6, 3, new int[0], new Dictionary<int, int>());
+                yield return new TestCaseData("3d4k2", 3, 4, 2, new int[0], new Dictionary<int, int>());
+                yield return new TestCaseData("1d8", 1, 8, 0, new int[0], new Dictionary<int, int>());
+                yield return new TestCaseData("1d2", 1, 2, 0, new int[0], new Dictionary<int, int>());
+                yield return new TestCaseData("4d3", 4, 3, 0, new int[0], new Dictionary<int, int>());
+                yield return new TestCaseData("4d6!", 4, 6, 0, new[] { 6 }, new Dictionary<int, int>());
+                yield return new TestCaseData("3d4!", 3, 4, 0, new[] { 4 }, new Dictionary<int, int>());
+                yield return new TestCaseData("3d4!k2", 3, 4, 2, new[] { 4 }, new Dictionary<int, int>());
+                yield return new TestCaseData("3d4!e3", 3, 4, 0, new[] { 4, 3 }, new Dictionary<int, int>());
+                yield return new TestCaseData("3d4e1e2k2", 3, 4, 2, new[] { 1, 2 }, new Dictionary<int, int>());
+                yield return new TestCaseData("3d6t1", 3, 6, 0, new int[0], new Dictionary<int, int> { { 1, 6 } });
+                yield return new TestCaseData("3d6t1t5", 3, 6, 0, new int[0], new Dictionary<int, int> { { 1, 6 }, { 5, 6 } });
+                yield return new TestCaseData("3d6!t1k2", 3, 6, 2, new[] { 6 }, new Dictionary<int, int> { { 1, 6 } });
+                yield return new TestCaseData("3d6t1:2", 3, 6, 0, new int[0], new Dictionary<int, int> { { 1, 2 } });
+                yield return new TestCaseData("4d3t2k1", 4, 3, 1, new int[0], new Dictionary<int, int> { { 2, 3 } });
+                yield return new TestCaseData("4d3k1t2", 4, 3, 1, new int[0], new Dictionary<int, int> { { 2, 3 } });
+                yield return new TestCaseData("4d3!t2k1", 4, 3, 1, new[] { 3 }, new Dictionary<int, int> { { 2, 3 } });
+                yield return new TestCaseData("4d3!k1t2", 4, 3, 1, new[] { 3 }, new Dictionary<int, int> { { 2, 3 } });
+                yield return new TestCaseData("4d3t2!k1", 4, 3, 1, new[] { 3 }, new Dictionary<int, int> { { 2, 3 } });
+                yield return new TestCaseData("4d3k1!t2", 4, 3, 1, new[] { 3 }, new Dictionary<int, int> { { 2, 3 } });
+                yield return new TestCaseData("4d3t2k1!", 4, 3, 1, new[] { 3 }, new Dictionary<int, int> { { 2, 3 } });
+                yield return new TestCaseData("4d3k1t2!", 4, 3, 1, new[] { 3 }, new Dictionary<int, int> { { 2, 3 } });
             }
         }
 
@@ -294,7 +299,42 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             roll.Quantity = 1;
             roll.Die = 4;
-            roll.TransformToMax.AddRange(transforms);
+
+            foreach (var transform in transforms)
+                roll.Transforms[transform] = 4;
+
+            Assert.That(roll.IsValid, Is.EqualTo(isValid));
+        }
+
+        [TestCase(true)]
+        [TestCase(false, -1)]
+        [TestCase(false, 0)]
+        [TestCase(true, 1)]
+        [TestCase(true, 4)]
+        [TestCase(true, Limits.Die - 1)]
+        [TestCase(true, Limits.Die)]
+        [TestCase(false, Limits.Die + 1)]
+        [TestCase(true, 1, 4)]
+        [TestCase(false, 0, 4)]
+        [TestCase(false, 1, 0)]
+        [TestCase(true, 2, 3, 4)]
+        [TestCase(true, 1, 3, 4)]
+        [TestCase(true, 1, 2, 4)]
+        [TestCase(true, 1, 2, 3)]
+        [TestCase(true, 1, 2, 3, 4)]
+        [TestCase(true, 1, 2, 3, 3)]
+        [TestCase(true, 2, 3, 4, 5)]
+        [TestCase(true, 1, 2, 3, 4, 5)]
+        [TestCase(false, 0, 1, 2, 3, 4)]
+        [TestCase(false, 0, 1, 2, 4, 5)]
+        [TestCase(false, 1, 2, 4, 5, Limits.Die + 1)]
+        public void IsValid_Transform_NonMax(bool isValid, params int[] transforms)
+        {
+            roll.Quantity = 1;
+            roll.Die = 4;
+
+            foreach (var transform in transforms)
+                roll.Transforms[transform] = 1;
 
             Assert.That(roll.IsValid, Is.EqualTo(isValid));
         }
@@ -311,7 +351,7 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             roll.Quantity = quantity;
             roll.Die = die;
             roll.AmountToKeep = keep;
-            roll.TransformToMax.Add(transform);
+            roll.Transforms[transform] = die;
             roll.ExplodeOn.AddRange(Enumerable.Range(1, die));
 
             if (!explodeMaxed)
@@ -439,7 +479,7 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             roll.Quantity = 9266;
             roll.Die = 42;
-            roll.TransformToMax.Add(transform);
+            roll.Transforms[transform] = 42;
 
             var message = $"9266d42t{transform} is not a valid roll";
             message += $"\n\tTransform: 0 < [{transform}] <= {Limits.Die}";
@@ -454,8 +494,8 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             roll.Quantity = 9266;
             roll.Die = 42;
-            roll.TransformToMax.Add(21);
-            roll.TransformToMax.Add(transform);
+            roll.Transforms[21] = 42;
+            roll.Transforms[transform] = 42;
 
             var message = $"9266d42t21t{transform} is not a valid roll";
             message += $"\n\tTransform: 0 < [21,{transform}] <= {Limits.Die}";
@@ -469,7 +509,7 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             roll.Die = 0;
             roll.AmountToKeep = -1;
             roll.ExplodeOn.Add(0);
-            roll.TransformToMax.Add(Limits.Die + 1);
+            roll.Transforms[Limits.Die + 1] = 0;
 
             var message = $"{Limits.Quantity + 1}d0e0t{Limits.Die + 1}k-1 is not a valid roll";
             message += $"\n\tQuantity: 0 < {Limits.Quantity + 1} < {Limits.Quantity}";
@@ -595,7 +635,7 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             roll.Quantity = 92;
             roll.Die = 66;
-            roll.TransformToMax.Add(42);
+            roll.Transforms[42] = 66;
 
             var rolls = roll.GetRolls(mockRandom.Object);
             var countTotal = 0;
@@ -623,8 +663,37 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             roll.Quantity = 92;
             roll.Die = 66;
-            roll.TransformToMax.Add(4);
-            roll.TransformToMax.Add(2);
+            roll.Transforms[4] = 66;
+            roll.Transforms[2] = 66;
+
+            var rolls = roll.GetRolls(mockRandom.Object);
+            var countTotal = 0;
+
+            for (var individualRoll = 66; individualRoll > 0; individualRoll--)
+            {
+                if (individualRoll == 4 || individualRoll == 2)
+                {
+                    Assert.That(rolls, Does.Not.Contain(individualRoll));
+                    continue;
+                }
+
+                Assert.That(rolls, Contains.Item(individualRoll));
+
+                var expectedCount = individualRoll < 27 ? 2 :
+                    individualRoll == 66 ? 5 : 1;
+                Assert.That(rolls.Count(r => r == individualRoll), Is.EqualTo(expectedCount), $"Roll of {individualRoll}");
+                countTotal += expectedCount;
+            }
+
+            Assert.That(rolls.Count(), Is.EqualTo(92).And.EqualTo(countTotal));
+        }
+
+        [Test]
+        public void GetRollsAndTransformCustom()
+        {
+            roll.Quantity = 92;
+            roll.Die = 66;
+            roll.Transforms[42] = 21;
 
             var rolls = roll.GetRolls(mockRandom.Object);
             var countTotal = 0;
@@ -656,8 +725,8 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             roll.ExplodeOn.Add(60);
             roll.ExplodeOn.Add(13);
             roll.AmountToKeep = 42;
-            roll.TransformToMax.Add(9);
-            roll.TransformToMax.Add(6);
+            roll.Transforms[9] = 66;
+            roll.Transforms[6] = 44;
 
             var rolls = roll.GetRolls(mockRandom.Object);
             var countTotal = 0;
@@ -724,7 +793,7 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             roll.Quantity = 92;
             roll.Die = 66;
-            roll.TransformToMax.Add(42);
+            roll.Transforms[42] = 66;
 
             var sum = roll.GetSum(mockRandom.Object);
             Assert.That(sum, Is.EqualTo(2586));
@@ -735,8 +804,19 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             roll.Quantity = 92;
             roll.Die = 66;
-            roll.TransformToMax.Add(4);
-            roll.TransformToMax.Add(2);
+            roll.Transforms[4] = 66;
+            roll.Transforms[2] = 66;
+
+            var sum = roll.GetSum(mockRandom.Object);
+            Assert.That(sum, Is.EqualTo(2814));
+        }
+
+        [Test]
+        public void GetSumOfRollsAndTransformCustom()
+        {
+            roll.Quantity = 92;
+            roll.Die = 66;
+            roll.Transforms[42] = 21;
 
             var sum = roll.GetSum(mockRandom.Object);
             Assert.That(sum, Is.EqualTo(2814));
@@ -750,8 +830,8 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             roll.ExplodeOn.Add(60);
             roll.ExplodeOn.Add(13);
             roll.AmountToKeep = 42;
-            roll.TransformToMax.Add(9);
-            roll.TransformToMax.Add(6);
+            roll.Transforms[9] = 66;
+            roll.Transforms[6] = 44;
 
             var sum = roll.GetSum(mockRandom.Object);
             Assert.That(sum, Is.EqualTo(2069));
@@ -829,18 +909,29 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             roll.Quantity = 92;
             roll.Die = 66;
-            roll.TransformToMax.Add(42);
+            roll.Transforms[42);
 
             var average = roll.GetPotentialAverage();
             Assert.That(average, Is.EqualTo((92 + 92 * 66) / 2));
         }
 
         [Test]
-        public void GetPotentialAverageRollAndTransform_TransformedMinimum()
+        public void GetPotentialAverageRollAndTransform_TransformedFromMinimum()
         {
             roll.Quantity = 92;
             roll.Die = 66;
-            roll.TransformToMax.Add(1);
+            roll.Transforms[1);
+
+            var average = roll.GetPotentialAverage();
+            Assert.That(average, Is.EqualTo((92 * 2 + 92 * 66) / 2));
+        }
+
+        [Test]
+        public void GetPotentialAverageRollAndTransform_TransformedToMinimum()
+        {
+            roll.Quantity = 92;
+            roll.Die = 66;
+            roll.Transforms[1);
 
             var average = roll.GetPotentialAverage();
             Assert.That(average, Is.EqualTo((92 * 2 + 92 * 66) / 2));
@@ -851,20 +942,44 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             roll.Quantity = 92;
             roll.Die = 66;
-            roll.TransformToMax.Add(4);
-            roll.TransformToMax.Add(2);
+            roll.Transforms[4);
+            roll.Transforms[2);
 
             var average = roll.GetPotentialAverage();
             Assert.That(average, Is.EqualTo((92 + 92 * 66) / 2));
         }
 
         [Test]
-        public void GetPotentialAverageRollAndTransformMultiple_TransformedMinimums()
+        public void GetPotentialAverageRollAndTransformCustom()
         {
             roll.Quantity = 92;
             roll.Die = 66;
-            roll.TransformToMax.Add(1);
-            roll.TransformToMax.Add(2);
+            roll.Transforms[4);
+            roll.Transforms[2);
+
+            var average = roll.GetPotentialAverage();
+            Assert.That(average, Is.EqualTo((92 + 92 * 66) / 2));
+        }
+
+        [Test]
+        public void GetPotentialAverageRollAndTransformMultiple_TransformedFromMinimums()
+        {
+            roll.Quantity = 92;
+            roll.Die = 66;
+            roll.Transforms[1);
+            roll.Transforms[2);
+
+            var average = roll.GetPotentialAverage();
+            Assert.That(average, Is.EqualTo((92 * 3 + 92 * 66) / 2));
+        }
+
+        [Test]
+        public void GetPotentialAverageRollAndTransformMultiple_TransformedToMinimums()
+        {
+            roll.Quantity = 92;
+            roll.Die = 66;
+            roll.Transforms[1);
+            roll.Transforms[2);
 
             var average = roll.GetPotentialAverage();
             Assert.That(average, Is.EqualTo((92 * 3 + 92 * 66) / 2));
@@ -878,9 +993,9 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             roll.ExplodeOn.Add(60);
             roll.ExplodeOn.Add(13);
             roll.AmountToKeep = 42;
-            roll.TransformToMax.Add(9);
-            roll.TransformToMax.Add(6);
-            roll.TransformToMax.Add(1);
+            roll.Transforms[9);
+            roll.Transforms[6);
+            roll.Transforms[1);
 
             var average = roll.GetPotentialAverage();
             Assert.That(average, Is.EqualTo((42 * 2 + 42 * 66) / 2));
@@ -970,18 +1085,29 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             roll.Quantity = 92;
             roll.Die = 66;
-            roll.TransformToMax.Add(42);
+            roll.Transforms[42);
 
             var minimum = roll.GetPotentialMinimum();
             Assert.That(minimum, Is.EqualTo(92));
         }
 
         [Test]
-        public void GetPotentialMinimumRollAndTransform_MinimumTransformed()
+        public void GetPotentialMinimumRollAndTransform_TransformedFromMinimum()
         {
             roll.Quantity = 92;
             roll.Die = 66;
-            roll.TransformToMax.Add(1);
+            roll.Transforms[1);
+
+            var minimum = roll.GetPotentialMinimum();
+            Assert.That(minimum, Is.EqualTo(92 * 2));
+        }
+
+        [Test]
+        public void GetPotentialMinimumRollAndTransform_TransformedToMinimum()
+        {
+            roll.Quantity = 92;
+            roll.Die = 66;
+            roll.Transforms[1);
 
             var minimum = roll.GetPotentialMinimum();
             Assert.That(minimum, Is.EqualTo(92 * 2));
@@ -992,20 +1118,44 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             roll.Quantity = 92;
             roll.Die = 66;
-            roll.TransformToMax.Add(4);
-            roll.TransformToMax.Add(2);
+            roll.Transforms[4);
+            roll.Transforms[2);
 
             var minimum = roll.GetPotentialMinimum();
             Assert.That(minimum, Is.EqualTo(92));
         }
 
         [Test]
-        public void GetPotentialMinimumRollAndTransformMultiple_MinimumsTransformed()
+        public void GetPotentialMinimumRollAndTransformCustom()
         {
             roll.Quantity = 92;
             roll.Die = 66;
-            roll.TransformToMax.Add(1);
-            roll.TransformToMax.Add(2);
+            roll.Transforms[4);
+            roll.Transforms[2);
+
+            var minimum = roll.GetPotentialMinimum();
+            Assert.That(minimum, Is.EqualTo(92));
+        }
+
+        [Test]
+        public void GetPotentialMinimumRollAndTransformMultiple_TransformedFromMinimums()
+        {
+            roll.Quantity = 92;
+            roll.Die = 66;
+            roll.Transforms[1);
+            roll.Transforms[2);
+
+            var minimum = roll.GetPotentialMinimum();
+            Assert.That(minimum, Is.EqualTo(92 * 3));
+        }
+
+        [Test]
+        public void GetPotentialMinimumRollAndTransformMultiple_TransformedToMinimums()
+        {
+            roll.Quantity = 92;
+            roll.Die = 66;
+            roll.Transforms[1);
+            roll.Transforms[2);
 
             var minimum = roll.GetPotentialMinimum();
             Assert.That(minimum, Is.EqualTo(92 * 3));
@@ -1016,8 +1166,8 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             roll.Quantity = 2;
             roll.Die = 3;
-            roll.TransformToMax.Add(1);
-            roll.TransformToMax.Add(2);
+            roll.Transforms[1);
+            roll.Transforms[2);
 
             var minimum = roll.GetPotentialMinimum();
             Assert.That(minimum, Is.EqualTo(6));
@@ -1028,9 +1178,9 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             roll.Quantity = 2;
             roll.Die = 3;
-            roll.TransformToMax.Add(1);
-            roll.TransformToMax.Add(2);
-            roll.TransformToMax.Add(3);
+            roll.Transforms[1);
+            roll.Transforms[2);
+            roll.Transforms[3);
 
             var minimum = roll.GetPotentialMinimum();
             Assert.That(minimum, Is.EqualTo(6));
@@ -1044,8 +1194,8 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             roll.ExplodeOn.Add(2);
             roll.ExplodeOn.Add(5);
             roll.AmountToKeep = 42;
-            roll.TransformToMax.Add(4);
-            roll.TransformToMax.Add(1);
+            roll.Transforms[4);
+            roll.Transforms[1);
 
             var minimum = roll.GetPotentialMinimum();
             Assert.That(minimum, Is.EqualTo(42 * 3));
@@ -1100,7 +1250,7 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             roll.Quantity = 92;
             roll.Die = 66;
-            roll.TransformToMax.Add(42);
+            roll.Transforms[42);
 
             var maximum = roll.GetPotentialMaximum();
             Assert.That(maximum, Is.EqualTo(92 * 66));
@@ -1111,8 +1261,20 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             roll.Quantity = 92;
             roll.Die = 66;
-            roll.TransformToMax.Add(4);
-            roll.TransformToMax.Add(2);
+            roll.Transforms[4);
+            roll.Transforms[2);
+
+            var maximum = roll.GetPotentialMaximum();
+            Assert.That(maximum, Is.EqualTo(92 * 66));
+        }
+
+        [Test]
+        public void GetPotentialMaximumRollAndTransformCustom()
+        {
+            roll.Quantity = 92;
+            roll.Die = 66;
+            roll.Transforms[4);
+            roll.Transforms[2);
 
             var maximum = roll.GetPotentialMaximum();
             Assert.That(maximum, Is.EqualTo(92 * 66));
@@ -1126,8 +1288,8 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             roll.ExplodeOn.Add(60);
             roll.ExplodeOn.Add(13);
             roll.AmountToKeep = 42;
-            roll.TransformToMax.Add(9);
-            roll.TransformToMax.Add(6);
+            roll.Transforms[9);
+            roll.Transforms[6);
 
             var maximum = roll.GetPotentialMaximum();
             Assert.That(maximum, Is.EqualTo(42 * 66 * 10));
@@ -1287,7 +1449,7 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             roll.Quantity = 92;
             roll.Die = 66;
-            roll.TransformToMax.Add(42);
+            roll.Transforms[42);
 
             Assert.That(roll.ToString(), Is.EqualTo("92d66t42"));
         }
@@ -1297,8 +1459,29 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             roll.Quantity = 92;
             roll.Die = 66;
-            roll.TransformToMax.Add(4);
-            roll.TransformToMax.Add(2);
+            roll.Transforms[4);
+            roll.Transforms[2);
+
+            Assert.That(roll.ToString(), Is.EqualTo("92d66t4t2"));
+        }
+
+        [Test]
+        public void RollStringWithCustomTransform()
+        {
+            roll.Quantity = 92;
+            roll.Die = 66;
+            roll.Transforms[42);
+
+            Assert.That(roll.ToString(), Is.EqualTo("92d66t42"));
+        }
+
+        [Test]
+        public void RollStringWithMultipleCustomTransforms()
+        {
+            roll.Quantity = 92;
+            roll.Die = 66;
+            roll.Transforms[4);
+            roll.Transforms[2);
 
             Assert.That(roll.ToString(), Is.EqualTo("92d66t4t2"));
         }
@@ -1311,8 +1494,8 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             roll.ExplodeOn.Add(60);
             roll.ExplodeOn.Add(13);
             roll.AmountToKeep = 42;
-            roll.TransformToMax.Add(9);
-            roll.TransformToMax.Add(6);
+            roll.Transforms[9);
+            roll.Transforms[6);
 
             Assert.That(roll.ToString(), Is.EqualTo("92d66e60e13t9t6k42"));
         }
