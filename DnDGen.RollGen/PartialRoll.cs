@@ -29,6 +29,9 @@ namespace DnDGen.RollGen
         public abstract PartialRoll Keeping(string amountToKeep);
         public PartialRoll Keeping(PartialRoll roll) => Keeping(roll.CurrentRollExpression);
         public abstract PartialRoll Explode();
+        public abstract PartialRoll ExplodeOn(int rollToExplode);
+        public abstract PartialRoll ExplodeOn(string rollToExplode);
+        public PartialRoll ExplodeOn(PartialRoll roll) => ExplodeOn(roll.CurrentRollExpression);
         public abstract PartialRoll Transforming(int rollToTransform);
         public abstract PartialRoll Transforming(string rollToTransform);
         public PartialRoll Transforming(PartialRoll roll) => Transforming(roll.CurrentRollExpression);

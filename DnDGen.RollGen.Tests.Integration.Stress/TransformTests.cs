@@ -17,16 +17,20 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
             random = GetNewInstanceOf<Random>();
         }
 
-        [Test]
-        public void StressTransform()
+        [TestCase(true)]
+        [TestCase(false)]
+        public void StressTransform(bool common)
         {
-            stressor.Stress(AssertTransform);
+            stressor.Stress(() => AssertTransform(common));
         }
 
-        protected void AssertTransform()
+        protected void AssertTransform(bool common)
         {
-            var quantity = random.Next(Limits.Quantity) + 1;
-            var die = random.Next(Limits.Die) + 1;
+            var quantityLimit = common ? 100 : Limits.Quantity;
+            var dieLimit = common ? 100 : Limits.Die;
+
+            var quantity = random.Next(quantityLimit) + 1;
+            var die = random.Next(dieLimit) + 1;
             var transform = random.Next(die - 1) + 1;
             var percentageThreshold = random.NextDouble();
             var rollThreshold = random.Next(quantity * die) + 1;
@@ -38,11 +42,12 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 
         private void AssertRoll(PartialRoll roll, int quantity, int die, int transform, double percentageThreshold, int rollThreshold)
         {
-            var rollMin = transform == 1 ? 2 : 1;
-            var average = (rollMin * quantity + quantity * die) / 2.0d;
+            var rollMin = transform == 1 && die != 1 ? 2 : 1;
             var min = quantity * rollMin;
             var max = quantity * die;
+            var average = (min + max) / 2.0d;
 
+            Assert.That(min, Is.LessThanOrEqualTo(max), roll.CurrentRollExpression);
             Assert.That(roll.AsSum(), Is.InRange(min, max), roll.CurrentRollExpression);
             Assert.That(roll.AsPotentialMinimum(), Is.EqualTo(min), roll.CurrentRollExpression);
             Assert.That(roll.AsPotentialMaximum(false), Is.EqualTo(max), roll.CurrentRollExpression);

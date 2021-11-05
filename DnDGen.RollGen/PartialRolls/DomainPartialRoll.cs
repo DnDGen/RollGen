@@ -170,6 +170,18 @@ namespace DnDGen.RollGen.PartialRolls
             return this;
         }
 
+        public override PartialRoll ExplodeOn(int rollToExplode)
+        {
+            CurrentRollExpression += $"e{rollToExplode}";
+            return this;
+        }
+
+        public override PartialRoll ExplodeOn(string rollToExplode)
+        {
+            CurrentRollExpression += $"e({rollToExplode})";
+            return this;
+        }
+
         private IEnumerable<T> GetIndividualRolls<T>(string rollExpression)
         {
             //INFO: Not sure how to evaluate individual rolls from genuine expressions (6d5d4k3d2k1), so will compute those as 1 roll

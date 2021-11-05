@@ -2,6 +2,7 @@
 using Moq;
 using NUnit.Framework;
 using System;
+using System.Collections;
 using System.Linq;
 
 namespace DnDGen.RollGen.Tests.Unit.PartialRolls
@@ -23,56 +24,90 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             mockRandom.Setup(r => r.Next(It.IsAny<int>())).Returns((int max) => count++ % max);
         }
 
-        [TestCase("1d2", 1, 2, 0, false)]
-        [TestCase("1d2!", 1, 2, 0, true)]
-        [TestCase("1d2!!", 1, 2, 0, true)]
-        [TestCase(" 1 d 2 ", 1, 2, 0, false)]
-        [TestCase(" 1 d 2 ! ", 1, 2, 0, true)]
-        [TestCase(" 1 d 2 ! ! ", 1, 2, 0, true)]
-        [TestCase("1d2k3", 1, 2, 3, false)]
-        [TestCase("1d2!k3", 1, 2, 3, true)]
-        [TestCase("1d2k3!", 1, 2, 3, true)]
-        [TestCase("1d2!k3!", 1, 2, 3, true)]
-        [TestCase(" 1 d 2 k 3 ", 1, 2, 3, false)]
-        [TestCase(" 1 d 2 ! k 3 ", 1, 2, 3, true)]
-        [TestCase(" 1 d 2 k 3 ! ", 1, 2, 3, true)]
-        [TestCase(" 1 d 2 ! k 3 ! ", 1, 2, 3, true)]
-        [TestCase("d2", 1, 2, 0, false)]
-        [TestCase("d2!", 1, 2, 0, true)]
-        [TestCase("d2!!", 1, 2, 0, true)]
-        [TestCase(" d 2 ", 1, 2, 0, false)]
-        [TestCase(" d 2 ! ", 1, 2, 0, true)]
-        [TestCase(" d 2 ! ! ", 1, 2, 0, true)]
-        [TestCase("1230d456k789", 1230, 456, 789, false)]
-        [TestCase("1230d456!k789", 1230, 456, 789, true)]
-        [TestCase("1230d456k789!", 1230, 456, 789, true)]
-        [TestCase("1230d456!k789!", 1230, 456, 789, true)]
-        [TestCase(" 1230 d 456 k 789 ", 1230, 456, 789, false)]
-        [TestCase(" 1230 d 456 ! k 789 ", 1230, 456, 789, true)]
-        [TestCase(" 1230 d 456 k 789 ! ", 1230, 456, 789, true)]
-        [TestCase(" 1230 d 456 ! k 789 ! ", 1230, 456, 789, true)]
-        [TestCase("92d66k42", 92, 66, 42, false)]
-        [TestCase("92 d 66 k 42 ", 92, 66, 42, false)]
-        [TestCase("92d66!k42", 92, 66, 42, true)]
-        [TestCase("92d66k42!", 92, 66, 42, true)]
-        [TestCase("92d66!k42!", 92, 66, 42, true)]
-        [TestCase("92 d 66 ! k 42 ", 92, 66, 42, true)]
-        [TestCase("92 d 66 k 42 ! ", 92, 66, 42, true)]
-        [TestCase("92 d 66 ! k 42 ! ", 92, 66, 42, true)]
-        [TestCase("3d6", 3, 6, 0, false)]
-        [TestCase("4d6k3", 4, 6, 3, false)]
-        [TestCase("3d6t1", 3, 6, 0, false, 1)]
-        [TestCase("3d6t1t2", 3, 6, 0, false, 1, 2)]
-        [TestCase("4d6!t1t2k3", 4, 6, 3, true, 1, 2)]
-        public void ParseExpression(string expression, int quantity, int die, int toKeep, bool explode, params int[] transforms)
+        [TestCaseSource(nameof(ParsedExpressions))]
+        public void ParseExpression(string expression, int quantity, int die, int toKeep, int[] explodes, int[] transforms)
         {
             roll = new Roll(expression);
             Assert.That(roll.Quantity, Is.EqualTo(quantity));
             Assert.That(roll.Die, Is.EqualTo(die));
-            Assert.That(roll.Explode, Is.EqualTo(explode));
+            Assert.That(roll.ExplodeOn, Is.EquivalentTo(explodes));
             Assert.That(roll.AmountToKeep, Is.EqualTo(toKeep));
-            Assert.That(roll.TransformToMax, Is.EqualTo(transforms));
+            Assert.That(roll.TransformToMax, Is.EquivalentTo(transforms));
             Assert.That(roll.IsValid, Is.True);
+        }
+
+        private static IEnumerable ParsedExpressions
+        {
+            get
+            {
+                yield return new TestCaseData("1d2!", 1, 2, 0, new[] { 2 }, new int[0]);
+                yield return new TestCaseData("1d2!!", 1, 2, 0, new[] { 2 }, new int[0]);
+                yield return new TestCaseData(" 1 d 2 ", 1, 2, 0, new int[0], new int[0]);
+                yield return new TestCaseData(" 1 d 2 ! ", 1, 2, 0, new[] { 2 }, new int[0]);
+                yield return new TestCaseData(" 1 d 2 ! ! ", 1, 2, 0, new[] { 2 }, new int[0]);
+                yield return new TestCaseData("1d2k3", 1, 2, 3, new int[0], new int[0]);
+                yield return new TestCaseData("1d2!k3", 1, 2, 3, new[] { 2 }, new int[0]);
+                yield return new TestCaseData("1d2k3!", 1, 2, 3, new[] { 2 }, new int[0]);
+                yield return new TestCaseData("1d2!k3!", 1, 2, 3, new[] { 2 }, new int[0]);
+                yield return new TestCaseData(" 1 d 2 k 3 ", 1, 2, 3, new int[0], new int[0]);
+                yield return new TestCaseData(" 1 d 2 ! k 3 ", 1, 2, 3, new[] { 2 }, new int[0]);
+                yield return new TestCaseData(" 1 d 2 k 3 ! ", 1, 2, 3, new[] { 2 }, new int[0]);
+                yield return new TestCaseData(" 1 d 2 ! k 3 ! ", 1, 2, 3, new[] { 2 }, new int[0]);
+                yield return new TestCaseData("d2", 1, 2, 0, new int[0], new int[0]);
+                yield return new TestCaseData("d2!", 1, 2, 0, new[] { 2 }, new int[0]);
+                yield return new TestCaseData("d2!!", 1, 2, 0, new[] { 2 }, new int[0]);
+                yield return new TestCaseData(" d 2 ", 1, 2, 0, new int[0], new int[0]);
+                yield return new TestCaseData(" d 2 ! ", 1, 2, 0, new[] { 2 }, new int[0]);
+                yield return new TestCaseData(" d 2 ! ! ", 1, 2, 0, new[] { 2 }, new int[0]);
+                yield return new TestCaseData("1230d456k789", 1230, 456, 789, new int[0], new int[0]);
+                yield return new TestCaseData("1230d456!k789", 1230, 456, 789, new[] { 456 }, new int[0]);
+                yield return new TestCaseData("1230d456k789!", 1230, 456, 789, new[] { 456 }, new int[0]);
+                yield return new TestCaseData("1230d456!k789!", 1230, 456, 789, new[] { 456 }, new int[0]);
+                yield return new TestCaseData(" 1230 d 456 k 789 ", 1230, 456, 789, new int[0], new int[0]);
+                yield return new TestCaseData(" 1230 d 456 ! k 789 ", 1230, 456, 789, new[] { 456 }, new int[0]);
+                yield return new TestCaseData(" 1230 d 456 k 789 ! ", 1230, 456, 789, new[] { 456 }, new int[0]);
+                yield return new TestCaseData(" 1230 d 456 ! k 789 ! ", 1230, 456, 789, new[] { 456 }, new int[0]);
+                yield return new TestCaseData("92d66k42", 92, 66, 42, new int[0], new int[0]);
+                yield return new TestCaseData("92 d 66 k 42 ", 92, 66, 42, new int[0], new int[0]);
+                yield return new TestCaseData("92d66!k42", 92, 66, 42, new[] { 66 }, new int[0]);
+                yield return new TestCaseData("92d66k42!", 92, 66, 42, new[] { 66 }, new int[0]);
+                yield return new TestCaseData("92d66!k42!", 92, 66, 42, new[] { 66 }, new int[0]);
+                yield return new TestCaseData("92 d 66 ! k 42 ", 92, 66, 42, new[] { 66 }, new int[0]);
+                yield return new TestCaseData("92 d 66 k 42 ! ", 92, 66, 42, new[] { 66 }, new int[0]);
+                yield return new TestCaseData("92 d 66 ! k 42 ! ", 92, 66, 42, new[] { 66 }, new int[0]);
+                yield return new TestCaseData("3d6", 3, 6, 0, new int[0], new int[0]);
+                yield return new TestCaseData("3d6t1t2", 3, 6, 0, new int[0], new[] { 1, 2 });
+                yield return new TestCaseData("4d6!t1t2k3", 4, 6, 3, new[] { 6 }, new[] { 1, 2 });
+                //From README
+                yield return new TestCaseData("4d6", 4, 6, 0, new int[0], new int[0]);
+                yield return new TestCaseData("92d66", 92, 66, 0, new int[0], new int[0]);
+                yield return new TestCaseData("3d4", 3, 4, 0, new int[0], new int[0]);
+                yield return new TestCaseData("1d6", 1, 6, 0, new int[0], new int[0]);
+                yield return new TestCaseData("2d6", 2, 6, 0, new int[0], new int[0]);
+                yield return new TestCaseData("3d6", 3, 6, 0, new int[0], new int[0]);
+                yield return new TestCaseData("5d6", 5, 6, 0, new int[0], new int[0]);
+                yield return new TestCaseData("4d6k3", 4, 6, 3, new int[0], new int[0]);
+                yield return new TestCaseData("3d4k2", 3, 4, 2, new int[0], new int[0]);
+                yield return new TestCaseData("1d8", 1, 8, 0, new int[0], new int[0]);
+                yield return new TestCaseData("1d2", 1, 2, 0, new int[0], new int[0]);
+                yield return new TestCaseData("4d3", 4, 3, 0, new int[0], new int[0]);
+                yield return new TestCaseData("4d6!", 4, 6, 0, new[] { 6 }, new int[0]);
+                yield return new TestCaseData("3d4!", 3, 4, 0, new[] { 4 }, new int[0]);
+                yield return new TestCaseData("3d4!k2", 3, 4, 2, new[] { 4 }, new int[0]);
+                yield return new TestCaseData("3d4!e3", 3, 4, 0, new[] { 4, 3 }, new int[0]);
+                yield return new TestCaseData("3d4e1e2k2", 3, 4, 2, new[] { 1, 2 }, new int[0]);
+                yield return new TestCaseData("3d6t1", 3, 6, 0, new int[0], new[] { 1 });
+                yield return new TestCaseData("3d6t1t5", 3, 6, 0, new int[0], new[] { 1, 5 });
+                yield return new TestCaseData("3d6!t1k2", 3, 6, 2, new[] { 6 }, new[] { 1 });
+                yield return new TestCaseData("4d3t2k1", 4, 3, 1, new int[0], new[] { 2 });
+                yield return new TestCaseData("4d3k1t2", 4, 3, 1, new int[0], new[] { 2 });
+                yield return new TestCaseData("4d3!t2k1", 4, 3, 1, new[] { 3 }, new[] { 2 });
+                yield return new TestCaseData("4d3!k1t2", 4, 3, 1, new[] { 3 }, new[] { 2 });
+                yield return new TestCaseData("4d3t2!k1", 4, 3, 1, new[] { 3 }, new[] { 2 });
+                yield return new TestCaseData("4d3k1!t2", 4, 3, 1, new[] { 3 }, new[] { 2 });
+                yield return new TestCaseData("4d3t2k1!", 4, 3, 1, new[] { 3 }, new[] { 2 });
+                yield return new TestCaseData("4d3k1t2!", 4, 3, 1, new[] { 3 }, new[] { 2 });
+            }
         }
 
         [TestCase("", false)]
@@ -113,817 +148,174 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         [TestCase("3d6t1", true)]
         [TestCase("3d6t1t2", true)]
         [TestCase("4d6!t1t2k3", true)]
+        //From README
+        [TestCase("4d6", true)]
+        [TestCase("92d66", true)]
+        [TestCase("5+3d4*2", false)]
+        [TestCase("((1d2)d5k1)d6", false)]
+        [TestCase("4d6k3", true)]
+        [TestCase("3d4k2", true)]
+        [TestCase("5+3d4*3", false)]
+        [TestCase("1d6+3", false)]
+        [TestCase("1d8+1d2-1", false)]
+        [TestCase("4d3-3", false)]
+        [TestCase("4d6!", true)]
+        [TestCase("3d4!", true)]
+        [TestCase("3d4!k2", true)]
+        [TestCase("3d4!e3", true)]
+        [TestCase("3d4e1e2k2", true)]
+        [TestCase("3d6t1", true)]
+        [TestCase("3d6t1t5", true)]
+        [TestCase("3d6!t1k2", true)]
+        [TestCase("4d3t2k1", true)]
+        [TestCase("4d3k1t2", true)]
+        [TestCase("4d3!t2k1", true)]
+        [TestCase("4d3!k1t2", true)]
+        [TestCase("4d3t2!k1", true)]
+        [TestCase("4d3k1!t2", true)]
+        [TestCase("4d3t2k1!", true)]
+        [TestCase("4d3k1t2!", true)]
         public void CanParse(string expression, bool canParse)
         {
             Assert.That(Roll.CanParse(expression), Is.EqualTo(canParse));
         }
 
-        [TestCase(-1, -1, -2, false, false)]
-        [TestCase(-1, -1, -2, true, false)]
-        [TestCase(-1, -1, -1, false, false)]
-        [TestCase(-1, -1, -1, true, false)]
-        [TestCase(-1, -1, 0, false, false)]
-        [TestCase(-1, -1, 0, true, false)]
-        [TestCase(-1, -1, 1, false, false)]
-        [TestCase(-1, -1, 1, true, false)]
-        [TestCase(-1, -1, 2, false, false)]
-        [TestCase(-1, -1, 2, true, false)]
-        [TestCase(-1, -1, Limits.Quantity - 1, false, false)]
-        [TestCase(-1, -1, Limits.Quantity - 1, true, false)]
-        [TestCase(-1, -1, Limits.Quantity, false, false)]
-        [TestCase(-1, -1, Limits.Quantity, true, false)]
-        [TestCase(-1, -1, Limits.Quantity + 1, false, false)]
-        [TestCase(-1, -1, Limits.Quantity + 1, true, false)]
-        [TestCase(-1, 0, -2, false, false)]
-        [TestCase(-1, 0, -2, true, false)]
-        [TestCase(-1, 0, -1, false, false)]
-        [TestCase(-1, 0, -1, true, false)]
-        [TestCase(-1, 0, 0, false, false)]
-        [TestCase(-1, 0, 0, true, false)]
-        [TestCase(-1, 0, 1, false, false)]
-        [TestCase(-1, 0, 1, true, false)]
-        [TestCase(-1, 0, 2, false, false)]
-        [TestCase(-1, 0, 2, true, false)]
-        [TestCase(-1, 0, Limits.Quantity - 1, false, false)]
-        [TestCase(-1, 0, Limits.Quantity - 1, true, false)]
-        [TestCase(-1, 0, Limits.Quantity, false, false)]
-        [TestCase(-1, 0, Limits.Quantity, true, false)]
-        [TestCase(-1, 0, Limits.Quantity + 1, false, false)]
-        [TestCase(-1, 0, Limits.Quantity + 1, true, false)]
-        [TestCase(-1, 1, -2, false, false)]
-        [TestCase(-1, 1, -2, true, false)]
-        [TestCase(-1, 1, -1, false, false)]
-        [TestCase(-1, 1, -1, true, false)]
-        [TestCase(-1, 1, 0, false, false)]
-        [TestCase(-1, 1, 0, true, false)]
-        [TestCase(-1, 1, 1, false, false)]
-        [TestCase(-1, 1, 1, true, false)]
-        [TestCase(-1, 1, 2, false, false)]
-        [TestCase(-1, 1, 2, true, false)]
-        [TestCase(-1, 1, Limits.Quantity - 1, false, false)]
-        [TestCase(-1, 1, Limits.Quantity - 1, true, false)]
-        [TestCase(-1, 1, Limits.Quantity, false, false)]
-        [TestCase(-1, 1, Limits.Quantity, true, false)]
-        [TestCase(-1, 1, Limits.Quantity + 1, false, false)]
-        [TestCase(-1, 1, Limits.Quantity + 1, true, false)]
-        [TestCase(-1, 2, -2, false, false)]
-        [TestCase(-1, 2, -2, true, false)]
-        [TestCase(-1, 2, -1, false, false)]
-        [TestCase(-1, 2, -1, true, false)]
-        [TestCase(-1, 2, 0, false, false)]
-        [TestCase(-1, 2, 0, true, false)]
-        [TestCase(-1, 2, 1, false, false)]
-        [TestCase(-1, 2, 1, true, false)]
-        [TestCase(-1, 2, 2, false, false)]
-        [TestCase(-1, 2, 2, true, false)]
-        [TestCase(-1, 2, Limits.Quantity - 1, false, false)]
-        [TestCase(-1, 2, Limits.Quantity - 1, true, false)]
-        [TestCase(-1, 2, Limits.Quantity, false, false)]
-        [TestCase(-1, 2, Limits.Quantity, true, false)]
-        [TestCase(-1, 2, Limits.Quantity + 1, false, false)]
-        [TestCase(-1, 2, Limits.Quantity + 1, true, false)]
-        [TestCase(-1, Limits.Die - 1, -2, false, false)]
-        [TestCase(-1, Limits.Die - 1, -2, true, false)]
-        [TestCase(-1, Limits.Die - 1, -1, false, false)]
-        [TestCase(-1, Limits.Die - 1, -1, true, false)]
-        [TestCase(-1, Limits.Die - 1, 0, false, false)]
-        [TestCase(-1, Limits.Die - 1, 0, true, false)]
-        [TestCase(-1, Limits.Die - 1, 1, false, false)]
-        [TestCase(-1, Limits.Die - 1, 1, true, false)]
-        [TestCase(-1, Limits.Die - 1, 2, false, false)]
-        [TestCase(-1, Limits.Die - 1, 2, true, false)]
-        [TestCase(-1, Limits.Die - 1, Limits.Quantity - 1, false, false)]
-        [TestCase(-1, Limits.Die - 1, Limits.Quantity - 1, true, false)]
-        [TestCase(-1, Limits.Die - 1, Limits.Quantity, false, false)]
-        [TestCase(-1, Limits.Die - 1, Limits.Quantity, true, false)]
-        [TestCase(-1, Limits.Die - 1, Limits.Quantity + 1, false, false)]
-        [TestCase(-1, Limits.Die - 1, Limits.Quantity + 1, true, false)]
-        [TestCase(-1, Limits.Die, -2, false, false)]
-        [TestCase(-1, Limits.Die, -2, true, false)]
-        [TestCase(-1, Limits.Die, -1, false, false)]
-        [TestCase(-1, Limits.Die, -1, true, false)]
-        [TestCase(-1, Limits.Die, 0, false, false)]
-        [TestCase(-1, Limits.Die, 0, true, false)]
-        [TestCase(-1, Limits.Die, 1, false, false)]
-        [TestCase(-1, Limits.Die, 1, true, false)]
-        [TestCase(-1, Limits.Die, 2, false, false)]
-        [TestCase(-1, Limits.Die, 2, true, false)]
-        [TestCase(-1, Limits.Die, Limits.Quantity - 1, false, false)]
-        [TestCase(-1, Limits.Die, Limits.Quantity - 1, true, false)]
-        [TestCase(-1, Limits.Die, Limits.Quantity, false, false)]
-        [TestCase(-1, Limits.Die, Limits.Quantity, true, false)]
-        [TestCase(-1, Limits.Die, Limits.Quantity + 1, false, false)]
-        [TestCase(-1, Limits.Die, Limits.Quantity + 1, true, false)]
-        [TestCase(-1, Limits.Die + 1, -2, false, false)]
-        [TestCase(-1, Limits.Die + 1, -2, true, false)]
-        [TestCase(-1, Limits.Die + 1, -1, false, false)]
-        [TestCase(-1, Limits.Die + 1, -1, true, false)]
-        [TestCase(-1, Limits.Die + 1, 0, false, false)]
-        [TestCase(-1, Limits.Die + 1, 0, true, false)]
-        [TestCase(-1, Limits.Die + 1, 1, false, false)]
-        [TestCase(-1, Limits.Die + 1, 1, true, false)]
-        [TestCase(-1, Limits.Die + 1, 2, false, false)]
-        [TestCase(-1, Limits.Die + 1, 2, true, false)]
-        [TestCase(-1, Limits.Die + 1, Limits.Quantity - 1, false, false)]
-        [TestCase(-1, Limits.Die + 1, Limits.Quantity - 1, true, false)]
-        [TestCase(-1, Limits.Die + 1, Limits.Quantity, false, false)]
-        [TestCase(-1, Limits.Die + 1, Limits.Quantity, true, false)]
-        [TestCase(-1, Limits.Die + 1, Limits.Quantity + 1, false, false)]
-        [TestCase(-1, Limits.Die + 1, Limits.Quantity + 1, true, false)]
-        [TestCase(0, -1, -2, false, false)]
-        [TestCase(0, -1, -2, true, false)]
-        [TestCase(0, -1, -1, false, false)]
-        [TestCase(0, -1, -1, true, false)]
-        [TestCase(0, -1, 0, false, false)]
-        [TestCase(0, -1, 0, true, false)]
-        [TestCase(0, -1, 1, false, false)]
-        [TestCase(0, -1, 1, true, false)]
-        [TestCase(0, -1, 2, false, false)]
-        [TestCase(0, -1, 2, true, false)]
-        [TestCase(0, -1, Limits.Quantity - 1, false, false)]
-        [TestCase(0, -1, Limits.Quantity - 1, true, false)]
-        [TestCase(0, -1, Limits.Quantity, false, false)]
-        [TestCase(0, -1, Limits.Quantity, true, false)]
-        [TestCase(0, -1, Limits.Quantity + 1, false, false)]
-        [TestCase(0, -1, Limits.Quantity + 1, true, false)]
-        [TestCase(0, 0, -2, false, false)]
-        [TestCase(0, 0, -2, true, false)]
-        [TestCase(0, 0, -1, false, false)]
-        [TestCase(0, 0, -1, true, false)]
-        [TestCase(0, 0, 0, false, false)]
-        [TestCase(0, 0, 0, true, false)]
-        [TestCase(0, 0, 1, false, false)]
-        [TestCase(0, 0, 1, true, false)]
-        [TestCase(0, 0, 2, false, false)]
-        [TestCase(0, 0, 2, true, false)]
-        [TestCase(0, 0, Limits.Quantity - 1, false, false)]
-        [TestCase(0, 0, Limits.Quantity - 1, true, false)]
-        [TestCase(0, 0, Limits.Quantity, false, false)]
-        [TestCase(0, 0, Limits.Quantity, true, false)]
-        [TestCase(0, 0, Limits.Quantity + 1, false, false)]
-        [TestCase(0, 0, Limits.Quantity + 1, true, false)]
-        [TestCase(0, 1, -2, false, false)]
-        [TestCase(0, 1, -2, true, false)]
-        [TestCase(0, 1, -1, false, false)]
-        [TestCase(0, 1, -1, true, false)]
-        [TestCase(0, 1, 0, false, false)]
-        [TestCase(0, 1, 0, true, false)]
-        [TestCase(0, 1, 1, false, false)]
-        [TestCase(0, 1, 1, true, false)]
-        [TestCase(0, 1, 2, false, false)]
-        [TestCase(0, 1, 2, true, false)]
-        [TestCase(0, 1, Limits.Quantity - 1, false, false)]
-        [TestCase(0, 1, Limits.Quantity - 1, true, false)]
-        [TestCase(0, 1, Limits.Quantity, false, false)]
-        [TestCase(0, 1, Limits.Quantity, true, false)]
-        [TestCase(0, 1, Limits.Quantity + 1, false, false)]
-        [TestCase(0, 1, Limits.Quantity + 1, true, false)]
-        [TestCase(0, 2, -2, false, false)]
-        [TestCase(0, 2, -2, true, false)]
-        [TestCase(0, 2, -1, false, false)]
-        [TestCase(0, 2, -1, true, false)]
-        [TestCase(0, 2, 0, false, false)]
-        [TestCase(0, 2, 0, true, false)]
-        [TestCase(0, 2, 1, false, false)]
-        [TestCase(0, 2, 1, true, false)]
-        [TestCase(0, 2, 2, false, false)]
-        [TestCase(0, 2, 2, true, false)]
-        [TestCase(0, 2, Limits.Quantity - 1, false, false)]
-        [TestCase(0, 2, Limits.Quantity - 1, true, false)]
-        [TestCase(0, 2, Limits.Quantity, false, false)]
-        [TestCase(0, 2, Limits.Quantity, true, false)]
-        [TestCase(0, 2, Limits.Quantity + 1, false, false)]
-        [TestCase(0, 2, Limits.Quantity + 1, true, false)]
-        [TestCase(0, Limits.Die - 1, -2, false, false)]
-        [TestCase(0, Limits.Die - 1, -2, true, false)]
-        [TestCase(0, Limits.Die - 1, -1, false, false)]
-        [TestCase(0, Limits.Die - 1, -1, true, false)]
-        [TestCase(0, Limits.Die - 1, 0, false, false)]
-        [TestCase(0, Limits.Die - 1, 0, true, false)]
-        [TestCase(0, Limits.Die - 1, 1, false, false)]
-        [TestCase(0, Limits.Die - 1, 1, true, false)]
-        [TestCase(0, Limits.Die - 1, 2, false, false)]
-        [TestCase(0, Limits.Die - 1, 2, true, false)]
-        [TestCase(0, Limits.Die - 1, Limits.Quantity - 1, false, false)]
-        [TestCase(0, Limits.Die - 1, Limits.Quantity - 1, true, false)]
-        [TestCase(0, Limits.Die - 1, Limits.Quantity, false, false)]
-        [TestCase(0, Limits.Die - 1, Limits.Quantity, true, false)]
-        [TestCase(0, Limits.Die - 1, Limits.Quantity + 1, false, false)]
-        [TestCase(0, Limits.Die - 1, Limits.Quantity + 1, true, false)]
-        [TestCase(0, Limits.Die, -2, false, false)]
-        [TestCase(0, Limits.Die, -2, true, false)]
-        [TestCase(0, Limits.Die, -1, false, false)]
-        [TestCase(0, Limits.Die, -1, true, false)]
-        [TestCase(0, Limits.Die, 0, false, false)]
-        [TestCase(0, Limits.Die, 0, true, false)]
-        [TestCase(0, Limits.Die, 1, false, false)]
-        [TestCase(0, Limits.Die, 1, true, false)]
-        [TestCase(0, Limits.Die, 2, false, false)]
-        [TestCase(0, Limits.Die, 2, true, false)]
-        [TestCase(0, Limits.Die, Limits.Quantity - 1, false, false)]
-        [TestCase(0, Limits.Die, Limits.Quantity - 1, true, false)]
-        [TestCase(0, Limits.Die, Limits.Quantity, false, false)]
-        [TestCase(0, Limits.Die, Limits.Quantity, true, false)]
-        [TestCase(0, Limits.Die, Limits.Quantity + 1, false, false)]
-        [TestCase(0, Limits.Die, Limits.Quantity + 1, true, false)]
-        [TestCase(0, Limits.Die + 1, -2, false, false)]
-        [TestCase(0, Limits.Die + 1, -2, true, false)]
-        [TestCase(0, Limits.Die + 1, -1, false, false)]
-        [TestCase(0, Limits.Die + 1, -1, true, false)]
-        [TestCase(0, Limits.Die + 1, 0, false, false)]
-        [TestCase(0, Limits.Die + 1, 0, true, false)]
-        [TestCase(0, Limits.Die + 1, 1, false, false)]
-        [TestCase(0, Limits.Die + 1, 1, true, false)]
-        [TestCase(0, Limits.Die + 1, 2, false, false)]
-        [TestCase(0, Limits.Die + 1, 2, true, false)]
-        [TestCase(0, Limits.Die + 1, Limits.Quantity - 1, false, false)]
-        [TestCase(0, Limits.Die + 1, Limits.Quantity - 1, true, false)]
-        [TestCase(0, Limits.Die + 1, Limits.Quantity, false, false)]
-        [TestCase(0, Limits.Die + 1, Limits.Quantity, true, false)]
-        [TestCase(0, Limits.Die + 1, Limits.Quantity + 1, false, false)]
-        [TestCase(0, Limits.Die + 1, Limits.Quantity + 1, true, false)]
-        [TestCase(1, -1, -2, false, false)]
-        [TestCase(1, -1, -2, true, false)]
-        [TestCase(1, -1, -1, false, false)]
-        [TestCase(1, -1, -1, true, false)]
-        [TestCase(1, -1, 0, false, false)]
-        [TestCase(1, -1, 0, true, false)]
-        [TestCase(1, -1, 1, false, false)]
-        [TestCase(1, -1, 1, true, false)]
-        [TestCase(1, -1, 2, false, false)]
-        [TestCase(1, -1, 2, true, false)]
-        [TestCase(1, -1, Limits.Quantity - 1, false, false)]
-        [TestCase(1, -1, Limits.Quantity - 1, true, false)]
-        [TestCase(1, -1, Limits.Quantity, false, false)]
-        [TestCase(1, -1, Limits.Quantity, true, false)]
-        [TestCase(1, -1, Limits.Quantity + 1, false, false)]
-        [TestCase(1, -1, Limits.Quantity + 1, true, false)]
-        [TestCase(1, 0, -2, false, false)]
-        [TestCase(1, 0, -2, true, false)]
-        [TestCase(1, 0, -1, false, false)]
-        [TestCase(1, 0, -1, true, false)]
-        [TestCase(1, 0, 0, false, false)]
-        [TestCase(1, 0, 0, true, false)]
-        [TestCase(1, 0, 1, false, false)]
-        [TestCase(1, 0, 1, true, false)]
-        [TestCase(1, 0, 2, false, false)]
-        [TestCase(1, 0, 2, true, false)]
-        [TestCase(1, 0, Limits.Quantity - 1, false, false)]
-        [TestCase(1, 0, Limits.Quantity - 1, true, false)]
-        [TestCase(1, 0, Limits.Quantity, false, false)]
-        [TestCase(1, 0, Limits.Quantity, true, false)]
-        [TestCase(1, 0, Limits.Quantity + 1, false, false)]
-        [TestCase(1, 0, Limits.Quantity + 1, true, false)]
-        [TestCase(1, 1, -2, false, false)]
-        [TestCase(1, 1, -2, true, false)]
-        [TestCase(1, 1, -1, false, false)]
-        [TestCase(1, 1, -1, true, false)]
-        [TestCase(1, 1, 0, false, true)]
-        [TestCase(1, 1, 0, true, false)]
-        [TestCase(1, 1, 1, false, true)]
-        [TestCase(1, 1, 1, true, false)]
-        [TestCase(1, 1, 2, false, true)]
-        [TestCase(1, 1, 2, true, false)]
-        [TestCase(1, 1, Limits.Quantity - 1, false, true)]
-        [TestCase(1, 1, Limits.Quantity - 1, true, false)]
-        [TestCase(1, 1, Limits.Quantity, false, true)]
-        [TestCase(1, 1, Limits.Quantity, true, false)]
-        [TestCase(1, 1, Limits.Quantity + 1, false, false)]
-        [TestCase(1, 1, Limits.Quantity + 1, true, false)]
-        [TestCase(1, 2, -2, false, false)]
-        [TestCase(1, 2, -2, true, false)]
-        [TestCase(1, 2, -1, false, false)]
-        [TestCase(1, 2, -1, true, false)]
-        [TestCase(1, 2, 0, false, true)]
-        [TestCase(1, 2, 0, true, true)]
-        [TestCase(1, 2, 1, false, true)]
-        [TestCase(1, 2, 1, true, true)]
-        [TestCase(1, 2, 2, false, true)]
-        [TestCase(1, 2, 2, true, true)]
-        [TestCase(1, 2, Limits.Quantity - 1, false, true)]
-        [TestCase(1, 2, Limits.Quantity - 1, true, true)]
-        [TestCase(1, 2, Limits.Quantity, false, true)]
-        [TestCase(1, 2, Limits.Quantity, true, true)]
-        [TestCase(1, 2, Limits.Quantity + 1, false, false)]
-        [TestCase(1, 2, Limits.Quantity + 1, true, false)]
-        [TestCase(1, Limits.Die - 1, -2, false, false)]
-        [TestCase(1, Limits.Die - 1, -2, true, false)]
-        [TestCase(1, Limits.Die - 1, -1, false, false)]
-        [TestCase(1, Limits.Die - 1, -1, true, false)]
-        [TestCase(1, Limits.Die - 1, 0, false, true)]
-        [TestCase(1, Limits.Die - 1, 0, true, true)]
-        [TestCase(1, Limits.Die - 1, 1, false, true)]
-        [TestCase(1, Limits.Die - 1, 1, true, true)]
-        [TestCase(1, Limits.Die - 1, 2, false, true)]
-        [TestCase(1, Limits.Die - 1, 2, true, true)]
-        [TestCase(1, Limits.Die - 1, Limits.Quantity - 1, false, true)]
-        [TestCase(1, Limits.Die - 1, Limits.Quantity - 1, true, true)]
-        [TestCase(1, Limits.Die - 1, Limits.Quantity, false, true)]
-        [TestCase(1, Limits.Die - 1, Limits.Quantity, true, true)]
-        [TestCase(1, Limits.Die - 1, Limits.Quantity + 1, false, false)]
-        [TestCase(1, Limits.Die - 1, Limits.Quantity + 1, true, false)]
-        [TestCase(1, Limits.Die, -2, false, false)]
-        [TestCase(1, Limits.Die, -2, true, false)]
-        [TestCase(1, Limits.Die, -1, false, false)]
-        [TestCase(1, Limits.Die, -1, true, false)]
-        [TestCase(1, Limits.Die, 0, false, true)]
-        [TestCase(1, Limits.Die, 0, true, true)]
-        [TestCase(1, Limits.Die, 1, false, true)]
-        [TestCase(1, Limits.Die, 1, true, true)]
-        [TestCase(1, Limits.Die, 2, false, true)]
-        [TestCase(1, Limits.Die, 2, true, true)]
-        [TestCase(1, Limits.Die, Limits.Quantity - 1, false, true)]
-        [TestCase(1, Limits.Die, Limits.Quantity - 1, true, true)]
-        [TestCase(1, Limits.Die, Limits.Quantity, false, true)]
-        [TestCase(1, Limits.Die, Limits.Quantity, true, true)]
-        [TestCase(1, Limits.Die, Limits.Quantity + 1, false, false)]
-        [TestCase(1, Limits.Die, Limits.Quantity + 1, true, false)]
-        [TestCase(1, Limits.Die + 1, -2, false, false)]
-        [TestCase(1, Limits.Die + 1, -2, true, false)]
-        [TestCase(1, Limits.Die + 1, -1, false, false)]
-        [TestCase(1, Limits.Die + 1, -1, true, false)]
-        [TestCase(1, Limits.Die + 1, 0, false, false)]
-        [TestCase(1, Limits.Die + 1, 0, true, false)]
-        [TestCase(1, Limits.Die + 1, 1, false, false)]
-        [TestCase(1, Limits.Die + 1, 1, true, false)]
-        [TestCase(1, Limits.Die + 1, 2, false, false)]
-        [TestCase(1, Limits.Die + 1, 2, true, false)]
-        [TestCase(1, Limits.Die + 1, Limits.Quantity - 1, false, false)]
-        [TestCase(1, Limits.Die + 1, Limits.Quantity - 1, true, false)]
-        [TestCase(1, Limits.Die + 1, Limits.Quantity, false, false)]
-        [TestCase(1, Limits.Die + 1, Limits.Quantity, true, false)]
-        [TestCase(1, Limits.Die + 1, Limits.Quantity + 1, false, false)]
-        [TestCase(1, Limits.Die + 1, Limits.Quantity + 1, true, false)]
-        [TestCase(2, -1, -2, false, false)]
-        [TestCase(2, -1, -2, true, false)]
-        [TestCase(2, -1, -1, false, false)]
-        [TestCase(2, -1, -1, true, false)]
-        [TestCase(2, -1, 0, false, false)]
-        [TestCase(2, -1, 0, true, false)]
-        [TestCase(2, -1, 1, false, false)]
-        [TestCase(2, -1, 1, true, false)]
-        [TestCase(2, -1, 2, false, false)]
-        [TestCase(2, -1, 2, true, false)]
-        [TestCase(2, -1, Limits.Quantity - 1, false, false)]
-        [TestCase(2, -1, Limits.Quantity - 1, true, false)]
-        [TestCase(2, -1, Limits.Quantity, false, false)]
-        [TestCase(2, -1, Limits.Quantity, true, false)]
-        [TestCase(2, -1, Limits.Quantity + 1, false, false)]
-        [TestCase(2, -1, Limits.Quantity + 1, true, false)]
-        [TestCase(2, 0, -2, false, false)]
-        [TestCase(2, 0, -2, true, false)]
-        [TestCase(2, 0, -1, false, false)]
-        [TestCase(2, 0, -1, true, false)]
-        [TestCase(2, 0, 0, false, false)]
-        [TestCase(2, 0, 0, true, false)]
-        [TestCase(2, 0, 1, false, false)]
-        [TestCase(2, 0, 1, true, false)]
-        [TestCase(2, 0, 2, false, false)]
-        [TestCase(2, 0, 2, true, false)]
-        [TestCase(2, 0, Limits.Quantity - 1, false, false)]
-        [TestCase(2, 0, Limits.Quantity - 1, true, false)]
-        [TestCase(2, 0, Limits.Quantity, false, false)]
-        [TestCase(2, 0, Limits.Quantity, true, false)]
-        [TestCase(2, 0, Limits.Quantity + 1, false, false)]
-        [TestCase(2, 0, Limits.Quantity + 1, true, false)]
-        [TestCase(2, 1, -2, false, false)]
-        [TestCase(2, 1, -2, true, false)]
-        [TestCase(2, 1, -1, false, false)]
-        [TestCase(2, 1, -1, true, false)]
-        [TestCase(2, 1, 0, false, true)]
-        [TestCase(2, 1, 0, true, false)]
-        [TestCase(2, 1, 1, false, true)]
-        [TestCase(2, 1, 1, true, false)]
-        [TestCase(2, 1, 2, false, true)]
-        [TestCase(2, 1, 2, true, false)]
-        [TestCase(2, 1, Limits.Quantity - 1, false, true)]
-        [TestCase(2, 1, Limits.Quantity - 1, true, false)]
-        [TestCase(2, 1, Limits.Quantity, false, true)]
-        [TestCase(2, 1, Limits.Quantity, true, false)]
-        [TestCase(2, 1, Limits.Quantity + 1, false, false)]
-        [TestCase(2, 1, Limits.Quantity + 1, true, false)]
-        [TestCase(2, 2, -2, false, false)]
-        [TestCase(2, 2, -2, true, false)]
-        [TestCase(2, 2, -1, false, false)]
-        [TestCase(2, 2, -1, true, false)]
-        [TestCase(2, 2, 0, false, true)]
-        [TestCase(2, 2, 0, true, true)]
-        [TestCase(2, 2, 1, false, true)]
-        [TestCase(2, 2, 1, true, true)]
-        [TestCase(2, 2, 2, false, true)]
-        [TestCase(2, 2, 2, true, true)]
-        [TestCase(2, 2, Limits.Quantity - 1, false, true)]
-        [TestCase(2, 2, Limits.Quantity - 1, true, true)]
-        [TestCase(2, 2, Limits.Quantity, false, true)]
-        [TestCase(2, 2, Limits.Quantity, true, true)]
-        [TestCase(2, 2, Limits.Quantity + 1, false, false)]
-        [TestCase(2, 2, Limits.Quantity + 1, true, false)]
-        [TestCase(2, Limits.Die - 1, -2, false, false)]
-        [TestCase(2, Limits.Die - 1, -2, true, false)]
-        [TestCase(2, Limits.Die - 1, -1, false, false)]
-        [TestCase(2, Limits.Die - 1, -1, true, false)]
-        [TestCase(2, Limits.Die - 1, 0, false, true)]
-        [TestCase(2, Limits.Die - 1, 0, true, true)]
-        [TestCase(2, Limits.Die - 1, 1, false, true)]
-        [TestCase(2, Limits.Die - 1, 1, true, true)]
-        [TestCase(2, Limits.Die - 1, 2, false, true)]
-        [TestCase(2, Limits.Die - 1, 2, true, true)]
-        [TestCase(2, Limits.Die - 1, Limits.Quantity - 1, false, true)]
-        [TestCase(2, Limits.Die - 1, Limits.Quantity - 1, true, true)]
-        [TestCase(2, Limits.Die - 1, Limits.Quantity, false, true)]
-        [TestCase(2, Limits.Die - 1, Limits.Quantity, true, true)]
-        [TestCase(2, Limits.Die - 1, Limits.Quantity + 1, false, false)]
-        [TestCase(2, Limits.Die - 1, Limits.Quantity + 1, true, false)]
-        [TestCase(2, Limits.Die, -2, false, false)]
-        [TestCase(2, Limits.Die, -2, true, false)]
-        [TestCase(2, Limits.Die, -1, false, false)]
-        [TestCase(2, Limits.Die, -1, true, false)]
-        [TestCase(2, Limits.Die, 0, false, true)]
-        [TestCase(2, Limits.Die, 0, true, true)]
-        [TestCase(2, Limits.Die, 1, false, true)]
-        [TestCase(2, Limits.Die, 1, true, true)]
-        [TestCase(2, Limits.Die, 2, false, true)]
-        [TestCase(2, Limits.Die, 2, true, true)]
-        [TestCase(2, Limits.Die, Limits.Quantity - 1, false, true)]
-        [TestCase(2, Limits.Die, Limits.Quantity - 1, true, true)]
-        [TestCase(2, Limits.Die, Limits.Quantity, false, true)]
-        [TestCase(2, Limits.Die, Limits.Quantity, true, true)]
-        [TestCase(2, Limits.Die, Limits.Quantity + 1, false, false)]
-        [TestCase(2, Limits.Die, Limits.Quantity + 1, true, false)]
-        [TestCase(2, Limits.Die + 1, -2, false, false)]
-        [TestCase(2, Limits.Die + 1, -2, true, false)]
-        [TestCase(2, Limits.Die + 1, -1, false, false)]
-        [TestCase(2, Limits.Die + 1, -1, true, false)]
-        [TestCase(2, Limits.Die + 1, 0, false, false)]
-        [TestCase(2, Limits.Die + 1, 0, true, false)]
-        [TestCase(2, Limits.Die + 1, 1, false, false)]
-        [TestCase(2, Limits.Die + 1, 1, true, false)]
-        [TestCase(2, Limits.Die + 1, 2, false, false)]
-        [TestCase(2, Limits.Die + 1, 2, true, false)]
-        [TestCase(2, Limits.Die + 1, Limits.Quantity - 1, false, false)]
-        [TestCase(2, Limits.Die + 1, Limits.Quantity - 1, true, false)]
-        [TestCase(2, Limits.Die + 1, Limits.Quantity, false, false)]
-        [TestCase(2, Limits.Die + 1, Limits.Quantity, true, false)]
-        [TestCase(2, Limits.Die + 1, Limits.Quantity + 1, false, false)]
-        [TestCase(2, Limits.Die + 1, Limits.Quantity + 1, true, false)]
-        [TestCase(Limits.Quantity - 1, -1, -2, false, false)]
-        [TestCase(Limits.Quantity - 1, -1, -2, true, false)]
-        [TestCase(Limits.Quantity - 1, -1, -1, false, false)]
-        [TestCase(Limits.Quantity - 1, -1, -1, true, false)]
-        [TestCase(Limits.Quantity - 1, -1, 0, false, false)]
-        [TestCase(Limits.Quantity - 1, -1, 0, true, false)]
-        [TestCase(Limits.Quantity - 1, -1, 1, false, false)]
-        [TestCase(Limits.Quantity - 1, -1, 1, true, false)]
-        [TestCase(Limits.Quantity - 1, -1, 2, false, false)]
-        [TestCase(Limits.Quantity - 1, -1, 2, true, false)]
-        [TestCase(Limits.Quantity - 1, -1, Limits.Quantity - 1, false, false)]
-        [TestCase(Limits.Quantity - 1, -1, Limits.Quantity - 1, true, false)]
-        [TestCase(Limits.Quantity - 1, -1, Limits.Quantity, false, false)]
-        [TestCase(Limits.Quantity - 1, -1, Limits.Quantity, true, false)]
-        [TestCase(Limits.Quantity - 1, -1, Limits.Quantity + 1, false, false)]
-        [TestCase(Limits.Quantity - 1, -1, Limits.Quantity + 1, true, false)]
-        [TestCase(Limits.Quantity - 1, 0, -2, false, false)]
-        [TestCase(Limits.Quantity - 1, 0, -2, true, false)]
-        [TestCase(Limits.Quantity - 1, 0, -1, false, false)]
-        [TestCase(Limits.Quantity - 1, 0, -1, true, false)]
-        [TestCase(Limits.Quantity - 1, 0, 0, false, false)]
-        [TestCase(Limits.Quantity - 1, 0, 0, true, false)]
-        [TestCase(Limits.Quantity - 1, 0, 1, false, false)]
-        [TestCase(Limits.Quantity - 1, 0, 1, true, false)]
-        [TestCase(Limits.Quantity - 1, 0, 2, false, false)]
-        [TestCase(Limits.Quantity - 1, 0, 2, true, false)]
-        [TestCase(Limits.Quantity - 1, 0, Limits.Quantity - 1, false, false)]
-        [TestCase(Limits.Quantity - 1, 0, Limits.Quantity - 1, true, false)]
-        [TestCase(Limits.Quantity - 1, 0, Limits.Quantity, false, false)]
-        [TestCase(Limits.Quantity - 1, 0, Limits.Quantity, true, false)]
-        [TestCase(Limits.Quantity - 1, 0, Limits.Quantity + 1, false, false)]
-        [TestCase(Limits.Quantity - 1, 0, Limits.Quantity + 1, true, false)]
-        [TestCase(Limits.Quantity - 1, 1, -2, false, false)]
-        [TestCase(Limits.Quantity - 1, 1, -2, true, false)]
-        [TestCase(Limits.Quantity - 1, 1, -1, false, false)]
-        [TestCase(Limits.Quantity - 1, 1, -1, true, false)]
-        [TestCase(Limits.Quantity - 1, 1, 0, false, true)]
-        [TestCase(Limits.Quantity - 1, 1, 0, true, false)]
-        [TestCase(Limits.Quantity - 1, 1, 1, false, true)]
-        [TestCase(Limits.Quantity - 1, 1, 1, true, false)]
-        [TestCase(Limits.Quantity - 1, 1, 2, false, true)]
-        [TestCase(Limits.Quantity - 1, 1, 2, true, false)]
-        [TestCase(Limits.Quantity - 1, 1, Limits.Quantity - 1, false, true)]
-        [TestCase(Limits.Quantity - 1, 1, Limits.Quantity - 1, true, false)]
-        [TestCase(Limits.Quantity - 1, 1, Limits.Quantity, false, true)]
-        [TestCase(Limits.Quantity - 1, 1, Limits.Quantity, true, false)]
-        [TestCase(Limits.Quantity - 1, 1, Limits.Quantity + 1, false, false)]
-        [TestCase(Limits.Quantity - 1, 1, Limits.Quantity + 1, true, false)]
-        [TestCase(Limits.Quantity - 1, 2, -2, false, false)]
-        [TestCase(Limits.Quantity - 1, 2, -2, true, false)]
-        [TestCase(Limits.Quantity - 1, 2, -1, false, false)]
-        [TestCase(Limits.Quantity - 1, 2, -1, true, false)]
-        [TestCase(Limits.Quantity - 1, 2, 0, false, true)]
-        [TestCase(Limits.Quantity - 1, 2, 0, true, true)]
-        [TestCase(Limits.Quantity - 1, 2, 1, false, true)]
-        [TestCase(Limits.Quantity - 1, 2, 1, true, true)]
-        [TestCase(Limits.Quantity - 1, 2, 2, false, true)]
-        [TestCase(Limits.Quantity - 1, 2, 2, true, true)]
-        [TestCase(Limits.Quantity - 1, 2, Limits.Quantity - 1, false, true)]
-        [TestCase(Limits.Quantity - 1, 2, Limits.Quantity - 1, true, true)]
-        [TestCase(Limits.Quantity - 1, 2, Limits.Quantity, false, true)]
-        [TestCase(Limits.Quantity - 1, 2, Limits.Quantity, true, true)]
-        [TestCase(Limits.Quantity - 1, 2, Limits.Quantity + 1, false, false)]
-        [TestCase(Limits.Quantity - 1, 2, Limits.Quantity + 1, true, false)]
-        [TestCase(Limits.Quantity - 1, Limits.Die - 1, -2, false, false)]
-        [TestCase(Limits.Quantity - 1, Limits.Die - 1, -2, true, false)]
-        [TestCase(Limits.Quantity - 1, Limits.Die - 1, -1, false, false)]
-        [TestCase(Limits.Quantity - 1, Limits.Die - 1, -1, true, false)]
-        [TestCase(Limits.Quantity - 1, Limits.Die - 1, 0, false, true)]
-        [TestCase(Limits.Quantity - 1, Limits.Die - 1, 0, true, true)]
-        [TestCase(Limits.Quantity - 1, Limits.Die - 1, 1, false, true)]
-        [TestCase(Limits.Quantity - 1, Limits.Die - 1, 1, true, true)]
-        [TestCase(Limits.Quantity - 1, Limits.Die - 1, 2, false, true)]
-        [TestCase(Limits.Quantity - 1, Limits.Die - 1, 2, true, true)]
-        [TestCase(Limits.Quantity - 1, Limits.Die - 1, Limits.Quantity - 1, false, true)]
-        [TestCase(Limits.Quantity - 1, Limits.Die - 1, Limits.Quantity - 1, true, true)]
-        [TestCase(Limits.Quantity - 1, Limits.Die - 1, Limits.Quantity, false, true)]
-        [TestCase(Limits.Quantity - 1, Limits.Die - 1, Limits.Quantity, true, true)]
-        [TestCase(Limits.Quantity - 1, Limits.Die - 1, Limits.Quantity + 1, false, false)]
-        [TestCase(Limits.Quantity - 1, Limits.Die - 1, Limits.Quantity + 1, true, false)]
-        [TestCase(Limits.Quantity - 1, Limits.Die, -2, false, false)]
-        [TestCase(Limits.Quantity - 1, Limits.Die, -2, true, false)]
-        [TestCase(Limits.Quantity - 1, Limits.Die, -1, false, false)]
-        [TestCase(Limits.Quantity - 1, Limits.Die, -1, true, false)]
-        [TestCase(Limits.Quantity - 1, Limits.Die, 0, false, true)]
-        [TestCase(Limits.Quantity - 1, Limits.Die, 0, true, true)]
-        [TestCase(Limits.Quantity - 1, Limits.Die, 1, false, true)]
-        [TestCase(Limits.Quantity - 1, Limits.Die, 1, true, true)]
-        [TestCase(Limits.Quantity - 1, Limits.Die, 2, false, true)]
-        [TestCase(Limits.Quantity - 1, Limits.Die, 2, true, true)]
-        [TestCase(Limits.Quantity - 1, Limits.Die, Limits.Quantity - 1, false, true)]
-        [TestCase(Limits.Quantity - 1, Limits.Die, Limits.Quantity - 1, true, true)]
-        [TestCase(Limits.Quantity - 1, Limits.Die, Limits.Quantity, false, true)]
-        [TestCase(Limits.Quantity - 1, Limits.Die, Limits.Quantity, true, true)]
-        [TestCase(Limits.Quantity - 1, Limits.Die, Limits.Quantity + 1, false, false)]
-        [TestCase(Limits.Quantity - 1, Limits.Die, Limits.Quantity + 1, true, false)]
-        [TestCase(Limits.Quantity - 1, Limits.Die + 1, -2, false, false)]
-        [TestCase(Limits.Quantity - 1, Limits.Die + 1, -2, true, false)]
-        [TestCase(Limits.Quantity - 1, Limits.Die + 1, -1, false, false)]
-        [TestCase(Limits.Quantity - 1, Limits.Die + 1, -1, true, false)]
-        [TestCase(Limits.Quantity - 1, Limits.Die + 1, 0, false, false)]
-        [TestCase(Limits.Quantity - 1, Limits.Die + 1, 0, true, false)]
-        [TestCase(Limits.Quantity - 1, Limits.Die + 1, 1, false, false)]
-        [TestCase(Limits.Quantity - 1, Limits.Die + 1, 1, true, false)]
-        [TestCase(Limits.Quantity - 1, Limits.Die + 1, 2, false, false)]
-        [TestCase(Limits.Quantity - 1, Limits.Die + 1, 2, true, false)]
-        [TestCase(Limits.Quantity - 1, Limits.Die + 1, Limits.Quantity - 1, false, false)]
-        [TestCase(Limits.Quantity - 1, Limits.Die + 1, Limits.Quantity - 1, true, false)]
-        [TestCase(Limits.Quantity - 1, Limits.Die + 1, Limits.Quantity, false, false)]
-        [TestCase(Limits.Quantity - 1, Limits.Die + 1, Limits.Quantity, true, false)]
-        [TestCase(Limits.Quantity - 1, Limits.Die + 1, Limits.Quantity + 1, false, false)]
-        [TestCase(Limits.Quantity - 1, Limits.Die + 1, Limits.Quantity + 1, true, false)]
-        [TestCase(Limits.Quantity, -1, -2, false, false)]
-        [TestCase(Limits.Quantity, -1, -2, true, false)]
-        [TestCase(Limits.Quantity, -1, -1, false, false)]
-        [TestCase(Limits.Quantity, -1, -1, true, false)]
-        [TestCase(Limits.Quantity, -1, 0, false, false)]
-        [TestCase(Limits.Quantity, -1, 0, true, false)]
-        [TestCase(Limits.Quantity, -1, 1, false, false)]
-        [TestCase(Limits.Quantity, -1, 1, true, false)]
-        [TestCase(Limits.Quantity, -1, 2, false, false)]
-        [TestCase(Limits.Quantity, -1, 2, true, false)]
-        [TestCase(Limits.Quantity, -1, Limits.Quantity - 1, false, false)]
-        [TestCase(Limits.Quantity, -1, Limits.Quantity - 1, true, false)]
-        [TestCase(Limits.Quantity, -1, Limits.Quantity, false, false)]
-        [TestCase(Limits.Quantity, -1, Limits.Quantity, true, false)]
-        [TestCase(Limits.Quantity, -1, Limits.Quantity + 1, false, false)]
-        [TestCase(Limits.Quantity, -1, Limits.Quantity + 1, true, false)]
-        [TestCase(Limits.Quantity, 0, -2, false, false)]
-        [TestCase(Limits.Quantity, 0, -2, true, false)]
-        [TestCase(Limits.Quantity, 0, -1, false, false)]
-        [TestCase(Limits.Quantity, 0, -1, true, false)]
-        [TestCase(Limits.Quantity, 0, 0, false, false)]
-        [TestCase(Limits.Quantity, 0, 0, true, false)]
-        [TestCase(Limits.Quantity, 0, 1, false, false)]
-        [TestCase(Limits.Quantity, 0, 1, true, false)]
-        [TestCase(Limits.Quantity, 0, 2, false, false)]
-        [TestCase(Limits.Quantity, 0, 2, true, false)]
-        [TestCase(Limits.Quantity, 0, Limits.Quantity - 1, false, false)]
-        [TestCase(Limits.Quantity, 0, Limits.Quantity - 1, true, false)]
-        [TestCase(Limits.Quantity, 0, Limits.Quantity, false, false)]
-        [TestCase(Limits.Quantity, 0, Limits.Quantity, true, false)]
-        [TestCase(Limits.Quantity, 0, Limits.Quantity + 1, false, false)]
-        [TestCase(Limits.Quantity, 0, Limits.Quantity + 1, true, false)]
-        [TestCase(Limits.Quantity, 1, -2, false, false)]
-        [TestCase(Limits.Quantity, 1, -2, true, false)]
-        [TestCase(Limits.Quantity, 1, -1, false, false)]
-        [TestCase(Limits.Quantity, 1, -1, true, false)]
-        [TestCase(Limits.Quantity, 1, 0, false, true)]
-        [TestCase(Limits.Quantity, 1, 0, true, false)]
-        [TestCase(Limits.Quantity, 1, 1, false, true)]
-        [TestCase(Limits.Quantity, 1, 1, true, false)]
-        [TestCase(Limits.Quantity, 1, 2, false, true)]
-        [TestCase(Limits.Quantity, 1, 2, true, false)]
-        [TestCase(Limits.Quantity, 1, Limits.Quantity - 1, false, true)]
-        [TestCase(Limits.Quantity, 1, Limits.Quantity - 1, true, false)]
-        [TestCase(Limits.Quantity, 1, Limits.Quantity, false, true)]
-        [TestCase(Limits.Quantity, 1, Limits.Quantity, true, false)]
-        [TestCase(Limits.Quantity, 1, Limits.Quantity + 1, false, false)]
-        [TestCase(Limits.Quantity, 1, Limits.Quantity + 1, true, false)]
-        [TestCase(Limits.Quantity, 2, -2, false, false)]
-        [TestCase(Limits.Quantity, 2, -2, true, false)]
-        [TestCase(Limits.Quantity, 2, -1, false, false)]
-        [TestCase(Limits.Quantity, 2, -1, true, false)]
-        [TestCase(Limits.Quantity, 2, 0, false, true)]
-        [TestCase(Limits.Quantity, 2, 0, true, true)]
-        [TestCase(Limits.Quantity, 2, 1, false, true)]
-        [TestCase(Limits.Quantity, 2, 1, true, true)]
-        [TestCase(Limits.Quantity, 2, 2, false, true)]
-        [TestCase(Limits.Quantity, 2, 2, true, true)]
-        [TestCase(Limits.Quantity, 2, Limits.Quantity - 1, false, true)]
-        [TestCase(Limits.Quantity, 2, Limits.Quantity - 1, true, true)]
-        [TestCase(Limits.Quantity, 2, Limits.Quantity, false, true)]
-        [TestCase(Limits.Quantity, 2, Limits.Quantity, true, true)]
-        [TestCase(Limits.Quantity, 2, Limits.Quantity + 1, false, false)]
-        [TestCase(Limits.Quantity, 2, Limits.Quantity + 1, true, false)]
-        [TestCase(Limits.Quantity, Limits.Die - 1, -2, false, false)]
-        [TestCase(Limits.Quantity, Limits.Die - 1, -2, true, false)]
-        [TestCase(Limits.Quantity, Limits.Die - 1, -1, false, false)]
-        [TestCase(Limits.Quantity, Limits.Die - 1, -1, true, false)]
-        [TestCase(Limits.Quantity, Limits.Die - 1, 0, false, true)]
-        [TestCase(Limits.Quantity, Limits.Die - 1, 0, true, true)]
-        [TestCase(Limits.Quantity, Limits.Die - 1, 1, false, true)]
-        [TestCase(Limits.Quantity, Limits.Die - 1, 1, true, true)]
-        [TestCase(Limits.Quantity, Limits.Die - 1, 2, false, true)]
-        [TestCase(Limits.Quantity, Limits.Die - 1, 2, true, true)]
-        [TestCase(Limits.Quantity, Limits.Die - 1, Limits.Quantity - 1, false, true)]
-        [TestCase(Limits.Quantity, Limits.Die - 1, Limits.Quantity - 1, true, true)]
-        [TestCase(Limits.Quantity, Limits.Die - 1, Limits.Quantity, false, true)]
-        [TestCase(Limits.Quantity, Limits.Die - 1, Limits.Quantity, true, true)]
-        [TestCase(Limits.Quantity, Limits.Die - 1, Limits.Quantity + 1, false, false)]
-        [TestCase(Limits.Quantity, Limits.Die - 1, Limits.Quantity + 1, true, false)]
-        [TestCase(Limits.Quantity, Limits.Die, -2, false, false)]
-        [TestCase(Limits.Quantity, Limits.Die, -2, true, false)]
-        [TestCase(Limits.Quantity, Limits.Die, -1, false, false)]
-        [TestCase(Limits.Quantity, Limits.Die, -1, true, false)]
-        [TestCase(Limits.Quantity, Limits.Die, 0, false, true)]
-        [TestCase(Limits.Quantity, Limits.Die, 0, true, true)]
-        [TestCase(Limits.Quantity, Limits.Die, 1, false, true)]
-        [TestCase(Limits.Quantity, Limits.Die, 1, true, true)]
-        [TestCase(Limits.Quantity, Limits.Die, 2, false, true)]
-        [TestCase(Limits.Quantity, Limits.Die, 2, true, true)]
-        [TestCase(Limits.Quantity, Limits.Die, Limits.Quantity - 1, false, true)]
-        [TestCase(Limits.Quantity, Limits.Die, Limits.Quantity - 1, true, true)]
-        [TestCase(Limits.Quantity, Limits.Die, Limits.Quantity, false, true)]
-        [TestCase(Limits.Quantity, Limits.Die, Limits.Quantity, true, true)]
-        [TestCase(Limits.Quantity, Limits.Die, Limits.Quantity + 1, false, false)]
-        [TestCase(Limits.Quantity, Limits.Die, Limits.Quantity + 1, true, false)]
-        [TestCase(Limits.Quantity, Limits.Die + 1, -2, false, false)]
-        [TestCase(Limits.Quantity, Limits.Die + 1, -2, true, false)]
-        [TestCase(Limits.Quantity, Limits.Die + 1, -1, false, false)]
-        [TestCase(Limits.Quantity, Limits.Die + 1, -1, true, false)]
-        [TestCase(Limits.Quantity, Limits.Die + 1, 0, false, false)]
-        [TestCase(Limits.Quantity, Limits.Die + 1, 0, true, false)]
-        [TestCase(Limits.Quantity, Limits.Die + 1, 1, false, false)]
-        [TestCase(Limits.Quantity, Limits.Die + 1, 1, true, false)]
-        [TestCase(Limits.Quantity, Limits.Die + 1, 2, false, false)]
-        [TestCase(Limits.Quantity, Limits.Die + 1, 2, true, false)]
-        [TestCase(Limits.Quantity, Limits.Die + 1, Limits.Quantity - 1, false, false)]
-        [TestCase(Limits.Quantity, Limits.Die + 1, Limits.Quantity - 1, true, false)]
-        [TestCase(Limits.Quantity, Limits.Die + 1, Limits.Quantity, false, false)]
-        [TestCase(Limits.Quantity, Limits.Die + 1, Limits.Quantity, true, false)]
-        [TestCase(Limits.Quantity, Limits.Die + 1, Limits.Quantity + 1, false, false)]
-        [TestCase(Limits.Quantity, Limits.Die + 1, Limits.Quantity + 1, true, false)]
-        [TestCase(Limits.Quantity + 1, -1, -2, false, false)]
-        [TestCase(Limits.Quantity + 1, -1, -2, true, false)]
-        [TestCase(Limits.Quantity + 1, -1, -1, false, false)]
-        [TestCase(Limits.Quantity + 1, -1, -1, true, false)]
-        [TestCase(Limits.Quantity + 1, -1, 0, false, false)]
-        [TestCase(Limits.Quantity + 1, -1, 0, true, false)]
-        [TestCase(Limits.Quantity + 1, -1, 1, false, false)]
-        [TestCase(Limits.Quantity + 1, -1, 1, true, false)]
-        [TestCase(Limits.Quantity + 1, -1, 2, false, false)]
-        [TestCase(Limits.Quantity + 1, -1, 2, true, false)]
-        [TestCase(Limits.Quantity + 1, -1, Limits.Quantity - 1, false, false)]
-        [TestCase(Limits.Quantity + 1, -1, Limits.Quantity - 1, true, false)]
-        [TestCase(Limits.Quantity + 1, -1, Limits.Quantity, false, false)]
-        [TestCase(Limits.Quantity + 1, -1, Limits.Quantity, true, false)]
-        [TestCase(Limits.Quantity + 1, -1, Limits.Quantity + 1, false, false)]
-        [TestCase(Limits.Quantity + 1, -1, Limits.Quantity + 1, true, false)]
-        [TestCase(Limits.Quantity + 1, 0, -2, false, false)]
-        [TestCase(Limits.Quantity + 1, 0, -2, true, false)]
-        [TestCase(Limits.Quantity + 1, 0, -1, false, false)]
-        [TestCase(Limits.Quantity + 1, 0, -1, true, false)]
-        [TestCase(Limits.Quantity + 1, 0, 0, false, false)]
-        [TestCase(Limits.Quantity + 1, 0, 0, true, false)]
-        [TestCase(Limits.Quantity + 1, 0, 1, false, false)]
-        [TestCase(Limits.Quantity + 1, 0, 1, true, false)]
-        [TestCase(Limits.Quantity + 1, 0, 2, false, false)]
-        [TestCase(Limits.Quantity + 1, 0, 2, true, false)]
-        [TestCase(Limits.Quantity + 1, 0, Limits.Quantity - 1, false, false)]
-        [TestCase(Limits.Quantity + 1, 0, Limits.Quantity - 1, true, false)]
-        [TestCase(Limits.Quantity + 1, 0, Limits.Quantity, false, false)]
-        [TestCase(Limits.Quantity + 1, 0, Limits.Quantity, true, false)]
-        [TestCase(Limits.Quantity + 1, 0, Limits.Quantity + 1, false, false)]
-        [TestCase(Limits.Quantity + 1, 0, Limits.Quantity + 1, true, false)]
-        [TestCase(Limits.Quantity + 1, 1, -2, false, false)]
-        [TestCase(Limits.Quantity + 1, 1, -2, true, false)]
-        [TestCase(Limits.Quantity + 1, 1, -1, false, false)]
-        [TestCase(Limits.Quantity + 1, 1, -1, true, false)]
-        [TestCase(Limits.Quantity + 1, 1, 0, false, false)]
-        [TestCase(Limits.Quantity + 1, 1, 0, true, false)]
-        [TestCase(Limits.Quantity + 1, 1, 1, false, false)]
-        [TestCase(Limits.Quantity + 1, 1, 1, true, false)]
-        [TestCase(Limits.Quantity + 1, 1, 2, false, false)]
-        [TestCase(Limits.Quantity + 1, 1, 2, true, false)]
-        [TestCase(Limits.Quantity + 1, 1, Limits.Quantity - 1, false, false)]
-        [TestCase(Limits.Quantity + 1, 1, Limits.Quantity - 1, true, false)]
-        [TestCase(Limits.Quantity + 1, 1, Limits.Quantity, false, false)]
-        [TestCase(Limits.Quantity + 1, 1, Limits.Quantity, true, false)]
-        [TestCase(Limits.Quantity + 1, 1, Limits.Quantity + 1, false, false)]
-        [TestCase(Limits.Quantity + 1, 1, Limits.Quantity + 1, true, false)]
-        [TestCase(Limits.Quantity + 1, 2, -2, false, false)]
-        [TestCase(Limits.Quantity + 1, 2, -2, true, false)]
-        [TestCase(Limits.Quantity + 1, 2, -1, false, false)]
-        [TestCase(Limits.Quantity + 1, 2, -1, true, false)]
-        [TestCase(Limits.Quantity + 1, 2, 0, false, false)]
-        [TestCase(Limits.Quantity + 1, 2, 0, true, false)]
-        [TestCase(Limits.Quantity + 1, 2, 1, false, false)]
-        [TestCase(Limits.Quantity + 1, 2, 1, true, false)]
-        [TestCase(Limits.Quantity + 1, 2, 2, false, false)]
-        [TestCase(Limits.Quantity + 1, 2, 2, true, false)]
-        [TestCase(Limits.Quantity + 1, 2, Limits.Quantity - 1, false, false)]
-        [TestCase(Limits.Quantity + 1, 2, Limits.Quantity - 1, true, false)]
-        [TestCase(Limits.Quantity + 1, 2, Limits.Quantity, false, false)]
-        [TestCase(Limits.Quantity + 1, 2, Limits.Quantity, true, false)]
-        [TestCase(Limits.Quantity + 1, 2, Limits.Quantity + 1, false, false)]
-        [TestCase(Limits.Quantity + 1, 2, Limits.Quantity + 1, true, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die - 1, -2, false, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die - 1, -2, true, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die - 1, -1, false, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die - 1, -1, true, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die - 1, 0, false, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die - 1, 0, true, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die - 1, 1, false, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die - 1, 1, true, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die - 1, 2, false, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die - 1, 2, true, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die - 1, Limits.Quantity - 1, false, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die - 1, Limits.Quantity - 1, true, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die - 1, Limits.Quantity, false, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die - 1, Limits.Quantity, true, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die - 1, Limits.Quantity + 1, false, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die - 1, Limits.Quantity + 1, true, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die, -2, false, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die, -2, true, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die, -1, false, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die, -1, true, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die, 0, false, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die, 0, true, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die, 1, false, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die, 1, true, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die, 2, false, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die, 2, true, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die, Limits.Quantity - 1, false, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die, Limits.Quantity - 1, true, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die, Limits.Quantity, false, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die, Limits.Quantity, true, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die, Limits.Quantity + 1, false, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die, Limits.Quantity + 1, true, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die + 1, -2, false, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die + 1, -2, true, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die + 1, -1, false, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die + 1, -1, true, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die + 1, 0, false, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die + 1, 0, true, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die + 1, 1, false, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die + 1, 1, true, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die + 1, 2, false, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die + 1, 2, true, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die + 1, Limits.Quantity - 1, false, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die + 1, Limits.Quantity - 1, true, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die + 1, Limits.Quantity, false, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die + 1, Limits.Quantity, true, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die + 1, Limits.Quantity + 1, false, false)]
-        [TestCase(Limits.Quantity + 1, Limits.Die + 1, Limits.Quantity + 1, true, false)]
-        [TestCase(1, 2, 0, false, true, 1)]
-        [TestCase(1, 2, 0, false, true, 1, 2)]
-        [TestCase(1, 2, 0, false, false, 3)]
-        [TestCase(1, 2, 0, false, false, 1, 3)]
-        [TestCase(1, 2, 0, false, false, Limits.Die)]
-        [TestCase(1, 2, 0, false, false, 1, Limits.Die)]
-        [TestCase(1, 2, 0, false, false, Limits.Die + 1)]
-        [TestCase(1, 2, 0, false, false, 1, Limits.Die + 1)]
-        [TestCase(1, Limits.Die, 0, false, true, Limits.Die)]
-        [TestCase(1, Limits.Die, 0, false, true, 1, Limits.Die)]
-        [TestCase(1, Limits.Die, 0, false, false, Limits.Die + 1)]
-        [TestCase(1, Limits.Die, 0, false, false, 1, Limits.Die + 1)]
-        [TestCase(3, 6, 0, false, true)]
-        [TestCase(4, 6, 3, false, true)]
-        [TestCase(3, 6, 0, false, true, 1)]
-        public void IsValid(int quantity, int die, int amountToKeep, bool explode, bool isValid, params int[] transforms)
+        [TestCase(-1, false)]
+        [TestCase(0, false)]
+        [TestCase(1, true)]
+        [TestCase(2, true)]
+        [TestCase(10, true)]
+        [TestCase(100, true)]
+        [TestCase(Limits.Quantity - 1, true)]
+        [TestCase(Limits.Quantity, true)]
+        [TestCase(Limits.Quantity + 1, false)]
+        public void IsValid_Quantity(int quantity, bool isValid)
+        {
+            roll.Quantity = quantity;
+            roll.Die = 2;
+            roll.AmountToKeep = 0;
+
+            Assert.That(roll.IsValid, Is.EqualTo(isValid));
+        }
+
+        [TestCase(-1, false)]
+        [TestCase(0, false)]
+        [TestCase(1, true)]
+        [TestCase(2, true)]
+        [TestCase(3, true)]
+        [TestCase(4, true)]
+        [TestCase(6, true)]
+        [TestCase(8, true)]
+        [TestCase(10, true)]
+        [TestCase(12, true)]
+        [TestCase(20, true)]
+        [TestCase(100, true)]
+        [TestCase(Limits.Die - 1, true)]
+        [TestCase(Limits.Die, true)]
+        [TestCase(Limits.Die + 1, false)]
+        public void IsValid_Die(int die, bool isValid)
+        {
+            roll.Quantity = 1;
+            roll.Die = die;
+            roll.AmountToKeep = 0;
+
+            Assert.That(roll.IsValid, Is.EqualTo(isValid));
+        }
+
+        [TestCase(-2, false)]
+        [TestCase(-1, false)]
+        [TestCase(0, true)]
+        [TestCase(1, true)]
+        [TestCase(2, true)]
+        [TestCase(10, true)]
+        [TestCase(100, true)]
+        [TestCase(Limits.Quantity - 1, true)]
+        [TestCase(Limits.Quantity, true)]
+        [TestCase(Limits.Quantity + 1, false)]
+        public void IsValid_Keep(int keep, bool isValid)
+        {
+            roll.Quantity = 1;
+            roll.Die = 2;
+            roll.AmountToKeep = keep;
+
+            Assert.That(roll.IsValid, Is.EqualTo(isValid));
+        }
+
+        [TestCase(true)]
+        [TestCase(true, -1)]
+        [TestCase(true, 0)]
+        [TestCase(true, 1)]
+        [TestCase(true, 4)]
+        [TestCase(true, 1, 4)]
+        [TestCase(true, 0, 4)]
+        [TestCase(true, 1, 0)]
+        [TestCase(true, 2, 3, 4)]
+        [TestCase(true, 1, 3, 4)]
+        [TestCase(true, 1, 2, 4)]
+        [TestCase(true, 1, 2, 3)]
+        [TestCase(false, 1, 2, 3, 4)]
+        [TestCase(true, 1, 2, 3, 3)]
+        [TestCase(true, 2, 3, 4, 5)]
+        [TestCase(false, 1, 2, 3, 4, 5)]
+        [TestCase(false, 0, 1, 2, 3, 4)]
+        [TestCase(true, 0, 1, 2, 4, 5)]
+        public void IsValid_Explode(bool isValid, params int[] explodes)
+        {
+            roll.Quantity = 1;
+            roll.Die = 4;
+            roll.ExplodeOn.AddRange(explodes);
+
+            Assert.That(roll.IsValid, Is.EqualTo(isValid));
+        }
+
+        [TestCase(true)]
+        [TestCase(false, -1)]
+        [TestCase(false, 0)]
+        [TestCase(true, 1)]
+        [TestCase(true, 4)]
+        [TestCase(true, Limits.Die - 1)]
+        [TestCase(true, Limits.Die)]
+        [TestCase(false, Limits.Die + 1)]
+        [TestCase(true, 1, 4)]
+        [TestCase(false, 0, 4)]
+        [TestCase(false, 1, 0)]
+        [TestCase(true, 2, 3, 4)]
+        [TestCase(true, 1, 3, 4)]
+        [TestCase(true, 1, 2, 4)]
+        [TestCase(true, 1, 2, 3)]
+        [TestCase(true, 1, 2, 3, 4)]
+        [TestCase(true, 1, 2, 3, 3)]
+        [TestCase(true, 2, 3, 4, 5)]
+        [TestCase(true, 1, 2, 3, 4, 5)]
+        [TestCase(false, 0, 1, 2, 3, 4)]
+        [TestCase(false, 0, 1, 2, 4, 5)]
+        [TestCase(false, 1, 2, 4, 5, Limits.Die + 1)]
+        public void IsValid_Transform(bool isValid, params int[] transforms)
+        {
+            roll.Quantity = 1;
+            roll.Die = 4;
+            roll.TransformToMax.AddRange(transforms);
+
+            Assert.That(roll.IsValid, Is.EqualTo(isValid));
+        }
+
+        [TestCase(5, 4, 3, false, 1, true)]
+        [TestCase(Limits.Quantity + 1, 4, 3, false, 1, false)]
+        [TestCase(5, Limits.Die + 1, 3, false, 1, false)]
+        [TestCase(5, 4, Limits.Quantity + 1, false, 1, false)]
+        [TestCase(5, 4, 3, true, 1, false)]
+        [TestCase(5, 4, 3, false, Limits.Die + 1, false)]
+        [TestCase(Limits.Quantity + 1, Limits.Die + 1, Limits.Quantity + 1, true, Limits.Die + 1, false)]
+        public void IsValid_AllProperties(int quantity, int die, int keep, bool explodeMaxed, int transform, bool isValid)
         {
             roll.Quantity = quantity;
             roll.Die = die;
-            roll.AmountToKeep = amountToKeep;
-            roll.Explode = explode;
-            roll.TransformToMax.AddRange(transforms);
+            roll.AmountToKeep = keep;
+            roll.TransformToMax.Add(transform);
+            roll.ExplodeOn.AddRange(Enumerable.Range(1, die));
+
+            if (!explodeMaxed)
+                roll.ExplodeOn.Remove(1);
 
             Assert.That(roll.IsValid, Is.EqualTo(isValid));
         }
@@ -934,7 +326,7 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             roll.Quantity = 46341;
             roll.Die = 46342;
 
-            Assert.That(() => roll.GetRolls(mockRandom.Object), Throws.InstanceOf<InvalidOperationException>().With.Message.EqualTo("46341d46342 is not a valid roll.\n\tQuantity: 0 < 46341 < 10000\n\tDie: 0 < 46342 < 10000"));
+            Assert.That(() => roll.GetRolls(mockRandom.Object), Throws.InstanceOf<InvalidOperationException>().With.Message.EqualTo("46341d46342 is not a valid roll\n\tQuantity: 0 < 46341 < 10000\n\tDie: 0 < 46342 < 10000"));
         }
 
         [Test]
@@ -943,7 +335,7 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             roll.Quantity = 46341;
             roll.Die = 46342;
 
-            Assert.That(() => roll.GetSum(mockRandom.Object), Throws.InstanceOf<InvalidOperationException>().With.Message.EqualTo("46341d46342 is not a valid roll.\n\tQuantity: 0 < 46341 < 10000\n\tDie: 0 < 46342 < 10000"));
+            Assert.That(() => roll.GetSum(mockRandom.Object), Throws.InstanceOf<InvalidOperationException>().With.Message.EqualTo("46341d46342 is not a valid roll\n\tQuantity: 0 < 46341 < 10000\n\tDie: 0 < 46342 < 10000"));
         }
 
         [Test]
@@ -952,7 +344,7 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             roll.Quantity = 46341;
             roll.Die = 46342;
 
-            Assert.That(() => roll.GetPotentialAverage(), Throws.InstanceOf<InvalidOperationException>().With.Message.EqualTo("46341d46342 is not a valid roll.\n\tQuantity: 0 < 46341 < 10000\n\tDie: 0 < 46342 < 10000"));
+            Assert.That(() => roll.GetPotentialAverage(), Throws.InstanceOf<InvalidOperationException>().With.Message.EqualTo("46341d46342 is not a valid roll\n\tQuantity: 0 < 46341 < 10000\n\tDie: 0 < 46342 < 10000"));
         }
 
         [Test]
@@ -961,7 +353,7 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             roll.Quantity = 46341;
             roll.Die = 46342;
 
-            Assert.That(() => roll.GetTrueOrFalse(mockRandom.Object), Throws.InstanceOf<InvalidOperationException>().With.Message.EqualTo("46341d46342 is not a valid roll.\n\tQuantity: 0 < 46341 < 10000\n\tDie: 0 < 46342 < 10000"));
+            Assert.That(() => roll.GetTrueOrFalse(mockRandom.Object), Throws.InstanceOf<InvalidOperationException>().With.Message.EqualTo("46341d46342 is not a valid roll\n\tQuantity: 0 < 46341 < 10000\n\tDie: 0 < 46342 < 10000"));
         }
 
         [Test]
@@ -970,7 +362,7 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             roll.Quantity = 46341;
             roll.Die = 46342;
 
-            Assert.That(() => roll.GetPotentialMinimum(), Throws.InstanceOf<InvalidOperationException>().With.Message.EqualTo("46341d46342 is not a valid roll.\n\tQuantity: 0 < 46341 < 10000\n\tDie: 0 < 46342 < 10000"));
+            Assert.That(() => roll.GetPotentialMinimum(), Throws.InstanceOf<InvalidOperationException>().With.Message.EqualTo("46341d46342 is not a valid roll\n\tQuantity: 0 < 46341 < 10000\n\tDie: 0 < 46342 < 10000"));
         }
 
         [Test]
@@ -979,7 +371,7 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             roll.Quantity = 46341;
             roll.Die = 46342;
 
-            Assert.That(() => roll.GetPotentialMaximum(), Throws.InstanceOf<InvalidOperationException>().With.Message.EqualTo("46341d46342 is not a valid roll.\n\tQuantity: 0 < 46341 < 10000\n\tDie: 0 < 46342 < 10000"));
+            Assert.That(() => roll.GetPotentialMaximum(), Throws.InstanceOf<InvalidOperationException>().With.Message.EqualTo("46341d46342 is not a valid roll\n\tQuantity: 0 < 46341 < 10000\n\tDie: 0 < 46342 < 10000"));
         }
 
         [TestCase(-2)]
@@ -992,7 +384,7 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             roll.Quantity = invalidQuantity;
             roll.Die = 9266;
 
-            var message = $"{invalidQuantity}d9266 is not a valid roll.";
+            var message = $"{invalidQuantity}d9266 is not a valid roll";
             message += $"\n\tQuantity: 0 < {invalidQuantity} < {Limits.Quantity}";
             Assert.That(() => roll.GetSum(mockRandom.Object), Throws.InstanceOf<InvalidOperationException>().With.Message.EqualTo(message));
         }
@@ -1007,7 +399,7 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             roll.Quantity = 9266;
             roll.Die = invalidDie;
 
-            var message = $"9266d{invalidDie} is not a valid roll.";
+            var message = $"9266d{invalidDie} is not a valid roll";
             message += $"\n\tDie: 0 < {invalidDie} < {Limits.Die}";
             Assert.That(() => roll.GetSum(mockRandom.Object), Throws.InstanceOf<InvalidOperationException>().With.Message.EqualTo(message));
         }
@@ -1022,7 +414,7 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             roll.Die = 42;
             roll.AmountToKeep = invalidKeep;
 
-            var message = $"9266d42k{invalidKeep} is not a valid roll.";
+            var message = $"9266d42k{invalidKeep} is not a valid roll";
             message += $"\n\tKeep: 0 <= {invalidKeep} < {Limits.Quantity}";
             Assert.That(() => roll.GetSum(mockRandom.Object), Throws.InstanceOf<InvalidOperationException>().With.Message.EqualTo(message));
         }
@@ -1032,32 +424,32 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             roll.Quantity = 9266;
             roll.Die = 1;
-            roll.Explode = true;
+            roll.ExplodeOn.Add(1);
 
-            var message = $"9266d1! is not a valid roll.";
-            message += $"\n\tExplode: Cannot explode die 1, must be > 1";
+            var message = $"9266d1e1 is not a valid roll";
+            message += $"\n\tExplode: Must have at least 1 non-exploded roll";
             Assert.That(() => roll.GetSum(mockRandom.Object), Throws.InstanceOf<InvalidOperationException>().With.Message.EqualTo(message));
         }
 
         [TestCase(-2)]
         [TestCase(-1)]
         [TestCase(0)]
-        [TestCase(43)]
+        [TestCase(Limits.Die + 1)]
         public void IfTransformNotValid_ThrowInvalidOperationException(int transform)
         {
             roll.Quantity = 9266;
             roll.Die = 42;
             roll.TransformToMax.Add(transform);
 
-            var message = $"9266d42t{transform} is not a valid roll.";
-            message += $"\n\tTransform: 0 < [{transform}] <= 42";
+            var message = $"9266d42t{transform} is not a valid roll";
+            message += $"\n\tTransform: 0 < [{transform}] <= {Limits.Die}";
             Assert.That(() => roll.GetSum(mockRandom.Object), Throws.InstanceOf<InvalidOperationException>().With.Message.EqualTo(message));
         }
 
         [TestCase(-2)]
         [TestCase(-1)]
         [TestCase(0)]
-        [TestCase(43)]
+        [TestCase(Limits.Die + 1)]
         public void IfAnyTransformNotValid_ThrowInvalidOperationException(int transform)
         {
             roll.Quantity = 9266;
@@ -1065,8 +457,8 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             roll.TransformToMax.Add(21);
             roll.TransformToMax.Add(transform);
 
-            var message = $"9266d42t21t{transform} is not a valid roll.";
-            message += $"\n\tTransform: 0 < [21,{transform}] <= 42";
+            var message = $"9266d42t21t{transform} is not a valid roll";
+            message += $"\n\tTransform: 0 < [21,{transform}] <= {Limits.Die}";
             Assert.That(() => roll.GetSum(mockRandom.Object), Throws.InstanceOf<InvalidOperationException>().With.Message.EqualTo(message));
         }
 
@@ -1076,15 +468,15 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             roll.Quantity = Limits.Quantity + 1;
             roll.Die = 0;
             roll.AmountToKeep = -1;
-            roll.Explode = true;
-            roll.TransformToMax.Add(1);
+            roll.ExplodeOn.Add(0);
+            roll.TransformToMax.Add(Limits.Die + 1);
 
-            var message = $"{Limits.Quantity + 1}d0!t1k-1 is not a valid roll.";
+            var message = $"{Limits.Quantity + 1}d0e0t{Limits.Die + 1}k-1 is not a valid roll";
             message += $"\n\tQuantity: 0 < {Limits.Quantity + 1} < {Limits.Quantity}";
             message += $"\n\tDie: 0 < 0 < {Limits.Die}";
             message += $"\n\tKeep: 0 <= -1 < {Limits.Quantity}";
-            message += $"\n\tExplode: Cannot explode die 0, must be > 1";
-            message += $"\n\tTransform: 0 < [1] <= 0";
+            message += $"\n\tExplode: Must have at least 1 non-exploded roll";
+            message += $"\n\tTransform: 0 < [{Limits.Die + 1}] <= {Limits.Die}";
             Assert.That(() => roll.GetSum(mockRandom.Object), Throws.InstanceOf<InvalidOperationException>().With.Message.EqualTo(message));
         }
 
@@ -1158,7 +550,7 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             roll.Quantity = 92;
             roll.Die = 66;
-            roll.Explode = true;
+            roll.ExplodeOn.Add(66);
 
             var rolls = roll.GetRolls(mockRandom.Object);
             var countTotal = 0;
@@ -1173,6 +565,29 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             }
 
             Assert.That(rolls.Count(), Is.EqualTo(93).And.EqualTo(countTotal));
+        }
+
+        [Test]
+        public void GetRollsAndExplodeMultiple()
+        {
+            roll.Quantity = 92;
+            roll.Die = 66;
+            roll.ExplodeOn.Add(6);
+            roll.ExplodeOn.Add(42);
+
+            var rolls = roll.GetRolls(mockRandom.Object);
+            var countTotal = 0;
+
+            for (var individualRoll = 66; individualRoll > 0; individualRoll--)
+            {
+                Assert.That(rolls, Contains.Item(individualRoll));
+
+                var expectedCount = individualRoll < 30 ? 2 : 1;
+                Assert.That(rolls.Count(r => r == individualRoll), Is.EqualTo(expectedCount), $"Roll of {individualRoll}");
+                countTotal += expectedCount;
+            }
+
+            Assert.That(rolls.Count(), Is.EqualTo(95).And.EqualTo(countTotal));
         }
 
         [Test]
@@ -1238,7 +653,8 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             roll.Quantity = 92 * 2;
             roll.Die = 66;
-            roll.Explode = true;
+            roll.ExplodeOn.Add(60);
+            roll.ExplodeOn.Add(13);
             roll.AmountToKeep = 42;
             roll.TransformToMax.Add(9);
             roll.TransformToMax.Add(6);
@@ -1246,11 +662,11 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             var rolls = roll.GetRolls(mockRandom.Object);
             var countTotal = 0;
 
-            for (var individualRoll = 66; individualRoll > 50; individualRoll--)
+            for (var individualRoll = 66; individualRoll > 51; individualRoll--)
             {
                 Assert.That(rolls, Contains.Item(individualRoll));
 
-                var expectedCount = individualRoll < 55 ? 3 :
+                var expectedCount = individualRoll < 58 ? 3 :
                     individualRoll == 66 ? 8 : 2;
                 Assert.That(rolls.Count(r => r == individualRoll), Is.EqualTo(expectedCount), $"Roll of {individualRoll}");
                 countTotal += expectedCount;
@@ -1285,10 +701,22 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             roll.Quantity = 92;
             roll.Die = 66;
-            roll.Explode = true;
+            roll.ExplodeOn.Add(66);
 
             var sum = roll.GetSum(mockRandom.Object);
             Assert.That(sum, Is.EqualTo(2589));
+        }
+
+        [Test]
+        public void GetSumOfRollsAndExplodeMultiple()
+        {
+            roll.Quantity = 92;
+            roll.Die = 66;
+            roll.ExplodeOn.Add(6);
+            roll.ExplodeOn.Add(42);
+
+            var sum = roll.GetSum(mockRandom.Object);
+            Assert.That(sum, Is.EqualTo(2646));
         }
 
         [Test]
@@ -1319,7 +747,8 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             roll.Quantity = 92;
             roll.Die = 66;
-            roll.Explode = true;
+            roll.ExplodeOn.Add(60);
+            roll.ExplodeOn.Add(13);
             roll.AmountToKeep = 42;
             roll.TransformToMax.Add(9);
             roll.TransformToMax.Add(6);
@@ -1354,10 +783,45 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             roll.Quantity = 92;
             roll.Die = 66;
-            roll.Explode = true;
+            roll.ExplodeOn.Add(66);
 
             var average = roll.GetPotentialAverage();
             Assert.That(average, Is.EqualTo((92 + 92 * 66) / 2));
+        }
+
+        [Test]
+        public void GetPotentialAverageRollAndExplodeMultiple()
+        {
+            roll.Quantity = 92;
+            roll.Die = 66;
+            roll.ExplodeOn.Add(6);
+            roll.ExplodeOn.Add(42);
+
+            var average = roll.GetPotentialAverage();
+            Assert.That(average, Is.EqualTo((92 + 92 * 66) / 2));
+        }
+
+        [Test]
+        public void GetPotentialAverageRollAndExplodeMinimum()
+        {
+            roll.Quantity = 92;
+            roll.Die = 66;
+            roll.ExplodeOn.Add(1);
+
+            var average = roll.GetPotentialAverage();
+            Assert.That(average, Is.EqualTo((92 * 2 + 92 * 66) / 2));
+        }
+
+        [Test]
+        public void GetPotentialAverageRollAndExplodeMultipleMinimum()
+        {
+            roll.Quantity = 92;
+            roll.Die = 66;
+            roll.ExplodeOn.Add(1);
+            roll.ExplodeOn.Add(2);
+
+            var average = roll.GetPotentialAverage();
+            Assert.That(average, Is.EqualTo((92 * 3 + 92 * 66) / 2));
         }
 
         [Test]
@@ -1411,7 +875,8 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             roll.Quantity = 92;
             roll.Die = 66;
-            roll.Explode = true;
+            roll.ExplodeOn.Add(60);
+            roll.ExplodeOn.Add(13);
             roll.AmountToKeep = 42;
             roll.TransformToMax.Add(9);
             roll.TransformToMax.Add(6);
@@ -1447,10 +912,57 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             roll.Quantity = 92;
             roll.Die = 66;
-            roll.Explode = true;
+            roll.ExplodeOn.Add(66);
 
             var minimum = roll.GetPotentialMinimum();
             Assert.That(minimum, Is.EqualTo(92));
+        }
+
+        [Test]
+        public void GetPotentialMinimumRollAndExplodeMultiple()
+        {
+            roll.Quantity = 92;
+            roll.Die = 66;
+            roll.ExplodeOn.Add(6);
+            roll.ExplodeOn.Add(42);
+
+            var minimum = roll.GetPotentialMinimum();
+            Assert.That(minimum, Is.EqualTo(92));
+        }
+
+        [Test]
+        public void GetPotentialMinimumRollAndExplodeMinimum()
+        {
+            roll.Quantity = 92;
+            roll.Die = 66;
+            roll.ExplodeOn.Add(1);
+
+            var minimum = roll.GetPotentialMinimum();
+            Assert.That(minimum, Is.EqualTo(92 * 2));
+        }
+
+        [Test]
+        public void GetPotentialMinimumRollAndExplodeMultipleMinimums()
+        {
+            roll.Quantity = 92;
+            roll.Die = 66;
+            roll.ExplodeOn.Add(1);
+            roll.ExplodeOn.Add(2);
+
+            var minimum = roll.GetPotentialMinimum();
+            Assert.That(minimum, Is.EqualTo(92 * 3));
+        }
+
+        [Test]
+        public void GetPotentialMinimumRollAndExplodeMultiple_AllButMaxTransformed()
+        {
+            roll.Quantity = 2;
+            roll.Die = 3;
+            roll.ExplodeOn.Add(1);
+            roll.ExplodeOn.Add(2);
+
+            var minimum = roll.GetPotentialMinimum();
+            Assert.That(minimum, Is.EqualTo(6));
         }
 
         [Test]
@@ -1529,13 +1041,14 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             roll.Quantity = 92;
             roll.Die = 66;
-            roll.Explode = true;
+            roll.ExplodeOn.Add(2);
+            roll.ExplodeOn.Add(5);
             roll.AmountToKeep = 42;
             roll.TransformToMax.Add(4);
             roll.TransformToMax.Add(1);
 
             var minimum = roll.GetPotentialMinimum();
-            Assert.That(minimum, Is.EqualTo(42 * 2));
+            Assert.That(minimum, Is.EqualTo(42 * 3));
         }
 
         [Test]
@@ -1564,7 +1077,19 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             roll.Quantity = 92;
             roll.Die = 66;
-            roll.Explode = true;
+            roll.ExplodeOn.Add(66);
+
+            var maximum = roll.GetPotentialMaximum();
+            Assert.That(maximum, Is.EqualTo(92 * 66 * 10));
+        }
+
+        [Test]
+        public void GetPotentialMaximumRollAndExplodeMultiple()
+        {
+            roll.Quantity = 92;
+            roll.Die = 66;
+            roll.ExplodeOn.Add(6);
+            roll.ExplodeOn.Add(42);
 
             var maximum = roll.GetPotentialMaximum();
             Assert.That(maximum, Is.EqualTo(92 * 66 * 10));
@@ -1598,7 +1123,8 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             roll.Quantity = 92;
             roll.Die = 66;
-            roll.Explode = true;
+            roll.ExplodeOn.Add(60);
+            roll.ExplodeOn.Add(13);
             roll.AmountToKeep = 42;
             roll.TransformToMax.Add(9);
             roll.TransformToMax.Add(6);
@@ -1740,32 +1266,20 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             roll.Quantity = 92;
             roll.Die = 66;
-            roll.Explode = true;
+            roll.ExplodeOn.Add(66);
 
-            Assert.That(roll.ToString(), Is.EqualTo("92d66!"));
+            Assert.That(roll.ToString(), Is.EqualTo("92d66e66"));
         }
 
         [Test]
-        public void RollStringWithExplodeAndKeep()
+        public void RollStringWithExplodeMultiple()
         {
             roll.Quantity = 92;
             roll.Die = 66;
-            roll.Explode = true;
-            roll.AmountToKeep = 42;
+            roll.ExplodeOn.Add(6);
+            roll.ExplodeOn.Add(42);
 
-            Assert.That(roll.ToString(), Is.EqualTo("92d66!k42"));
-        }
-
-        //INFO: This roll is not valid, but good to know for identification
-        [Test]
-        public void RollStringWithExplodeAndNegativeKeep()
-        {
-            roll.Quantity = 92;
-            roll.Die = 66;
-            roll.Explode = true;
-            roll.AmountToKeep = -42;
-
-            Assert.That(roll.ToString(), Is.EqualTo("92d66!k-42"));
+            Assert.That(roll.ToString(), Is.EqualTo("92d66e6e42"));
         }
 
         [Test]
@@ -1794,12 +1308,13 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             roll.Quantity = 92;
             roll.Die = 66;
-            roll.Explode = true;
+            roll.ExplodeOn.Add(60);
+            roll.ExplodeOn.Add(13);
             roll.AmountToKeep = 42;
             roll.TransformToMax.Add(9);
             roll.TransformToMax.Add(6);
 
-            Assert.That(roll.ToString(), Is.EqualTo("92d66!t9t6k42"));
+            Assert.That(roll.ToString(), Is.EqualTo("92d66e60e13t9t6k42"));
         }
     }
 }
