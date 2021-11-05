@@ -48,8 +48,10 @@ var optimizedRollWithMultipleDice = RollHelper.GetRollWithMostEvenDistribution(1
 var optimizedRollWithFewestDice = RollHelper.GetRollWithFewestDice(1, 9); //returns "4d3-3", because it uses only 1 kind of dice compared to "1d8+1d2-1"
 
 var explodedRolls = dice.Roll(4).d6().Explode().AsIndividualRolls(); //If a 6 is rolled, then an additional roll is performed.  I.E., 3 + 6 + 5 + 4 + 1
-var expressionExplodedRolls = dice.Roll("3d4!").AsSum(); //Return the sum of the rolls, including bonus rolls from explosion
-var expressionExplodedKeptRolls = dice.Roll("3d4!k2").AsSum(); //Returns the sum of 2 highest rolls, including bonus rolls from explosion
+var expressionExplodedRolls = dice.Roll("3d4!").AsSum(); //Return the sum of the rolls, including bonus rolls from explosion on rolls of 4
+var expressionExplodedKeptRolls = dice.Roll("3d4!k2").AsSum(); //Returns the sum of 2 highest rolls, including bonus rolls from explosion on rolls of 4
+var expressionExplodedMultipleRolls = dice.Roll("3d4!e3").AsSum(); //Return the sum of the rolls, including bonus rolls from explosion on rolls of 3 or 4
+var expressionExplodedMultipleKeptRolls = dice.Roll("3d4e1e2k2").AsSum(); //Returns the sum of 2 highest rolls, including bonus rolls from explosion on rolls of 1 or 2
 
 var transformedRolls = dice.Roll(3).d6().Transform(1).AsIndividualRolls(); //If a 1 is rolled, we will count it as a 6.  I.E., 3 + 1 + 6 = 3 + 6 + 6
 var transformedExplodedRolls = dice.Roll("3d6t1t5").AsSum(); //Return the sum of the rolls, including 1's and 5's transformed to 6's

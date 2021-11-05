@@ -228,6 +228,33 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
+        public void AddNumericExplodeOnToRollWithNumericQuantity()
+        {
+            BuildPartialRoll(9266);
+            partialRoll = partialRoll.ExplodeOn(90210);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("9266e90210"));
+        }
+
+        [Test]
+        public void AddExplodeOnExpressionToRollWithNumericQuantity()
+        {
+            BuildPartialRoll(9266);
+            partialRoll = partialRoll.ExplodeOn("4d3k2");
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("9266e(4d3k2)"));
+        }
+
+        [Test]
+        public void AddExplodeOnPartialRollToRollWithNumericQuantity()
+        {
+            BuildPartialRoll(9266);
+            var otherPartialRoll = new DomainPartialRoll(42, mockRandom.Object, mockExpressionEvaluator.Object);
+            otherPartialRoll.d(600);
+
+            partialRoll = partialRoll.ExplodeOn(otherPartialRoll);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("9266e(42d600)"));
+        }
+
+        [Test]
         public void ChainDiceToRollWithNumericQuantity()
         {
             BuildPartialRoll(9266);
@@ -245,6 +272,8 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
                 .Keeping("7d6k5")
                 .d("4d3k2")
                 .Explode()
+                .ExplodeOn(7)
+                .ExplodeOn("1d4")
                 .Transforming(1)
                 .Transforming("2d3")
                 .Keeping(42)
@@ -273,6 +302,8 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             expected += "k(7d6k5)";
             expected += "d(4d3k2)";
             expected += "!";
+            expected += "e7";
+            expected += "e(1d4)";
             expected += "t1";
             expected += "t(2d3)";
             expected += "k42";
@@ -451,6 +482,33 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
+        public void AddNumericExplodeOnToRollWithQuantityExpression()
+        {
+            BuildPartialRoll("7d6k5");
+            partialRoll = partialRoll.ExplodeOn(90210);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("(7d6k5)e90210"));
+        }
+
+        [Test]
+        public void AddExplodeOnExpressionToRollWithQuantityExpression()
+        {
+            BuildPartialRoll("7d6k5");
+            partialRoll = partialRoll.ExplodeOn("4d3k2");
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("(7d6k5)e(4d3k2)"));
+        }
+
+        [Test]
+        public void AddExplodeOnPartialRollToRollWithQuantityExpression()
+        {
+            BuildPartialRoll("7d6k5");
+            var otherPartialRoll = new DomainPartialRoll(42, mockRandom.Object, mockExpressionEvaluator.Object);
+            otherPartialRoll.d(600);
+
+            partialRoll = partialRoll.ExplodeOn(otherPartialRoll);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("(7d6k5)e(42d600)"));
+        }
+
+        [Test]
         public void ChainDiceToRollWithQuantityExpression()
         {
             BuildPartialRoll("7d6k5");
@@ -468,6 +526,8 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
                 .Keeping("11d10k9")
                 .d("4d3k2")
                 .Explode()
+                .ExplodeOn(7)
+                .ExplodeOn("1d4")
                 .Transforming(1)
                 .Transforming("2d3")
                 .Keeping(42)
@@ -496,6 +556,8 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             expected += "k(11d10k9)";
             expected += "d(4d3k2)";
             expected += "!";
+            expected += "e7";
+            expected += "e(1d4)";
             expected += "t1";
             expected += "t(2d3)";
             expected += "k42";
@@ -2551,17 +2613,17 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             partialRoll.d(1).Explode();
 
             Assert.That(() => partialRoll.AsSum(),
-                Throws.InstanceOf<InvalidOperationException>().With.Message.EqualTo("1d1! is not a valid roll.\n\tExplode: Cannot explode die 1, must be > 1"));
+                Throws.InstanceOf<InvalidOperationException>().With.Message.EqualTo("1d1e1 is not a valid roll\n\tExplode: Must have at least 1 non-exploded roll"));
         }
 
-        [TestCase(1, 6, new[] { 1, 666 }, ExpectedResult = 1)] // Single, no Explode
-        [TestCase(1, 6, new[] { 6, 1, 666 }, ExpectedResult = 7)] // Single, Explode once
-        [TestCase(1, 6, new[] { 6, 6, 1, 666 }, ExpectedResult = 13)] // Single, Explode twice
-        [TestCase(3, 6, new[] { 3, 4, 2, 666 }, ExpectedResult = 9)] // Multiple, no Explode
-        [TestCase(3, 6, new[] { 1, 6, 2, 2, 666 }, ExpectedResult = 11)] // Multiple, Explode once
-        [TestCase(3, 6, new[] { 5, 6, 6, 1, 2, 666 }, ExpectedResult = 20)] // Multiple, Explode twice in a row
-        [TestCase(3, 6, new[] { 6, 1, 6, 4, 2, 666 }, ExpectedResult = 19)] // Multiple, Explode twice not in a row
-        public int ExplodeRoll(int quantity, int die, int[] rolls)
+        [TestCase(1, 6, new[] { 1, 666 }, 1)] // Single, no Explode
+        [TestCase(1, 6, new[] { 6, 1, 666 }, 7)] // Single, Explode once
+        [TestCase(1, 6, new[] { 6, 6, 1, 666 }, 13)] // Single, Explode twice
+        [TestCase(3, 6, new[] { 3, 4, 2, 666 }, 9)] // Multiple, no Explode
+        [TestCase(3, 6, new[] { 1, 6, 2, 2, 666 }, 11)] // Multiple, Explode once
+        [TestCase(3, 6, new[] { 5, 6, 6, 1, 2, 666 }, 20)] // Multiple, Explode twice in a row
+        [TestCase(3, 6, new[] { 6, 1, 6, 4, 2, 666 }, 19)] // Multiple, Explode twice not in a row
+        public void ExplodeRoll(int quantity, int die, int[] rolls, int expected)
         {
             var seq = mockRandom.SetupSequence(r => r.Next(die));
             foreach (var roll in rolls)
@@ -2572,7 +2634,8 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             BuildPartialRoll(quantity);
             partialRoll.d(die).Explode();
 
-            return partialRoll.AsSum();
+            var sum = partialRoll.AsSum();
+            Assert.That(sum, Is.EqualTo(expected), partialRoll.CurrentRollExpression);
         }
 
         [TestCase("1", 1)]

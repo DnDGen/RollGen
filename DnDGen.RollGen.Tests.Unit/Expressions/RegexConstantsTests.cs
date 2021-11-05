@@ -8,13 +8,11 @@ namespace DnDGen.RollGen.Tests.Unit.Expressions
     public class RegexConstantsTests
     {
         [TestCase(RegexConstants.CommonRollRegexPattern, "d *\\d+(?: *("
-            + "(! *(t *\\d+)+ *(k *\\d+)?)" //etk
-            + "|(! *(k *\\d+)? *(t *\\d+)*)" //ekt
-            + "|((t *\\d+)+ *! *(k *\\d+)?)" //tek
-            + "|((t *\\d+)+ *(k *\\d+)? *!?)" //tke
-            + "|((k *\\d+)? *! *(t *\\d+)*)" //ket
-            + "|((k *\\d+)? *(t *\\d+)* *!?)" //kte or nothing
-            + "))")]
+            + "( *!)" //explode default
+            + "|( *(e *\\d+))" //explode specific
+            + "|( *(t *\\d+))" //transform
+            + "|( *(k *\\d+))" //keep
+            + ")*)")]
         [TestCase(RegexConstants.StrictRollPattern, "(?:(?:\\d* +)|(?:\\d+ *)|^)" + RegexConstants.CommonRollRegexPattern)]
         [TestCase(RegexConstants.LenientRollPattern, "\\d* *" + RegexConstants.CommonRollRegexPattern)]
         [TestCase(RegexConstants.ExpressionWithoutDieRollsPattern, "(?:[-+]?\\d*\\.?\\d+[%/\\+\\-\\*])+(?:[-+]?\\d*\\.?\\d+)")]
@@ -47,6 +45,33 @@ namespace DnDGen.RollGen.Tests.Unit.Expressions
         [TestCase("3d6t1t2", true)]
         [TestCase("2d4!t1t2k3", true)]
         [TestCase(" 2 d 4 ! t 1 k 3 ", true)]
+        [TestCase("1d4e2", true)]
+        [TestCase(" 1 d 4 e 2 ", true)]
+        [TestCase("1d4e2!", true)]
+        [TestCase(" 1 d 4 e 2 ! ", true)]
+        [TestCase("1d4e2e3!", true)]
+        [TestCase(" 1 d 4 e 2 e 3 ! ", true)]
+        [TestCase("1d4e4", true)]
+        [TestCase(" 1 d 4 e 4 ", true)]
+        //From README
+        [TestCase("4d6", true)]
+        [TestCase("92d66", true)]
+        [TestCase("5+3d4*2", true, Ignore = "This is only a partial match")]
+        [TestCase("((1d2)d5k1)d6", true, Ignore = "This is only a partial match")]
+        [TestCase("4d6k3", true)]
+        [TestCase("3d4k2", true)]
+        [TestCase("5+3d4*3", true, Ignore = "This is only a partial match")]
+        [TestCase("1d6+3", true, Ignore = "This is only a partial match")]
+        [TestCase("1d8+1d2-1", true, Ignore = "This is only a partial match")]
+        [TestCase("4d3-3", true, Ignore = "This is only a partial match")]
+        [TestCase("4d6!", true)]
+        [TestCase("3d4!", true)]
+        [TestCase("3d4!k2", true)]
+        [TestCase("3d4!e3", true)]
+        [TestCase("3d4e1e2k2", true)]
+        [TestCase("3d6t1", true)]
+        [TestCase("3d6t1t5", true)]
+        [TestCase("3d6!t1k2", true)]
         [TestCase("4d3t2k1", true)]
         [TestCase("4d3k1t2", true)]
         [TestCase("4d3!t2k1", true)]

@@ -27,12 +27,13 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
         {
             var quantity = random.Next(Limits.Quantity) + 1;
             var die = random.Next(Limits.Die - 1) + 2; //INFO: Can't allow d1, as explode fails on that
+            var explode = random.Next(die - 1) + 1;
             var percentageThreshold = random.NextDouble();
             var rollThreshold = random.Next(quantity * die) + 1;
 
             Assert.That(die, Is.InRange(2, Limits.Die));
 
-            var roll = GetRoll(quantity, die);
+            var roll = GetRoll(quantity, die, explode);
 
             AssertRoll(roll, quantity, die, percentageThreshold, rollThreshold);
         }
@@ -57,6 +58,6 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
             Assert.That(rolls, Has.All.InRange(1, die));
         }
 
-        private PartialRoll GetRoll(int quantity, int die) => dice.Roll(quantity).d(die).Explode();
+        private PartialRoll GetRoll(int quantity, int die, int explode) => dice.Roll(quantity).d(die).ExplodeOn(explode);
     }
 }

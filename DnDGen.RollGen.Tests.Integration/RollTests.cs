@@ -40,6 +40,8 @@ namespace DnDGen.RollGen.Tests.Integration
         [TestCase("4d6!", 4, 240)]
         [TestCase("3d4!", 3, 120)]
         [TestCase("3d4!k2", 2, 80)]
+        [TestCase("3d4!e3", 3, 120)]
+        [TestCase("3d4e1e2k2", 6, 80)]
         [TestCase("3d6t1", 6, 18)]
         [TestCase("3d6t1t5", 6, 18)]
         [TestCase("3d6!t1k2", 4, 120)]
