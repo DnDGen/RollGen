@@ -201,6 +201,33 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
+        public void AddNumericTransformToRollWithNumericQuantity()
+        {
+            BuildPartialRoll(9266);
+            partialRoll = partialRoll.Transforming(90210);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("9266t90210"));
+        }
+
+        [Test]
+        public void AddTransformExpressionToRollWithNumericQuantity()
+        {
+            BuildPartialRoll(9266);
+            partialRoll = partialRoll.Transforming("4d3k2");
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("9266t(4d3k2)"));
+        }
+
+        [Test]
+        public void AddTransformPartialRollToRollWithNumericQuantity()
+        {
+            BuildPartialRoll(9266);
+            var otherPartialRoll = new DomainPartialRoll(42, mockRandom.Object, mockExpressionEvaluator.Object);
+            otherPartialRoll.d(600);
+
+            partialRoll = partialRoll.Transforming(otherPartialRoll);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("9266t(42d600)"));
+        }
+
+        [Test]
         public void ChainDiceToRollWithNumericQuantity()
         {
             BuildPartialRoll(9266);
@@ -218,6 +245,8 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
                 .Keeping("7d6k5")
                 .d("4d3k2")
                 .Explode()
+                .Transforming(1)
+                .Transforming("2d3")
                 .Keeping(42)
                 .Plus(600)
                 .Minus(1337)
@@ -244,6 +273,8 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             expected += "k(7d6k5)";
             expected += "d(4d3k2)";
             expected += "!";
+            expected += "t1";
+            expected += "t(2d3)";
             expected += "k42";
             expected += "+600";
             expected += "-1337";
@@ -393,6 +424,33 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
+        public void AddNumericTransformToRollWithQuantityExpression()
+        {
+            BuildPartialRoll("7d6k5");
+            partialRoll = partialRoll.Transforming(90210);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("(7d6k5)t90210"));
+        }
+
+        [Test]
+        public void AddTransformExpressionToRollWithQuantityExpression()
+        {
+            BuildPartialRoll("7d6k5");
+            partialRoll = partialRoll.Transforming("4d3k2");
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("(7d6k5)t(4d3k2)"));
+        }
+
+        [Test]
+        public void AddTransformPartialRollToRollWithQuantityExpression()
+        {
+            BuildPartialRoll("7d6k5");
+            var otherPartialRoll = new DomainPartialRoll(42, mockRandom.Object, mockExpressionEvaluator.Object);
+            otherPartialRoll.d(600);
+
+            partialRoll = partialRoll.Transforming(otherPartialRoll);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("(7d6k5)t(42d600)"));
+        }
+
+        [Test]
         public void ChainDiceToRollWithQuantityExpression()
         {
             BuildPartialRoll("7d6k5");
@@ -410,6 +468,8 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
                 .Keeping("11d10k9")
                 .d("4d3k2")
                 .Explode()
+                .Transforming(1)
+                .Transforming("2d3")
                 .Keeping(42)
                 .Plus(600)
                 .Minus(1337)
@@ -436,6 +496,8 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             expected += "k(11d10k9)";
             expected += "d(4d3k2)";
             expected += "!";
+            expected += "t1";
+            expected += "t(2d3)";
             expected += "k42";
             expected += "+600";
             expected += "-1337";
@@ -2487,7 +2549,6 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         {
             BuildPartialRoll(1);
             partialRoll.d(1).Explode();
-
 
             Assert.That(() => partialRoll.AsSum(),
                 Throws.InstanceOf<InvalidOperationException>().With.Message.EqualTo("1d1! is not a valid roll.\n\tExplode: Cannot explode die 1, must be > 1"));

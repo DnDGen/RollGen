@@ -29,6 +29,9 @@ namespace DnDGen.RollGen
         public abstract PartialRoll Keeping(string amountToKeep);
         public PartialRoll Keeping(PartialRoll roll) => Keeping(roll.CurrentRollExpression);
         public abstract PartialRoll Explode();
+        public abstract PartialRoll Transforming(int rollToTransform);
+        public abstract PartialRoll Transforming(string rollToTransform);
+        public PartialRoll Transforming(PartialRoll roll) => Transforming(roll.CurrentRollExpression);
 
         public int AsSum() => AsSum<int>();
         public abstract T AsSum<T>();
@@ -52,8 +55,8 @@ namespace DnDGen.RollGen
 
         /// <summary>
         /// Return the value as True or False, depending on if it is higher or lower then the threshold.
-        /// A value less than or equal to the threshold is false.
-        /// A value higher than the threshold is true.
+        /// A value less than the threshold is false.
+        /// A value equal to or higher than the threshold is true.
         /// As an example, on a roll of a 1d10 with threshold = 7, rolling a 6 produces False, while 7 produces True.
         /// </summary>
         /// <param name="threshold">The inclusive lower-bound roll value of success</param>
