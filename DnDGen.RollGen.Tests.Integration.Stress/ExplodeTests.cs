@@ -35,13 +35,14 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 
             var roll = GetRoll(quantity, die, explode);
 
-            AssertRoll(roll, quantity, die, percentageThreshold, rollThreshold);
+            AssertRoll(roll, quantity, die, explode, percentageThreshold, rollThreshold);
         }
 
-        private void AssertRoll(PartialRoll roll, int quantity, int die, double percentageThreshold, int rollThreshold)
+        private void AssertRoll(PartialRoll roll, int quantity, int die, int explode, double percentageThreshold, int rollThreshold)
         {
+            var rollMin = explode == 1 ? 2 : 1;
             var average = quantity * (die + 1) / 2.0d;
-            var min = quantity;
+            var min = quantity * rollMin;
             var max = quantity * die;
 
             Assert.That(roll.AsSum(), Is.InRange(min, max * 10));

@@ -96,7 +96,9 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
         private void AssertDividedBy()
         {
             var quantity = random.Next(Limits.Quantity) + 1;
-            var dividedBy = random.Next(quantity) + random.NextDouble();
+            //HACK: Making sure divisor is >= 1, because when it is less, sometimes the division expression ends up in something Albatross doesn't like,
+            //such as '3/9.12030227907016E-05' (it doesn't like the scientific notation)
+            var dividedBy = random.Next(quantity) + 1 + random.NextDouble();
             var percentageThreshold = random.NextDouble();
             var thresholdLimit = Convert.ToInt32(Math.Floor(quantity / dividedBy));
             var rollThreshold = random.Next(thresholdLimit) + 1;
