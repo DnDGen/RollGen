@@ -17,16 +17,20 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
             random = GetNewInstanceOf<Random>();
         }
 
-        [Test]
-        public void StressKeep()
+        [TestCase(true)]
+        [TestCase(false)]
+        public void StressKeep(bool common)
         {
-            stressor.Stress(AssertKeep);
+            stressor.Stress(() => AssertKeep(common));
         }
 
-        protected void AssertKeep()
+        protected void AssertKeep(bool common)
         {
-            var quantity = random.Next(Limits.Quantity) + 1;
-            var die = random.Next(Limits.Die) + 1;
+            var quantityLimit = common ? 100 : Limits.Quantity;
+            var dieLimit = common ? 100 : Limits.Die;
+
+            var quantity = random.Next(quantityLimit) + 1;
+            var die = random.Next(dieLimit) + 1;
             var keep = random.Next(quantity - 1) + 1;
             var percentageThreshold = random.NextDouble();
             var rollThreshold = random.Next(quantity * die) + 1;
