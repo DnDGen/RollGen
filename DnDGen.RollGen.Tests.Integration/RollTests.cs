@@ -26,6 +26,9 @@ namespace DnDGen.RollGen.Tests.Integration
         [TestCase("7d6k5", 5, 30)]
         [TestCase("7d8", 7, 56)]
         [TestCase("7d8!", 7, 560)]
+        [TestCase("3d6t1:2t3:4k2", 4, 12)]
+        [TestCase("3d6t1t3:4k2", 4, 12)]
+        [TestCase("3d6t1:2t3k2", 4, 12)]
         //From README
         [TestCase("4d6", 4, 24)]
         [TestCase("92d66", 92, 92 * 66)]
@@ -45,6 +48,7 @@ namespace DnDGen.RollGen.Tests.Integration
         [TestCase("3d6t1", 6, 18)]
         [TestCase("3d6t1t5", 6, 18)]
         [TestCase("3d6!t1k2", 4, 120)]
+        [TestCase("3d6t1:2", 6, 18)]
         [TestCase("4d3t2k1", 1, 3)]
         [TestCase("4d3k1t2", 1, 3)]
         [TestCase("4d3!t2k1", 1, 30)]
@@ -161,9 +165,9 @@ namespace DnDGen.RollGen.Tests.Integration
         [TestCase("(1d2!+3)(6d5k4)", 1, 460)]
         [TestCase("(3)d(2)k(1)", 1, 2)]
         [TestCase("(9d8!k7)d(6d4!)!k(3d2k1)", 1, 4800)]
-        public void ParantheticalDie(string quantity, int lower, int upper)
+        public void ParantheticalDie(string die, int lower, int upper)
         {
-            var roll = dice.Roll().d(quantity);
+            var roll = dice.Roll().d(die);
             var sum = roll.AsSum();
             var min = roll.AsPotentialMinimum();
             var max = roll.AsPotentialMaximum();
@@ -227,51 +231,159 @@ namespace DnDGen.RollGen.Tests.Integration
             Assert.That(sum, Is.InRange(lower, upper));
         }
 
-        [TestCase("1d2", 20_000, 1_000_000)]
-        [TestCase("(1d2)", 20_000, 1_000_000)]
-        [TestCase("((1d2))", 20_000, 1_000_000)]
-        [TestCase("1d2+3", 10_000, 1_000_000)]
-        [TestCase("1d2+3d4", 10_000, 1_000_000)]
-        [TestCase("(1d2)+(3d4)", 10_000, 1_000_000)]
-        [TestCase("(1d2)d3", 20_000, 1_000_000)]
-        [TestCase("1d(2d3)", 20_000, 1_000_000)]
-        [TestCase("1d2+1", 10_000, 1_000_000)]
-        [TestCase("(1d2+1)", 10_000, 1_000_000)]
-        [TestCase("(1d2)+1", 10_000, 1_000_000)]
-        [TestCase("(1d2+1)+1", 10_000, 1_000_000)]
-        [TestCase("((1d2+1))", 10_000, 1_000_000)]
-        [TestCase("((1d2+1)+1)", 10_000, 1_000_000)]
-        [TestCase("((1d2+1))+1", 10_000, 1_000_000)]
-        [TestCase("((1d2+1)+1)+1", 10_000, 1_000_000)]
-        [TestCase("((1d2)+1)", 10_000, 1_000_000)]
-        [TestCase("((1d2)+1)+1", 10_000, 1_000_000)]
-        [TestCase("((1d2))+1", 10_000, 1_000_000)]
-        [TestCase("(1d2+1)+(3d4+1)", 10_000, 1_000_000)]
-        [TestCase("(1d2+1)+(3d4)+1", 10_000, 1_000_000)]
-        [TestCase("(1d2+1)+(3d4+1)+1", 10_000, 1_000_000)]
-        [TestCase("(1d2+1)+1+(3d4+1)", 10_000, 1_000_000)]
-        [TestCase("(1d2+1)+1+(3d4)+1", 10_000, 1_000_000)]
-        [TestCase("(1d2+1)+1+(3d4+1)+1", 10_000, 1_000_000)]
-        [TestCase("(1d2)+1+(3d4+1)", 10_000, 1_000_000)]
-        [TestCase("(1d2)+1+(3d4)+1", 10_000, 1_000_000)]
-        [TestCase("(1d2)+1+(3d4+1)+1", 10_000, 1_000_000)]
-        [TestCase("(1d2+1)d3", 10_000, 1_000_000)]
-        [TestCase("1d(2d3+1)", 20_000, 1_000_000)]
-        [TestCase("6d5d4k3d2k1", 20_000, 1_000_000)]
-        [TestCase("6d5d4k(3d2k1)", 20_000, 1_000_000)]
-        [TestCase("6d(5d4k3)d2k1", 20_000, 1_000_000)]
-        [TestCase("1+2-(3*4/5)%6", 20_000, 1_000_000)]
-        [TestCase("7d6k5", 10_000, 1_000_000)]
-        [TestCase("1d3!", 20_000, 1_000_000)]
-        [TestCase("2d3!", 10_000, 1_000_000)]
-        [TestCase("1-2+3(4)", 10_000, 1_000_000)]
-        [TestCase("1-2+3(4d5)", 10_000, 1_000_000)]
-        [TestCase("(1)(2)(3)", 10_000, 1_000_000)]
-        [TestCase("(1d2!+3)+(6d5k4)", 10_000, 1_000_000)]
-        [TestCase("(3)d(2)k(1)", 20_000, 1_000_000)]
+        [TestCase("1d2", 2, 100)]
+        [TestCase("(1d2)", 2, 100)]
+        [TestCase("((1d2))", 2, 100)]
+        [TestCase("1d2+3", 1, 100)]
+        [TestCase("1d2+3d4", 1, 100)]
+        [TestCase("(1d2)+(3d4)", 1, 100)]
+        [TestCase("(1d2)d3", 2, 100)]
+        [TestCase("1d(2d3)", 2, 100)]
+        [TestCase("1d2+1", 1, 100)]
+        [TestCase("(1d2+1)", 1, 100)]
+        [TestCase("(1d2)+1", 1, 100)]
+        [TestCase("(1d2+1)+1", 1, 100)]
+        [TestCase("((1d2+1))", 1, 100)]
+        [TestCase("((1d2+1)+1)", 1, 100)]
+        [TestCase("((1d2+1))+1", 1, 100)]
+        [TestCase("((1d2+1)+1)+1", 1, 100)]
+        [TestCase("((1d2)+1)", 1, 100)]
+        [TestCase("((1d2)+1)+1", 1, 100)]
+        [TestCase("((1d2))+1", 1, 100)]
+        [TestCase("(1d2+1)+(3d4+1)", 1, 100)]
+        [TestCase("(1d2+1)+(3d4)+1", 1, 100)]
+        [TestCase("(1d2+1)+(3d4+1)+1", 1, 100)]
+        [TestCase("(1d2+1)+1+(3d4+1)", 1, 100)]
+        [TestCase("(1d2+1)+1+(3d4)+1", 1, 100)]
+        [TestCase("(1d2+1)+1+(3d4+1)+1", 1, 100)]
+        [TestCase("(1d2)+1+(3d4+1)", 1, 100)]
+        [TestCase("(1d2)+1+(3d4)+1", 1, 100)]
+        [TestCase("(1d2)+1+(3d4+1)+1", 1, 100)]
+        [TestCase("(1d2+1)d3", 1, 100)]
+        [TestCase("1d(2d3+1)", 2, 100)]
+        [TestCase("6d5d4k3d2k1", 2, 100)]
+        [TestCase("6d5d4k(3d2k1)", 2, 100)]
+        [TestCase("6d(5d4k3)d2k1", 2, 100)]
+        [TestCase("1+2-(3*4/5)%6", 2, 100)]
+        [TestCase("7d6k5", 1, 100)]
+        [TestCase("1d3!", 2, 100)]
+        [TestCase("2d3!", 1, 100)]
+        [TestCase("1-2+3(4)", 1, 100)]
+        [TestCase("1-2+3(4d5)", 1, 100)]
+        [TestCase("(1)(2)(3)", 1, 100)]
+        [TestCase("(1d2!+3)+(6d5k4)", 1, 100)]
+        [TestCase("(3)d(2)k(1)", 2, 100)]
         public void ParantheticalTransform(string transform, int lower, int upper)
         {
-            var roll = dice.Roll(Limits.Quantity).Percentile().Transforming(transform);
+            var roll = dice.Roll().Percentile().Transforming(transform);
+            var sum = roll.AsSum();
+            var min = roll.AsPotentialMinimum();
+            var max = roll.AsPotentialMaximum();
+
+            Assert.That(min, Is.EqualTo(lower), "Min");
+            Assert.That(max, Is.EqualTo(upper), "Max");
+            Assert.That(sum, Is.InRange(lower, upper));
+        }
+
+        [TestCase("1d2", 2, 1_000)]
+        [TestCase("(1d2)", 2, 1_000)]
+        [TestCase("((1d2))", 2, 1_000)]
+        [TestCase("1d2+3", 1, 1_000)]
+        [TestCase("1d2+3d4", 1, 1_000)]
+        [TestCase("(1d2)+(3d4)", 1, 1_000)]
+        [TestCase("(1d2)d3", 2, 1_000)]
+        [TestCase("1d(2d3)", 2, 1_000)]
+        [TestCase("1d2+1", 1, 1_000)]
+        [TestCase("(1d2+1)", 1, 1_000)]
+        [TestCase("(1d2)+1", 1, 1_000)]
+        [TestCase("(1d2+1)+1", 1, 1_000)]
+        [TestCase("((1d2+1))", 1, 1_000)]
+        [TestCase("((1d2+1)+1)", 1, 1_000)]
+        [TestCase("((1d2+1))+1", 1, 1_000)]
+        [TestCase("((1d2+1)+1)+1", 1, 1_000)]
+        [TestCase("((1d2)+1)", 1, 1_000)]
+        [TestCase("((1d2)+1)+1", 1, 1_000)]
+        [TestCase("((1d2))+1", 1, 1_000)]
+        [TestCase("(1d2+1)+(3d4+1)", 1, 1_000)]
+        [TestCase("(1d2+1)+(3d4)+1", 1, 1_000)]
+        [TestCase("(1d2+1)+(3d4+1)+1", 1, 1_000)]
+        [TestCase("(1d2+1)+1+(3d4+1)", 1, 1_000)]
+        [TestCase("(1d2+1)+1+(3d4)+1", 1, 1_000)]
+        [TestCase("(1d2+1)+1+(3d4+1)+1", 1, 1_000)]
+        [TestCase("(1d2)+1+(3d4+1)", 1, 1_000)]
+        [TestCase("(1d2)+1+(3d4)+1", 1, 1_000)]
+        [TestCase("(1d2)+1+(3d4+1)+1", 1, 1_000)]
+        [TestCase("(1d2+1)d3", 1, 1_000)]
+        [TestCase("1d(2d3+1)", 2, 1_000)]
+        [TestCase("6d5d4k3d2k1", 2, 1_000)]
+        [TestCase("6d5d4k(3d2k1)", 2, 1_000)]
+        [TestCase("6d(5d4k3)d2k1", 2, 1_000)]
+        [TestCase("1+2-(3*4/5)%6", 2, 1_000)]
+        [TestCase("7d6k5", 1, 1_000)]
+        [TestCase("1d3!", 2, 1_000)]
+        [TestCase("2d3!", 1, 1_000)]
+        [TestCase("1-2+3(4)", 1, 1_000)]
+        [TestCase("1-2+3(4d5)", 1, 1_000)]
+        [TestCase("(1)(2)(3)", 1, 1_000)]
+        [TestCase("(1d2!+3)+(6d5k4)", 1, 1_000)]
+        [TestCase("(3)d(2)k(1)", 2, 1_000)]
+        public void ParantheticalExplode(string explode, int lower, int upper)
+        {
+            var roll = dice.Roll().Percentile().ExplodeOn(explode);
+            var sum = roll.AsSum();
+            var min = roll.AsPotentialMinimum();
+            var max = roll.AsPotentialMaximum();
+
+            Assert.That(min, Is.EqualTo(lower), "Min");
+            Assert.That(max, Is.EqualTo(upper), "Max");
+            Assert.That(sum, Is.InRange(lower, upper));
+        }
+
+        [TestCase("1d2", "1d2", 1, 100)]
+        [TestCase("(1d2)", "1d2+3", 2, 100)]
+        [TestCase("((1d2))", "(1d2+3d4)", 2, 100)]
+        [TestCase("1d2+3", "(1d2)d3", 1, 100)]
+        [TestCase("1d2+3d4", "1d(2d3)", 1, 100)]
+        [TestCase("(1d2)+(3d4)", "1d2+1", 1, 100)]
+        [TestCase("(1d2)d3", "(1d2+1)+1", 2, 100)]
+        [TestCase("1d(2d3)", "((1d2+1)+1)+1", 2, 100)]
+        [TestCase("1d2+1", "(1d2+1)+(3d4+1)", 1, 100)]
+        [TestCase("(1d2+1)", "(1d2+1)+(3d4+1)+1", 1, 100)]
+        [TestCase("(1d2)+1", "(1d2+1)+1+(3d4+1)+1", 1, 100)]
+        [TestCase("(1d2+1)+1", "(1d2+1)d3", 1, 100)]
+        [TestCase("((1d2+1))", "1d(2d3+1)", 1, 100)]
+        [TestCase("((1d2+1)+1)", "6d5d4k3d2k1", 1, 100)]
+        [TestCase("((1d2+1))+1", "6d5d4k(3d2k1)", 1, 100)]
+        [TestCase("((1d2+1)+1)+1", "1+2-(3*4/5)%6", 1, 100)]
+        [TestCase("((1d2)+1)", "7d6k5", 1, 100)]
+        [TestCase("((1d2)+1)+1", "1d3!", 1, 100)]
+        [TestCase("((1d2))+1", "2d3!", 1, 100)]
+        [TestCase("(1d2+1)+(3d4+1)", "1-2+3(4)", 1, 100)]
+        [TestCase("(1d2+1)+(3d4)+1", "1-2+3(4d5)", 1, 100)]
+        [TestCase("(1d2+1)+(3d4+1)+1", "(1)(2)(3)", 1, 100)]
+        [TestCase("(1d2+1)+1+(3d4+1)", "(1d2!+3)+(6d5k4)", 1, 100)]
+        [TestCase("(1d2+1)+1+(3d4)+1", "(3)d(2)k(1)", 1, 100)]
+        [TestCase("(1d2+1)+1+(3d4+1)+1", "1d2", 1, 100)]
+        [TestCase("(1d2)+1+(3d4+1)", "(1d2)", 1, 100)]
+        [TestCase("(1d2)+1+(3d4)+1", "((1d2))", 1, 100)]
+        [TestCase("(1d2)+1+(3d4+1)+1", "1d2+3", 1, 100)]
+        [TestCase("(1d2+1)d3", "1d2+3d4", 1, 100)]
+        [TestCase("1d(2d3+1)", "(1d2)+(3d4)", 2, 100)]
+        [TestCase("6d5d4k3d2k1", "(1d2)d3", 1, 100)]
+        [TestCase("6d5d4k(3d2k1)", "1d(2d3)", 1, 100)]
+        [TestCase("6d(5d4k3)d2k1", "1d2+1", 2, 100)]
+        [TestCase("1+2-(3*4/5)%6", "(1d2+1)", 2, 100)]
+        [TestCase("7d6k5", "(1d2+1)+1", 1, 100)]
+        [TestCase("1d3!", "((1d2+1))", 2, 100)]
+        [TestCase("2d3!", "((1d2+1))+1", 1, 100)]
+        [TestCase("1-2+3(4)", "((1d2+1)+1)", 1, 100)]
+        [TestCase("1-2+3(4d5)", "((1d2+1)+1)+1", 1, 100)]
+        [TestCase("(1)(2)(3)", "((1d2)+1)", 1, 100)]
+        [TestCase("(1d2!+3)+(6d5k4)", "(1d2+1)+(3d4+1)", 1, 100)]
+        [TestCase("(3)d(2)k(1)", "(1d2+1)+(3d4)+1", 2, 100)]
+        public void ParantheticalCustomTransform(string transform, string target, int lower, int upper)
+        {
+            var roll = dice.Roll().Percentile().Transforming(transform, target);
             var sum = roll.AsSum();
             var min = roll.AsPotentialMinimum();
             var max = roll.AsPotentialMaximum();
@@ -284,14 +396,14 @@ namespace DnDGen.RollGen.Tests.Integration
         [Test]
         public void AllParantheticalExpressions()
         {
-            var roll = dice.Roll("7d8").d("3d4").Transforming("1d2").Keeping("5d6");
+            var roll = dice.Roll("13d12").d("11d10").ExplodeOn("9d8").Transforming("7d6", "5d4").Keeping("3d2");
             var sum = roll.AsSum();
             var min = roll.AsPotentialMinimum();
             var max = roll.AsPotentialMaximum();
 
-            Assert.That(min, Is.EqualTo(10));
-            Assert.That(max, Is.EqualTo(360));
-            Assert.That(sum, Is.InRange(10, 360));
+            Assert.That(min, Is.EqualTo(3));
+            Assert.That(max, Is.EqualTo(6600));
+            Assert.That(sum, Is.InRange(3, 6600));
         }
     }
 }

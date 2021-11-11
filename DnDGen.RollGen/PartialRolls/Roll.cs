@@ -12,7 +12,7 @@ namespace DnDGen.RollGen.PartialRolls
         public int Die { get; set; }
         public int AmountToKeep { get; set; }
         public readonly List<int> ExplodeOn;
-        public readonly List<int> TransformToMax;
+        public readonly Dictionary<int, int> Transforms;
 
         public bool IsValid => QuantityValid && DieValid && KeepValid && ExplodeValid && TransformValid;
         private bool QuantityValid => Quantity > 0 && Quantity <= Limits.Quantity;
@@ -20,12 +20,12 @@ namespace DnDGen.RollGen.PartialRolls
         private bool KeepValid => AmountToKeep > -1 && AmountToKeep <= Limits.Quantity;
         private bool Explode => ExplodeOn.Any();
         private bool ExplodeValid => !ExplodeOn.Any() || (DieValid && Enumerable.Range(1, Die).Except(ExplodeOn).Any());
-        private bool TransformValid => !TransformToMax.Any() || TransformToMax.All(t => t > 0 && t <= Limits.Die);
+        private bool TransformValid => !Transforms.Any() || Transforms.All(kvp => kvp.Key > 0 && kvp.Key <= Limits.Die);
 
         public Roll()
         {
             ExplodeOn = new List<int>();
-            TransformToMax = new List<int>();
+            Transforms = new Dictionary<int, int>();
         }
 
         public Roll(string toParse)
@@ -35,6 +35,7 @@ namespace DnDGen.RollGen.PartialRolls
             sections['d'] = new List<int>();
             sections['e'] = new List<int>();
             sections['t'] = new List<int>();
+            sections[':'] = new List<int>();
             sections['k'] = new List<int>();
 
             var key = 'q';
@@ -66,6 +67,12 @@ namespace DnDGen.RollGen.PartialRolls
                 if (!number.Any())
                     continue;
 
+                //INFO: This means we are using the "Default" transform to the max die value
+                if (toParse[i] != ':' && key == 't')
+                {
+                    sections[':'].Add(sections['d'][0]);
+                }
+
                 sections[key].Add(Convert.ToInt32(number));
 
                 number = string.Empty;
@@ -73,6 +80,12 @@ namespace DnDGen.RollGen.PartialRolls
             }
 
             sections[key].Add(Convert.ToInt32(number));
+
+            //INFO: This means we ended on a transform and are using the "Default" transform to the max die value
+            if (key == 't')
+            {
+                sections[':'].Add(sections['d'][0]);
+            }
 
             if (!sections['q'].Any())
                 sections['q'].Add(1);
@@ -87,7 +100,12 @@ namespace DnDGen.RollGen.PartialRolls
                 AmountToKeep = sections['k'][0];
 
             ExplodeOn = sections['e'].Distinct().ToList();
-            TransformToMax = sections['t'].Distinct().ToList();
+            Transforms = new Dictionary<int, int>();
+
+            for (var i = 0; i < sections['t'].Count; i++)
+            {
+                Transforms[sections['t'][i]] = sections[':'][i];
+            }
         }
 
         public static bool CanParse(string toParse)
@@ -117,9 +135,9 @@ namespace DnDGen.RollGen.PartialRolls
                     --i; // We're rerolling this die, so Quantity actually stays the same.
                 }
 
-                if (TransformToMax.Contains(roll))
+                if (Transforms.ContainsKey(roll))
                 {
-                    roll = Die;
+                    roll = Transforms[roll];
                 }
 
                 rolls.Add(roll);
@@ -151,7 +169,7 @@ namespace DnDGen.RollGen.PartialRolls
                 message += $"\n\tExplode: Must have at least 1 non-exploded roll";
 
             if (!TransformValid)
-                message += $"\n\tTransform: 0 < [{string.Join(',', TransformToMax)}] <= {Limits.Die}";
+                message += $"\n\tTransform: 0 < [{string.Join(',', Transforms.Select(kvp => $"{kvp.Key}:{kvp.Value}"))}] <= {Limits.Die}";
 
             throw new InvalidOperationException(message);
         }
@@ -182,9 +200,23 @@ namespace DnDGen.RollGen.PartialRolls
             var quantity = GetEffectiveQuantity();
             var min = 1;
 
-            while ((TransformToMax.Contains(min) || ExplodeOn.Contains(min)) && min < Die)
+            while ((Transforms.ContainsKey(min) || ExplodeOn.Contains(min)) && min < Die)
             {
                 min++;
+            }
+
+            if (Transforms.Any())
+            {
+                //INFO: This means we are transforming all rolls
+                if (!Enumerable.Range(1, Die).Except(Transforms.Keys).Any())
+                {
+                    min = Transforms.Values.Min();
+                }
+                else
+                {
+                    var minTransform = Transforms.Values.Min();
+                    min = Math.Min(min, minTransform);
+                }
             }
 
             return min * quantity;
@@ -203,14 +235,26 @@ namespace DnDGen.RollGen.PartialRolls
             ValidateRoll();
 
             var quantity = GetEffectiveQuantity();
-            var max = quantity * Die;
+            var max = Die;
+            var multiplier = 1;
+
+            while (Transforms.ContainsKey(max) && max > 1)
+            {
+                --max;
+            }
+
+            if (Transforms.Any())
+            {
+                var maxTransform = Transforms.Values.Max();
+                max = Math.Max(max, maxTransform);
+            }
 
             //INFO: Since exploded dice can in theory be infinite, we will assume 10x multiplier,
             //which should cover 99.9% of use cases
             if (Explode && includeExplode)
-                max *= 10;
+                multiplier *= 10;
 
-            return max;
+            return quantity * max * multiplier;
         }
 
         public bool GetTrueOrFalse(Random random)
@@ -230,8 +274,8 @@ namespace DnDGen.RollGen.PartialRolls
             foreach (var explode in ExplodeOn)
                 output += $"e{explode}";
 
-            foreach (var transform in TransformToMax)
-                output += $"t{transform}";
+            foreach (var kvp in Transforms)
+                output += $"t{kvp.Key}:{kvp.Value}";
 
             if (AmountToKeep != 0)
                 output += $"k{AmountToKeep}";

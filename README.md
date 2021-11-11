@@ -54,8 +54,9 @@ var expressionExplodedMultipleRolls = dice.Roll("3d4!e3").AsSum(); //Return the 
 var expressionExplodedMultipleKeptRolls = dice.Roll("3d4e1e2k2").AsSum(); //Returns the sum of 2 highest rolls, including bonus rolls from explosion on rolls of 1 or 2
 
 var transformedRolls = dice.Roll(3).d6().Transform(1).AsIndividualRolls(); //If a 1 is rolled, we will count it as a 6.  I.E., 3 + 1 + 6 = 3 + 6 + 6
-var transformedExplodedRolls = dice.Roll("3d6t1t5").AsSum(); //Return the sum of the rolls, including 1's and 5's transformed to 6's
+var transformedMultipleRolls = dice.Roll("3d6t1t5").AsSum(); //Return the sum of the rolls, including 1's and 5's transformed to 6's
 var transformedExplodedKeptRolls = dice.Roll("3d6!t1k2").AsSum(); //Returns the sum of 2 highest rolls, including bonus rolls from explosion and transforming 1's to 6's.
+var transformedCustomRolls = dice.Roll("3d6t1:2").AsSum(); //Return the sum of the rolls, transforming 1's into 2's.
 
 ```
 

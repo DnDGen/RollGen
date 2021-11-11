@@ -32,9 +32,9 @@ namespace DnDGen.RollGen
         public abstract PartialRoll ExplodeOn(int rollToExplode);
         public abstract PartialRoll ExplodeOn(string rollToExplode);
         public PartialRoll ExplodeOn(PartialRoll roll) => ExplodeOn(roll.CurrentRollExpression);
-        public abstract PartialRoll Transforming(int rollToTransform);
-        public abstract PartialRoll Transforming(string rollToTransform);
-        public PartialRoll Transforming(PartialRoll roll) => Transforming(roll.CurrentRollExpression);
+        public abstract PartialRoll Transforming(int rollToTransform, int? transformTarget = null);
+        public abstract PartialRoll Transforming(string rollToTransform, string transformTarget = null);
+        public PartialRoll Transforming(PartialRoll roll, PartialRoll transformTarget = null) => Transforming(roll.CurrentRollExpression, transformTarget?.CurrentRollExpression);
 
         public int AsSum() => AsSum<int>();
         public abstract T AsSum<T>();

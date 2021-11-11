@@ -228,6 +228,35 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
+        public void AddCustomNumericTransformToRollWithNumericQuantity()
+        {
+            BuildPartialRoll(9266);
+            partialRoll = partialRoll.Transforming(90210, 42);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("9266t90210:42"));
+        }
+
+        [Test]
+        public void AddCustomTransformExpressionToRollWithNumericQuantity()
+        {
+            BuildPartialRoll(9266);
+            partialRoll = partialRoll.Transforming("4d3k2", "7d6k5");
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("9266t(4d3k2):(7d6k5)"));
+        }
+
+        [Test]
+        public void AddCustomTransformPartialRollToRollWithNumericQuantity()
+        {
+            BuildPartialRoll(9266);
+            var otherPartialRoll = new DomainPartialRoll(42, mockRandom.Object, mockExpressionEvaluator.Object);
+            otherPartialRoll.d(600);
+            var targetPartialRoll = new DomainPartialRoll(1337, mockRandom.Object, mockExpressionEvaluator.Object);
+            targetPartialRoll.d(1336);
+
+            partialRoll = partialRoll.Transforming(otherPartialRoll, targetPartialRoll);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("9266t(42d600):(1337d1336)"));
+        }
+
+        [Test]
         public void AddNumericExplodeOnToRollWithNumericQuantity()
         {
             BuildPartialRoll(9266);
@@ -276,6 +305,8 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
                 .ExplodeOn("1d4")
                 .Transforming(1)
                 .Transforming("2d3")
+                .Transforming(4, 5)
+                .Transforming("6d7", "8d9")
                 .Keeping(42)
                 .Plus(600)
                 .Minus(1337)
@@ -306,6 +337,8 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             expected += "e(1d4)";
             expected += "t1";
             expected += "t(2d3)";
+            expected += "t4:5";
+            expected += "t(6d7):(8d9)";
             expected += "k42";
             expected += "+600";
             expected += "-1337";
@@ -482,6 +515,36 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
+        public void AddCustomNumericTransformToRollWithQuantityExpression()
+        {
+            BuildPartialRoll("7d6k5");
+            partialRoll = partialRoll.Transforming(90210, 42);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("(7d6k5)t90210:42"));
+        }
+
+        [Test]
+        public void AddCustomTransformExpressionToRollWithQuantityExpression()
+        {
+            BuildPartialRoll("7d6k5");
+            partialRoll = partialRoll.Transforming("4d3k2", "10d9k8");
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("(7d6k5)t(4d3k2):(10d9k8)"));
+        }
+
+        [Test]
+        public void AddCustomTransformPartialRollToRollWithQuantityExpression()
+        {
+            BuildPartialRoll("7d6k5");
+            var otherPartialRoll = new DomainPartialRoll(42, mockRandom.Object, mockExpressionEvaluator.Object);
+            otherPartialRoll.d(600);
+
+            var targetPartialRoll = new DomainPartialRoll(1337, mockRandom.Object, mockExpressionEvaluator.Object);
+            targetPartialRoll.d(1336);
+
+            partialRoll = partialRoll.Transforming(otherPartialRoll, targetPartialRoll);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("(7d6k5)t(42d600):(1337d1336)"));
+        }
+
+        [Test]
         public void AddNumericExplodeOnToRollWithQuantityExpression()
         {
             BuildPartialRoll("7d6k5");
@@ -530,6 +593,8 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
                 .ExplodeOn("1d4")
                 .Transforming(1)
                 .Transforming("2d3")
+                .Transforming(4, 5)
+                .Transforming("6d7", "8d9")
                 .Keeping(42)
                 .Plus(600)
                 .Minus(1337)
@@ -560,6 +625,8 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             expected += "e(1d4)";
             expected += "t1";
             expected += "t(2d3)";
+            expected += "t4:5";
+            expected += "t(6d7):(8d9)";
             expected += "k42";
             expected += "+600";
             expected += "-1337";
