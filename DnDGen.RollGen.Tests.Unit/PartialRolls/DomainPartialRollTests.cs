@@ -201,6 +201,89 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
+        public void AddNumericTransformToRollWithNumericQuantity()
+        {
+            BuildPartialRoll(9266);
+            partialRoll = partialRoll.Transforming(90210);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("9266t90210"));
+        }
+
+        [Test]
+        public void AddTransformExpressionToRollWithNumericQuantity()
+        {
+            BuildPartialRoll(9266);
+            partialRoll = partialRoll.Transforming("4d3k2");
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("9266t(4d3k2)"));
+        }
+
+        [Test]
+        public void AddTransformPartialRollToRollWithNumericQuantity()
+        {
+            BuildPartialRoll(9266);
+            var otherPartialRoll = new DomainPartialRoll(42, mockRandom.Object, mockExpressionEvaluator.Object);
+            otherPartialRoll.d(600);
+
+            partialRoll = partialRoll.Transforming(otherPartialRoll);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("9266t(42d600)"));
+        }
+
+        [Test]
+        public void AddCustomNumericTransformToRollWithNumericQuantity()
+        {
+            BuildPartialRoll(9266);
+            partialRoll = partialRoll.Transforming(90210, 42);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("9266t90210:42"));
+        }
+
+        [Test]
+        public void AddCustomTransformExpressionToRollWithNumericQuantity()
+        {
+            BuildPartialRoll(9266);
+            partialRoll = partialRoll.Transforming("4d3k2", "7d6k5");
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("9266t(4d3k2):(7d6k5)"));
+        }
+
+        [Test]
+        public void AddCustomTransformPartialRollToRollWithNumericQuantity()
+        {
+            BuildPartialRoll(9266);
+            var otherPartialRoll = new DomainPartialRoll(42, mockRandom.Object, mockExpressionEvaluator.Object);
+            otherPartialRoll.d(600);
+            var targetPartialRoll = new DomainPartialRoll(1337, mockRandom.Object, mockExpressionEvaluator.Object);
+            targetPartialRoll.d(1336);
+
+            partialRoll = partialRoll.Transforming(otherPartialRoll, targetPartialRoll);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("9266t(42d600):(1337d1336)"));
+        }
+
+        [Test]
+        public void AddNumericExplodeOnToRollWithNumericQuantity()
+        {
+            BuildPartialRoll(9266);
+            partialRoll = partialRoll.ExplodeOn(90210);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("9266e90210"));
+        }
+
+        [Test]
+        public void AddExplodeOnExpressionToRollWithNumericQuantity()
+        {
+            BuildPartialRoll(9266);
+            partialRoll = partialRoll.ExplodeOn("4d3k2");
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("9266e(4d3k2)"));
+        }
+
+        [Test]
+        public void AddExplodeOnPartialRollToRollWithNumericQuantity()
+        {
+            BuildPartialRoll(9266);
+            var otherPartialRoll = new DomainPartialRoll(42, mockRandom.Object, mockExpressionEvaluator.Object);
+            otherPartialRoll.d(600);
+
+            partialRoll = partialRoll.ExplodeOn(otherPartialRoll);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("9266e(42d600)"));
+        }
+
+        [Test]
         public void ChainDiceToRollWithNumericQuantity()
         {
             BuildPartialRoll(9266);
@@ -218,6 +301,12 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
                 .Keeping("7d6k5")
                 .d("4d3k2")
                 .Explode()
+                .ExplodeOn(7)
+                .ExplodeOn("1d4")
+                .Transforming(1)
+                .Transforming("2d3")
+                .Transforming(4, 5)
+                .Transforming("6d7", "8d9")
                 .Keeping(42)
                 .Plus(600)
                 .Minus(1337)
@@ -244,6 +333,12 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             expected += "k(7d6k5)";
             expected += "d(4d3k2)";
             expected += "!";
+            expected += "e7";
+            expected += "e(1d4)";
+            expected += "t1";
+            expected += "t(2d3)";
+            expected += "t4:5";
+            expected += "t(6d7):(8d9)";
             expected += "k42";
             expected += "+600";
             expected += "-1337";
@@ -393,6 +488,90 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
+        public void AddNumericTransformToRollWithQuantityExpression()
+        {
+            BuildPartialRoll("7d6k5");
+            partialRoll = partialRoll.Transforming(90210);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("(7d6k5)t90210"));
+        }
+
+        [Test]
+        public void AddTransformExpressionToRollWithQuantityExpression()
+        {
+            BuildPartialRoll("7d6k5");
+            partialRoll = partialRoll.Transforming("4d3k2");
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("(7d6k5)t(4d3k2)"));
+        }
+
+        [Test]
+        public void AddTransformPartialRollToRollWithQuantityExpression()
+        {
+            BuildPartialRoll("7d6k5");
+            var otherPartialRoll = new DomainPartialRoll(42, mockRandom.Object, mockExpressionEvaluator.Object);
+            otherPartialRoll.d(600);
+
+            partialRoll = partialRoll.Transforming(otherPartialRoll);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("(7d6k5)t(42d600)"));
+        }
+
+        [Test]
+        public void AddCustomNumericTransformToRollWithQuantityExpression()
+        {
+            BuildPartialRoll("7d6k5");
+            partialRoll = partialRoll.Transforming(90210, 42);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("(7d6k5)t90210:42"));
+        }
+
+        [Test]
+        public void AddCustomTransformExpressionToRollWithQuantityExpression()
+        {
+            BuildPartialRoll("7d6k5");
+            partialRoll = partialRoll.Transforming("4d3k2", "10d9k8");
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("(7d6k5)t(4d3k2):(10d9k8)"));
+        }
+
+        [Test]
+        public void AddCustomTransformPartialRollToRollWithQuantityExpression()
+        {
+            BuildPartialRoll("7d6k5");
+            var otherPartialRoll = new DomainPartialRoll(42, mockRandom.Object, mockExpressionEvaluator.Object);
+            otherPartialRoll.d(600);
+
+            var targetPartialRoll = new DomainPartialRoll(1337, mockRandom.Object, mockExpressionEvaluator.Object);
+            targetPartialRoll.d(1336);
+
+            partialRoll = partialRoll.Transforming(otherPartialRoll, targetPartialRoll);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("(7d6k5)t(42d600):(1337d1336)"));
+        }
+
+        [Test]
+        public void AddNumericExplodeOnToRollWithQuantityExpression()
+        {
+            BuildPartialRoll("7d6k5");
+            partialRoll = partialRoll.ExplodeOn(90210);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("(7d6k5)e90210"));
+        }
+
+        [Test]
+        public void AddExplodeOnExpressionToRollWithQuantityExpression()
+        {
+            BuildPartialRoll("7d6k5");
+            partialRoll = partialRoll.ExplodeOn("4d3k2");
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("(7d6k5)e(4d3k2)"));
+        }
+
+        [Test]
+        public void AddExplodeOnPartialRollToRollWithQuantityExpression()
+        {
+            BuildPartialRoll("7d6k5");
+            var otherPartialRoll = new DomainPartialRoll(42, mockRandom.Object, mockExpressionEvaluator.Object);
+            otherPartialRoll.d(600);
+
+            partialRoll = partialRoll.ExplodeOn(otherPartialRoll);
+            Assert.That(partialRoll.CurrentRollExpression, Is.EqualTo("(7d6k5)e(42d600)"));
+        }
+
+        [Test]
         public void ChainDiceToRollWithQuantityExpression()
         {
             BuildPartialRoll("7d6k5");
@@ -410,6 +589,12 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
                 .Keeping("11d10k9")
                 .d("4d3k2")
                 .Explode()
+                .ExplodeOn(7)
+                .ExplodeOn("1d4")
+                .Transforming(1)
+                .Transforming("2d3")
+                .Transforming(4, 5)
+                .Transforming("6d7", "8d9")
                 .Keeping(42)
                 .Plus(600)
                 .Minus(1337)
@@ -436,6 +621,12 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             expected += "k(11d10k9)";
             expected += "d(4d3k2)";
             expected += "!";
+            expected += "e7";
+            expected += "e(1d4)";
+            expected += "t1";
+            expected += "t(2d3)";
+            expected += "t4:5";
+            expected += "t(6d7):(8d9)";
             expected += "k42";
             expected += "+600";
             expected += "-1337";
@@ -2488,19 +2679,18 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             BuildPartialRoll(1);
             partialRoll.d(1).Explode();
 
-
             Assert.That(() => partialRoll.AsSum(),
-                Throws.InstanceOf<InvalidOperationException>().With.Message.EqualTo("1d1! is not a valid roll.\n\tExplode: Cannot explode die 1, must be > 1"));
+                Throws.InstanceOf<InvalidOperationException>().With.Message.EqualTo("1d1e1 is not a valid roll\n\tExplode: Must have at least 1 non-exploded roll"));
         }
 
-        [TestCase(1, 6, new[] { 1, 666 }, ExpectedResult = 1)] // Single, no Explode
-        [TestCase(1, 6, new[] { 6, 1, 666 }, ExpectedResult = 7)] // Single, Explode once
-        [TestCase(1, 6, new[] { 6, 6, 1, 666 }, ExpectedResult = 13)] // Single, Explode twice
-        [TestCase(3, 6, new[] { 3, 4, 2, 666 }, ExpectedResult = 9)] // Multiple, no Explode
-        [TestCase(3, 6, new[] { 1, 6, 2, 2, 666 }, ExpectedResult = 11)] // Multiple, Explode once
-        [TestCase(3, 6, new[] { 5, 6, 6, 1, 2, 666 }, ExpectedResult = 20)] // Multiple, Explode twice in a row
-        [TestCase(3, 6, new[] { 6, 1, 6, 4, 2, 666 }, ExpectedResult = 19)] // Multiple, Explode twice not in a row
-        public int ExplodeRoll(int quantity, int die, int[] rolls)
+        [TestCase(1, 6, new[] { 1, 666 }, 1)] // Single, no Explode
+        [TestCase(1, 6, new[] { 6, 1, 666 }, 7)] // Single, Explode once
+        [TestCase(1, 6, new[] { 6, 6, 1, 666 }, 13)] // Single, Explode twice
+        [TestCase(3, 6, new[] { 3, 4, 2, 666 }, 9)] // Multiple, no Explode
+        [TestCase(3, 6, new[] { 1, 6, 2, 2, 666 }, 11)] // Multiple, Explode once
+        [TestCase(3, 6, new[] { 5, 6, 6, 1, 2, 666 }, 20)] // Multiple, Explode twice in a row
+        [TestCase(3, 6, new[] { 6, 1, 6, 4, 2, 666 }, 19)] // Multiple, Explode twice not in a row
+        public void ExplodeRoll(int quantity, int die, int[] rolls, int expected)
         {
             var seq = mockRandom.SetupSequence(r => r.Next(die));
             foreach (var roll in rolls)
@@ -2511,7 +2701,8 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             BuildPartialRoll(quantity);
             partialRoll.d(die).Explode();
 
-            return partialRoll.AsSum();
+            var sum = partialRoll.AsSum();
+            Assert.That(sum, Is.EqualTo(expected), partialRoll.CurrentRollExpression);
         }
 
         [TestCase("1", 1)]

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>netcoreapp3.1;netstandard2.1</TargetFrameworks>
-    <Version>15.2.2</Version>
+    <Version>15.3.0</Version>
     <Authors>Karl M. Speer</Authors>
     <Company>DnDGen</Company>
     <Product>RollGen</Product>
@@ -14,7 +14,7 @@
     <PackageIcon>18531-twenty-sided-dice-vector-thumb.png</PackageIcon>
     <PackageIconUrl />
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageReleaseNotes></PackageReleaseNotes>
+    <PackageReleaseNotes>Features: #43, #59, #61</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,13 +25,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Albatross.Expression" Version="3.0.2" />
+    <PackageReference Include="Albatross.Expression" Version="3.0.3" />
     <PackageReference Include="Ninject" Version="3.3.4" />
-  </ItemGroup>
-
-  <!--Needed for Framework compatibility when building in Travis-->
-  <ItemGroup>
-    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" PrivateAssets="All" Version="1.0.0" />
   </ItemGroup>
 
 </Project>
