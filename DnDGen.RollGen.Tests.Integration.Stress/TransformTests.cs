@@ -38,12 +38,12 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 
             var roll = GetRoll(quantity, die, transform, transformTarget);
 
-            AssertRoll(roll, quantity, die, transform, percentageThreshold, rollThreshold);
+            AssertRoll(roll, quantity, die, transform, transformTarget, percentageThreshold, rollThreshold);
         }
 
-        private void AssertRoll(PartialRoll roll, int quantity, int die, int transform, double percentageThreshold, int rollThreshold)
+        private void AssertRoll(PartialRoll roll, int quantity, int die, int transform, int target, double percentageThreshold, int rollThreshold)
         {
-            var rollMin = transform == 1 && die != 1 ? 2 : 1;
+            var rollMin = transform == 1 && die != 1 && target != 1 ? 2 : 1;
             var min = quantity * rollMin;
             var max = quantity * die;
             var average = (min + max) / 2.0d;

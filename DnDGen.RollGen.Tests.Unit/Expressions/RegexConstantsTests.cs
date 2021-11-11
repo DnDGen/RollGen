@@ -10,6 +10,7 @@ namespace DnDGen.RollGen.Tests.Unit.Expressions
         [TestCase(RegexConstants.CommonRollRegexPattern, "d *\\d+(?: *("
             + "( *!)" //explode default
             + "|( *(e *\\d+))" //explode specific
+            + "|( *(t *\\d+ *: *\\d+))" //transform specific
             + "|( *(t *\\d+))" //transform
             + "|( *(k *\\d+))" //keep
             + ")*)")]

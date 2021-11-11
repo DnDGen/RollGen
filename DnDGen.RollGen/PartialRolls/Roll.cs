@@ -81,6 +81,12 @@ namespace DnDGen.RollGen.PartialRolls
 
             sections[key].Add(Convert.ToInt32(number));
 
+            //INFO: This means we ended on a transform and are using the "Default" transform to the max die value
+            if (key == 't')
+            {
+                sections[':'].Add(sections['d'][0]);
+            }
+
             if (!sections['q'].Any())
                 sections['q'].Add(1);
 
@@ -94,6 +100,7 @@ namespace DnDGen.RollGen.PartialRolls
                 AmountToKeep = sections['k'][0];
 
             ExplodeOn = sections['e'].Distinct().ToList();
+            Transforms = new Dictionary<int, int>();
 
             for (var i = 0; i < sections['t'].Count; i++)
             {
@@ -198,9 +205,21 @@ namespace DnDGen.RollGen.PartialRolls
                 min++;
             }
 
-            var minTransform = Transforms.Values.Min();
+            if (Transforms.Any())
+            {
+                //INFO: This means we are transforming all rolls
+                if (!Enumerable.Range(1, Die).Except(Transforms.Keys).Any())
+                {
+                    min = Transforms.Values.Min();
+                }
+                else
+                {
+                    var minTransform = Transforms.Values.Min();
+                    min = Math.Min(min, minTransform);
+                }
+            }
 
-            return Math.Min(min, minTransform) * quantity;
+            return min * quantity;
         }
 
         private int GetEffectiveQuantity()
@@ -216,15 +235,26 @@ namespace DnDGen.RollGen.PartialRolls
             ValidateRoll();
 
             var quantity = GetEffectiveQuantity();
-            var maxTransform = Transforms.Values.Max();
-            var max = quantity * Math.Max(Die, maxTransform);
+            var max = Die;
+            var multiplier = 1;
+
+            while (Transforms.ContainsKey(max) && max > 1)
+            {
+                --max;
+            }
+
+            if (Transforms.Any())
+            {
+                var maxTransform = Transforms.Values.Max();
+                max = Math.Max(max, maxTransform);
+            }
 
             //INFO: Since exploded dice can in theory be infinite, we will assume 10x multiplier,
             //which should cover 99.9% of use cases
             if (Explode && includeExplode)
-                max *= 10;
+                multiplier *= 10;
 
-            return max;
+            return quantity * max * multiplier;
         }
 
         public bool GetTrueOrFalse(Random random)
