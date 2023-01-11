@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>net6.0</TargetFrameworks>
-    <Version>15.3.0</Version>
+    <Version>15.4.0</Version>
     <Authors>Karl M. Speer</Authors>
     <Company>DnDGen</Company>
     <Product>RollGen</Product>
@@ -14,7 +14,7 @@
     <PackageIcon>18531-twenty-sided-dice-vector-thumb.png</PackageIcon>
     <PackageIconUrl />
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageReleaseNotes>Features: #43, #59, #61</PackageReleaseNotes>
+    <PackageReleaseNotes>Features: #65</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
