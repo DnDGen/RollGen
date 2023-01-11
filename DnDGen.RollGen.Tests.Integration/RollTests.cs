@@ -272,7 +272,7 @@ namespace DnDGen.RollGen.Tests.Integration
         [TestCase("1-2+3(4d5)", 1, 100)]
         [TestCase("(1)(2)(3)", 1, 100)]
         [TestCase("(1d2!+3)+(6d5k4)", 1, 100)]
-        [TestCase("(3)d(2)k(1)", 2, 100)]
+        [TestCase("(3)d(2)k(1)", 1, 100)]
         public void ParantheticalTransform(string transform, int lower, int upper)
         {
             var roll = dice.Roll().Percentile().Transforming(transform);
