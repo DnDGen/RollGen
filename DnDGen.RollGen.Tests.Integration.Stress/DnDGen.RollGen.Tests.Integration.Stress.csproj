@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DnDGen.Stress" Version="3.3.0" />
+    <PackageReference Include="DnDGen.Stress" Version="3.4.0" />
     <PackageReference Include="Ninject" Version="3.3.6" />
     <PackageReference Include="nunit" Version="3.13.3" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.3.1" />
