@@ -41,7 +41,8 @@ var explicitExpressionSuccess = dice.Roll("2d6 >= 1d12").AsTrueOrFalse(); //Eval
 var containsRoll = dice.ContainsRoll("This contains a roll of 4d6k3 for rolling stats"); //will return true here
 var summedSentence = dice.ReplaceRollsWithSumExpression("This contains a roll of 4d6k3 for rolling stats"); //returns "This contains a roll of (5 + 3 + 2) for rolling stats"
 var rolledSentence = dice.ReplaceExpressionWithTotal("This contains a roll of 4d6k3 for rolling stats"); //returns "This contains a roll of 10 for rolling stats"
-var rolledComplexSentence = dice.ReplaceWrappedExpressions<double>("Fireball does {min(4d6,10) + 0.5} damage"); //returns "Fireball does 15.5 damage"
+var rolledComplexSentenceMin = dice.ReplaceWrappedExpressions<double>("Fireball does {min(4d6,10) + 0.5} damage"); //returns "Fireball does 7.5 damage"
+var rolledComplexSentenceMax = dice.ReplaceWrappedExpressions<double>("Fireball does {max(4d6,10) + 0.5} damage"); //returns "Fireball does 15.5 damage"
 
 var optimizedRoll = RollHelper.GetRollWithMostEvenDistribution(4, 9); //returns "1d6+3", which is the most evenly-distributed roll possible, whether optimizing for dice or distribution
 var optimizedRollWithMultipleDice = RollHelper.GetRollWithMostEvenDistribution(1, 9); //returns "1d8+1d2-1", because it more evenly-distributed than "4d3-3"
