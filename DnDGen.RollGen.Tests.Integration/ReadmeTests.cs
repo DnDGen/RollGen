@@ -187,9 +187,17 @@ namespace DnDGen.RollGen.Tests.Integration
 
         [Test]
         [Repeat(100)]
-        public void RolledComplexSentence()
+        public void RolledComplexSentence_Minimum()
         {
-            var rolledComplexSentence = dice.ReplaceWrappedExpressions<double>("Fireball does {min\\(4d6,10\\) + 0.5} damage");
+            var rolledComplexSentence = dice.ReplaceWrappedExpressions<double>("Fireball does {min(4d6,10) + 0.5} damage");
+            Assert.That(rolledComplexSentence, Does.Match(@"Fireball does ([4-9]|10).5 damage"));
+        }
+
+        [Test]
+        [Repeat(100)]
+        public void RolledComplexSentence_Maximum()
+        {
+            var rolledComplexSentence = dice.ReplaceWrappedExpressions<double>("Fireball does {max(4d6,10) + 0.5} damage");
             Assert.That(rolledComplexSentence, Does.Match(@"Fireball does (1[0-9]|2[0-4]).5 damage"));
         }
 

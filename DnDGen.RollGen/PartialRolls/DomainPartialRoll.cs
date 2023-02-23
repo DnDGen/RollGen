@@ -192,17 +192,52 @@ namespace DnDGen.RollGen.PartialRolls
 
         private IEnumerable<T> GetIndividualRolls<T>(string rollExpression)
         {
-            //INFO: Not sure how to evaluate individual rolls from genuine expressions (6d5d4k3d2k1), so will compute those as 1 roll
-            if (!Roll.CanParse(rollExpression))
+            var trimmedExpression = rollExpression;
+
+            while (CanTrimParanthesesFromExpression(trimmedExpression))
             {
-                var evaluatedExpression = EvaluateExpression(rollExpression, e => GetTotalOfRolls<T>(e));
-                return new[] { evaluatedExpression };
+                trimmedExpression = trimmedExpression[1..^1];
             }
 
-            var roll = new Roll(rollExpression);
-            var rolls = roll.GetRolls(random);
+            //INFO: Not sure how to evaluate individual rolls from genuine expressions (6d5d4k3d2k1), so will compute those as 1 roll
+            if (Roll.CanParse(trimmedExpression))
+            {
+                var roll = new Roll(trimmedExpression);
+                var rolls = roll.GetRolls(random);
 
-            return rolls.Select(r => Utils.ChangeType<T>(r));
+                return rolls.Select(r => Utils.ChangeType<T>(r));
+            }
+
+            //INFO: Not sure how to evaluate individual rolls from genuine expressions (6d5d4k3d2k1), so will compute those as 1 roll
+            var evaluatedExpression = EvaluateExpression(trimmedExpression, e => GetTotalOfRolls<T>(e));
+            return new[] { evaluatedExpression };
+        }
+
+        private bool CanTrimParanthesesFromExpression(string rollExpression)
+        {
+            var wrappedInParantheses = rollExpression.StartsWith('(') && rollExpression.EndsWith(')');
+            if (!wrappedInParantheses)
+                return false;
+
+            var trimmed = rollExpression[1..^1];
+            if (!trimmed.Intersect(new[] { '(', ')' }).Any())
+                return true;
+
+            var startCount = 0;
+            var endCount = 0;
+
+            for (var i = 0; i < trimmed.Length; i++)
+            {
+                if (trimmed[i] == '(')
+                    startCount++;
+                else if (trimmed[i] == ')')
+                    endCount++;
+
+                if (endCount > startCount)
+                    return false;
+            }
+
+            return true;
         }
 
         private T EvaluateExpression<T>(string rollExpression, Func<string, T> getRoll)
@@ -216,6 +251,14 @@ namespace DnDGen.RollGen.PartialRolls
         {
             var expressionWithReplacedRolls = rollExpression;
 
+            while (CanTrimParanthesesFromExpression(expressionWithReplacedRolls))
+            {
+                expressionWithReplacedRolls = expressionWithReplacedRolls[1..^1];
+            }
+
+            if (expressionEvaluator.IsValid(expressionWithReplacedRolls))
+                return expressionWithReplacedRolls;
+
             //1. Replace paranthetical expressions
             while (expressionWithReplacedRolls.Contains('('))
             {
@@ -223,20 +266,37 @@ namespace DnDGen.RollGen.PartialRolls
                 var innerExpressionLength = GetInnerExpressionLength(expressionWithReplacedRolls, openParanthesisIndex);
                 var innerExpression = expressionWithReplacedRolls.Substring(openParanthesisIndex + 1, innerExpressionLength);
 
-                var innerExpressionWithReplacedRolls = EvaluateExpression(innerExpression, getRoll);
-                var replacement = innerExpressionWithReplacedRolls.ToString();
+                //var innerExpressionWithReplacedRolls = EvaluateExpression(innerExpression, getRoll);
+                var replacement = ReplaceRollsInExpression(innerExpression, getRoll);
 
-                if (NeedLeadingMultiplier(expressionWithReplacedRolls))
+                if (expressionEvaluator.IsValid(replacement))
                 {
-                    replacement = $"*{replacement}";
+                    replacement = expressionEvaluator.Evaluate<T>(replacement).ToString();
+
+                    if (NeedLeadingMultiplier(expressionWithReplacedRolls))
+                    {
+                        replacement = $"*{replacement}";
+                    }
+
+                    if (NeedFollowingMultiplier(expressionWithReplacedRolls))
+                    {
+                        replacement = $"{replacement}*";
+                    }
+
+                    expressionWithReplacedRolls = ReplaceFirst(expressionWithReplacedRolls, $"({innerExpression})", replacement);
+                }
+                //INFO: This means we might be inside a function declaration
+                else
+                {
+                    //This means we didn't change anything and shoud move on
+                    if (replacement == innerExpression)
+                        break;
+
+                    expressionWithReplacedRolls = ReplaceFirst(expressionWithReplacedRolls, $"({innerExpression})", $"({replacement})");
                 }
 
-                if (NeedFollowingMultiplier(expressionWithReplacedRolls))
-                {
-                    replacement = $"{replacement}*";
-                }
-
-                expressionWithReplacedRolls = ReplaceFirst(expressionWithReplacedRolls, $"({innerExpression})", replacement);
+                if (expressionEvaluator.IsValid(expressionWithReplacedRolls))
+                    return expressionWithReplacedRolls;
             }
 
             //2. Replace rolls
@@ -250,7 +310,7 @@ namespace DnDGen.RollGen.PartialRolls
                     || (expressionWithReplacedRolls.Length > matchIndex + match.Value.Length
                         && expressionWithReplacedRolls[matchIndex + match.Value.Length] == '.'))
                 {
-                    throw new ArgumentException($"Cannot have decimal values for die rolls");
+                    throw new ArgumentException($"Cannot have decimal values for die rolls: {expressionWithReplacedRolls}");
                 }
 
                 var matchValue = match.Value.Trim();

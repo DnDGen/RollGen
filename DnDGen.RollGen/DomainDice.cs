@@ -72,7 +72,7 @@ namespace DnDGen.RollGen
             if (typeof(T) == typeof(bool))
                 return partialRoll.AsTrueOrFalse().ToString();
 
-            return partialRoll.AsSum().ToString();
+            return partialRoll.AsSum<T>().ToString();
         }
 
         public string ReplaceRollsWithSumExpression(string expression, bool lenient = false)
