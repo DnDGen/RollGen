@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using System.Linq;
 
 namespace DnDGen.RollGen.Tests.Integration
 {
@@ -346,7 +347,7 @@ namespace DnDGen.RollGen.Tests.Integration
         [TestCase("1d2+3", "(1d2)d3", 1, 100)]
         [TestCase("1d2+3d4", "1d(2d3)", 1, 100)]
         [TestCase("(1d2)+(3d4)", "1d2+1", 1, 100)]
-        [TestCase("(1d2)d3", "(1d2+1)+1", 2, 100)]
+        [TestCase("(1d2)d3", "(1d2+1)+1", 1, 100)]
         [TestCase("1d(2d3)", "((1d2+1)+1)+1", 2, 100)]
         [TestCase("1d2+1", "(1d2+1)+(3d4+1)", 1, 100)]
         [TestCase("(1d2+1)", "(1d2+1)+(3d4+1)+1", 1, 100)]
@@ -406,6 +407,85 @@ namespace DnDGen.RollGen.Tests.Integration
             Assert.That(min, Is.EqualTo(3));
             Assert.That(max, Is.EqualTo(6600));
             Assert.That(sum, Is.InRange(3, 6600));
+        }
+
+        [TestCase("4d6k3", 3, 18, 10.5)]
+        [TestCase("min(4d6,10)", 4, 10, 10)]
+        [TestCase("min(1d4d6,10)", 1, 10, 10, Ignore = "Average of 1d4d6 = 2.5d6, which isn't valid")]
+        [TestCase("min(2d4d6,10)", 2, 10, 10)]
+        [TestCase("min((1d3+1)d(2d3),10)", 2, 10, 7.5)]
+        [TestCase("min(4d6,10)+2d3", 6, 16, 14)]
+        [TestCase("(min(4d6,10))", 4, 10, 10)]
+        [TestCase("min(4d6,10)+0.5", 4, 10, 10.5)]
+        [TestCase("(min(4d6,10)+0.5)", 4, 10, 10.5)]
+        [TestCase("max(4d6,10)", 10, 24, 14)]
+        [TestCase("(max(4d6,10))", 10, 24, 14)]
+        [TestCase("max(4d6,10)+0.5", 10, 24, 14.5)]
+        [TestCase("(max(4d6,10)+0.5)", 10, 24, 14.5)]
+        public void SpecificRolls(string rollExpression, int expectedMinimum, int expectedMaximum, double expectedAverage)
+        {
+            var roll = dice.Roll(rollExpression);
+            var sum = roll.AsSum();
+            var average = roll.AsPotentialAverage();
+            var min = roll.AsPotentialMinimum();
+            var max = roll.AsPotentialMaximum();
+
+            Assert.That(min, Is.EqualTo(expectedMinimum));
+            Assert.That(max, Is.EqualTo(expectedMaximum));
+            Assert.That(average, Is.EqualTo(expectedAverage));
+            Assert.That(sum, Is.InRange(expectedMinimum, expectedMaximum));
+        }
+
+        [TestCase("2d6>1d12")]
+        [TestCase("2d6=1d12")]
+        [TestCase("2d6<1d12")]
+        [TestCase("2d6>=1d12")]
+        [TestCase("2d6<=1d12")]
+        [TestCase("8>=6", true)]
+        [TestCase("8>6", true)]
+        [TestCase("8=6", false)]
+        [TestCase("8<6", false)]
+        [TestCase("8<=6", false)]
+        [TestCase("(2d6>1d12)")]
+        [TestCase("(8>6)", true)]
+        [TestCase("(8=6)", false)]
+        public void SpecificBooleanRolls(string rollExpression, bool? expectedValue = null)
+        {
+            var roll = dice.Roll(rollExpression).AsTrueOrFalse();
+            Assert.That(roll, Is.True.Or.False);
+
+            if (expectedValue.HasValue)
+                Assert.That(roll, Is.EqualTo(expectedValue.Value));
+        }
+
+        [TestCase("4d6k3", 1, 6, 3)]
+        [TestCase("(4d6k3)", 1, 6, 3)]
+        [TestCase("((4d6k3))", 1, 6, 3)]
+        [TestCase("(((((4d6k3)))))", 1, 6, 3)]
+        [TestCase("4d6k3+2", 5, 20, 1)]
+        [TestCase("1d2+3d4", 4, 14, 1)]
+        [TestCase("1d2d3", 1, 6, 1)]
+        [TestCase("(1d2)d3", 1, 6, 1)]
+        [TestCase("((1d2)d3)", 1, 6, 1)]
+        [TestCase("1d(2d3)", 1, 6, 1)]
+        [TestCase("(1d(2d3))", 1, 6, 1)]
+        [TestCase("((1d2))d((2d2))d2d3d4k((1d1))+((1d2))d6d8d10k((1d1))+((1d2))d12d20d100!t((2d4))t((2d1))k((1d1))+((1d1))-((1d1))*((1d1))/((1d2))%((2d2))", 3, 1014, 1)]
+        public void SpecificIndividualRolls(string rollExpression, int expectedMinimum, int expectedMaximum, int rollCount)
+        {
+            var partialRoll = dice.Roll(rollExpression);
+            var rolls = partialRoll.AsIndividualRolls<int>();
+
+            if (rollCount == 1)
+            {
+                var min = partialRoll.AsPotentialMinimum();
+                var max = partialRoll.AsPotentialMaximum();
+
+                Assert.That(min, Is.EqualTo(expectedMinimum));
+                Assert.That(max, Is.EqualTo(expectedMaximum));
+            }
+
+            Assert.That(rolls, Has.All.InRange(expectedMinimum, expectedMaximum));
+            Assert.That(rolls.Count(), Is.EqualTo(rollCount));
         }
     }
 }

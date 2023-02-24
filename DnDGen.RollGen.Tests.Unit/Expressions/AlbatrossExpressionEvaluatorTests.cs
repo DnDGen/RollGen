@@ -69,7 +69,8 @@ namespace DnDGen.RollGen.Tests.Unit.Expressions
         [Test]
         public void IfDieRollIsInExpression_ThrowArgumentException()
         {
-            Assert.That(() => expressionEvaluator.Evaluate<int>("expression with 3 d 4+2"), Throws.ArgumentException.With.Message.EqualTo("Cannot evaluate unrolled die roll 3 d 4"));
+            Assert.That(() => expressionEvaluator.Evaluate<int>("expression with 3 d 4+2"),
+                Throws.ArgumentException.With.Message.EqualTo("Cannot evaluate unrolled die roll 3 d 4"));
         }
 
         [Test]
@@ -110,6 +111,35 @@ namespace DnDGen.RollGen.Tests.Unit.Expressions
                 Throws.InvalidOperationException
                 .With.Message.EqualTo($"Expression 'wrong expression' is invalid")
                 .And.InnerException.EqualTo(exception));
+        }
+
+        [Test]
+        public void IsValid_ReturnsTrue()
+        {
+            //mockParser.Setup(p => p.IsValidExpression(Expression)).Returns(true);
+
+            var result = expressionEvaluator.IsValid(Expression);
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public void IsValid_ReturnsFalse()
+        {
+            //mockParser.Setup(p => p.IsValidExpression(Expression)).Returns(false);
+
+            var mockToken = new Mock<IToken>();
+            var queue = new Queue<IToken>();
+            var stack = new Stack<IToken>();
+
+            mockParser.Setup(p => p.Tokenize(Expression)).Returns(queue);
+            mockParser.Setup(p => p.BuildStack(queue)).Returns(stack);
+            mockParser.Setup(p => p.CreateTree(stack)).Returns(mockToken.Object);
+
+            var exception = new Exception("I failed");
+            mockToken.Setup(t => t.EvalValue(null)).Throws(exception);
+
+            var result = expressionEvaluator.IsValid(Expression);
+            Assert.That(result, Is.False);
         }
     }
 }

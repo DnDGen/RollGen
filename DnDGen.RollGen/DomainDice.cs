@@ -72,7 +72,7 @@ namespace DnDGen.RollGen
             if (typeof(T) == typeof(bool))
                 return partialRoll.AsTrueOrFalse().ToString();
 
-            return partialRoll.AsSum().ToString();
+            return partialRoll.AsSum<T>().ToString();
         }
 
         public string ReplaceRollsWithSumExpression(string expression, bool lenient = false)
@@ -157,6 +157,42 @@ namespace DnDGen.RollGen
             }
 
             return expressionWithReplacedRolls;
+        }
+
+        public string Describe(string rollExpression, int roll, params string[] descriptions)
+        {
+            if (descriptions.Length == 0)
+                descriptions = new[] { "Bad", "Good" };
+
+            var minimumRoll = Roll(rollExpression).AsPotentialMinimum();
+            var maximumRoll = Roll(rollExpression).AsPotentialMaximum();
+
+            if (roll < minimumRoll)
+                return descriptions.First();
+
+            if (roll > maximumRoll)
+                return descriptions.Last();
+
+            var percentile = GetPercentile(minimumRoll, maximumRoll, roll);
+
+            var rawIndex = percentile * descriptions.Length;
+            rawIndex = Math.Floor(rawIndex);
+
+            var index = Convert.ToInt32(rawIndex);
+            index = Math.Min(index, descriptions.Count() - 1);
+
+            return descriptions[index];
+        }
+
+        private double GetPercentile(int min, int max, double value)
+        {
+            var totalRange = max - min;
+            var range = value - min;
+
+            if (totalRange > 0)
+                return range / totalRange;
+
+            return .5;
         }
     }
 }
