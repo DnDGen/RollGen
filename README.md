@@ -110,7 +110,7 @@ valid = dice.IsValid("bad(1d12, 2d6, 3d4, 4d3, 6d2)"); //Returns FALSE, because 
 
 valid = dice.IsValid("this is not a roll"); //Returns FALSE
 valid = dice.IsValid("this contains 3d6, but is not a roll"); //Returns FALSE
-valid = dice.IsValid("9266+90210-42*600/1337%1336+96d(783d82%45+922-2022/337)-min(max(avg(1d2, 3d4, 5d6)))"); //Returns TRUE
+valid = dice.IsValid("9266+90210-42*600/1337%1336+96d(783d82%45+922-2022/337)-min(1d2, 3d4, 5d6)+max(1d2, 3d4, 5d6)*avg(1d2, 3d4, 5d6)"); //Returns TRUE
 
 ```
 
