@@ -647,5 +647,29 @@ namespace DnDGen.RollGen.Tests.Unit
             var description = dice.Describe("1d100", roll, "Low", "Medium", "High");
             Assert.That(description, Is.EqualTo(expected));
         }
+
+        [Test]
+        public void IsValid_ReturnsValid()
+        {
+            var mockPartialRollWithQuantity = new Mock<PartialRoll>();
+            mockPartialRollFactory.Setup(f => f.Build("my roll expression")).Returns(mockPartialRollWithQuantity.Object);
+
+            mockPartialRollWithQuantity.Setup(r => r.IsValid()).Returns(true);
+
+            var valid = dice.IsValid("my roll expression");
+            Assert.That(valid, Is.True);
+        }
+
+        [Test]
+        public void IsValid_ReturnsInvalid()
+        {
+            var mockPartialRollWithQuantity = new Mock<PartialRoll>();
+            mockPartialRollFactory.Setup(f => f.Build("my roll expression")).Returns(mockPartialRollWithQuantity.Object);
+
+            mockPartialRollWithQuantity.Setup(r => r.IsValid()).Returns(false);
+
+            var valid = dice.IsValid("my roll expression");
+            Assert.That(valid, Is.False);
+        }
     }
 }

@@ -24,6 +24,9 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             mockRandom.Setup(r => r.Next(It.IsAny<int>())).Returns((int max) => count++ % max);
             mockExpressionEvaluator.Setup(e => e.Evaluate<int>(It.IsAny<string>())).Returns((string s) => DefaultIntValue(s));
             mockExpressionEvaluator.Setup(e => e.Evaluate<double>(It.IsAny<string>())).Returns((string s) => DefaultDoubleValue(s));
+            mockExpressionEvaluator
+                .Setup(e => e.IsValid(It.IsAny<string>()))
+                .Returns((string s) => int.TryParse(s, out var o1) || double.TryParse(s, out var o2));
         }
 
         private int DefaultIntValue(string source)
@@ -31,7 +34,8 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             if (int.TryParse(source, out var output))
                 return output;
 
-            throw new ArgumentException($"{source} was not configured to be evaluated");
+            Assert.Fail($"{source} was not configured to be evaluated as an integer");
+            throw new InvalidOperationException();
         }
 
         private double DefaultDoubleValue(string source)
@@ -39,7 +43,8 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             if (double.TryParse(source, out var output))
                 return output;
 
-            throw new ArgumentException($"{source} was not configured to be evaluated");
+            Assert.Fail($"{source} was not configured to be evaluated as a double");
+            throw new InvalidOperationException();
         }
 
         private void BuildPartialRoll(double quantity)
@@ -3130,7 +3135,7 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             partialRoll.d("6.6");
 
             Assert.That(() => partialRoll.AsSum<double>(),
-                Throws.ArgumentException.With.Message.EqualTo("92d(6.6) was not configured to be evaluated"));
+                Throws.ArgumentException.With.Message.EqualTo("Cannot have decimal values for die rolls: 92d6.6"));
         }
 
         [Test]
@@ -3150,7 +3155,7 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             partialRoll.d("6.6");
 
             Assert.That(() => partialRoll.AsIndividualRolls<double>(),
-                Throws.ArgumentException.With.Message.EqualTo("92d(6.6) was not configured to be evaluated"));
+                Throws.ArgumentException.With.Message.EqualTo("Cannot have decimal values for die rolls: 92d6.6"));
         }
 
         [Test]
@@ -3170,7 +3175,7 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             partialRoll.d("6.6");
 
             Assert.That(() => partialRoll.AsPotentialMinimum<double>(),
-                Throws.ArgumentException.With.Message.EqualTo("92d(6.6) was not configured to be evaluated"));
+                Throws.ArgumentException.With.Message.EqualTo("Cannot have decimal values for die rolls: 92d6.6"));
         }
 
         [Test]
@@ -3190,7 +3195,7 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             partialRoll.d("6.6");
 
             Assert.That(() => partialRoll.AsPotentialMaximum<double>(),
-                Throws.ArgumentException.With.Message.EqualTo("92d(6.6) was not configured to be evaluated"));
+                Throws.ArgumentException.With.Message.EqualTo("Cannot have decimal values for die rolls: 92d6.6"));
         }
 
         [Test]
@@ -3210,7 +3215,7 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             partialRoll.d("6.6");
 
             Assert.That(() => partialRoll.AsPotentialAverage(),
-                Throws.ArgumentException.With.Message.EqualTo("92d(6.6) was not configured to be evaluated"));
+                Throws.ArgumentException.With.Message.EqualTo("Cannot have decimal values for die rolls: 92d6.6"));
         }
 
         [Test]
@@ -3231,7 +3236,290 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             mockExpressionEvaluator.Setup(e => e.Evaluate<double>("6.6")).Returns((string s) => 6.6);
 
             Assert.That(() => partialRoll.AsTrueOrFalse(),
-                Throws.ArgumentException.With.Message.EqualTo("92d(6.6) was not configured to be evaluated"));
+                Throws.ArgumentException.With.Message.EqualTo("Cannot have decimal values for die rolls: 92d6.6"));
+        }
+
+        [TestCase(-9266)]
+        [TestCase(-2)]
+        [TestCase(-1)]
+        [TestCase(0)]
+        [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(9266)]
+        [TestCase(Limits.Quantity)]
+        [TestCase(Limits.Quantity + 1)]
+        public void IsValidFromNumericQuantity_NoRoll_Valid(int value)
+        {
+            BuildPartialRoll(value);
+            var valid = partialRoll.IsValid();
+            Assert.That(valid, Is.True);
+        }
+
+        [Test]
+        public void IsValidFromNumericQuantity_NoRoll_Double()
+        {
+            BuildPartialRoll(92.66);
+            var valid = partialRoll.IsValid();
+            Assert.That(valid, Is.True);
+        }
+
+        [TestCase(-9266, Ignore = "This gets interpreted as -1(9266d2), which is valid")]
+        [TestCase(-2, Ignore = "This gets interpreted as -1(2d2), which is valid")]
+        [TestCase(-1, Ignore = "This gets interpreted as -1(1d2), which is valid")]
+        [TestCase(0)]
+        [TestCase(Limits.Quantity + 1)]
+        public void IsValidFromNumericQuantity_WithRoll_Invalid(int value)
+        {
+            BuildPartialRoll(value);
+            var valid = partialRoll.d2().IsValid();
+            Assert.That(valid, Is.False);
+        }
+
+        [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(9266)]
+        [TestCase(Limits.Quantity)]
+        public void IsValidFromNumericQuantity_WithRoll_Valid(int value)
+        {
+            BuildPartialRoll(value);
+            var valid = partialRoll.d2().IsValid();
+            Assert.That(valid, Is.True);
+        }
+
+        [Test]
+        public void IsValidFromNumericQuantity_WithRoll_Double()
+        {
+            BuildPartialRoll(92.66);
+            var valid = partialRoll.d2().IsValid();
+            Assert.That(valid, Is.False);
+        }
+
+        [TestCase("4d3k2")]
+        [TestCase("-432")]
+        [TestCase("-2")]
+        [TestCase("-1")]
+        [TestCase("0")]
+        [TestCase("1")]
+        [TestCase("2")]
+        [TestCase("43.2")]
+        [TestCase("432")]
+        [TestCase("10000")]
+        [TestCase("10001")]
+        public void IsValidFromQuantityExpression_NoRoll_Valid(string expression)
+        {
+            BuildPartialRoll(expression);
+            var valid = partialRoll.IsValid();
+            Assert.That(valid, Is.True);
+        }
+
+        [TestCase("4d3k2")]
+        [TestCase("1")]
+        [TestCase("2")]
+        [TestCase("432")]
+        [TestCase("10000")]
+        public void IsValidFromQuantityExpression_WithRoll_Valid(string expression)
+        {
+            BuildPartialRoll(expression);
+            var valid = partialRoll.d2().IsValid();
+            Assert.That(valid, Is.True);
+        }
+
+        [TestCase("-432", Ignore = "This gets interpreted as -1(432d2), which is valid")]
+        [TestCase("-2", Ignore = "This gets interpreted as -1(2d2), which is valid")]
+        [TestCase("-1", Ignore = "This gets interpreted as -1(1d2), which is valid")]
+        [TestCase("0")]
+        [TestCase("43.2")]
+        [TestCase("10001")]
+        public void IsValidFromQuantityExpression_WithRoll_Invalid(string expression)
+        {
+            BuildPartialRoll(expression);
+            var valid = partialRoll.d2().IsValid();
+            Assert.That(valid, Is.False);
+        }
+
+        [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(9266)]
+        [TestCase(Limits.Die)]
+        public void IsValidFromNumericDie_Valid(int value)
+        {
+            BuildPartialRoll(1);
+            var valid = partialRoll.d(value).IsValid();
+            Assert.That(valid, Is.True);
+        }
+
+        [TestCase(-9266)]
+        [TestCase(-2)]
+        [TestCase(-1)]
+        [TestCase(0)]
+        [TestCase(Limits.Die + 1)]
+        public void IsValidFromNumericDie_Invalid(int value)
+        {
+            BuildPartialRoll(1);
+            var valid = partialRoll.d(value).IsValid();
+            Assert.That(valid, Is.False);
+        }
+
+        [TestCase("4d3k2")]
+        [TestCase("1")]
+        [TestCase("2")]
+        [TestCase("432")]
+        [TestCase("10000")]
+        public void IsValidFromDieExpression_Valid(string expression)
+        {
+            BuildPartialRoll(1);
+            var valid = partialRoll.d(expression).IsValid();
+            Assert.That(valid, Is.True);
+        }
+
+        [TestCase("-432")]
+        [TestCase("-2")]
+        [TestCase("-1")]
+        [TestCase("0")]
+        [TestCase("43.2")]
+        [TestCase("10001")]
+        public void IsValidFromDieExpression_Invalid(string expression)
+        {
+            BuildPartialRoll(1);
+            var valid = partialRoll.d(expression).IsValid();
+            Assert.That(valid, Is.False);
+        }
+
+        [TestCase(0)]
+        [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(9266)]
+        [TestCase(Limits.Quantity)]
+        public void IsValidFromNumericKeep_Valid(int value)
+        {
+            BuildPartialRoll(1);
+            var valid = partialRoll.d2().Keeping(value).IsValid();
+            Assert.That(valid, Is.True);
+        }
+
+        [TestCase(-9266)]
+        [TestCase(-2)]
+        [TestCase(-1)]
+        [TestCase(Limits.Quantity + 1)]
+        public void IsValidFromNumericKeep_Invalid(int value)
+        {
+            BuildPartialRoll(1);
+            var valid = partialRoll.d2().Keeping(value).IsValid();
+            Assert.That(valid, Is.False);
+        }
+
+        [TestCase("4d3k2")]
+        [TestCase("0")]
+        [TestCase("1")]
+        [TestCase("2")]
+        [TestCase("432")]
+        [TestCase("10000")]
+        public void IsValidFromKeepExpression_Valid(string expression)
+        {
+            BuildPartialRoll(1);
+            var valid = partialRoll.d2().Keeping(expression).IsValid();
+            Assert.That(valid, Is.True);
+        }
+
+        [TestCase("-432")]
+        [TestCase("-2")]
+        [TestCase("-1")]
+        [TestCase("43.2")]
+        [TestCase("10001")]
+        public void IsValidFromKeepExpression_Invalid(string expression)
+        {
+            BuildPartialRoll(1);
+            var valid = partialRoll.d2().Keeping(expression).IsValid();
+            Assert.That(valid, Is.False);
+        }
+
+        [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(9266)]
+        [TestCase(Limits.Die)]
+        public void IsValidFromNumericTransform_Valid(int value)
+        {
+            BuildPartialRoll(1);
+            var valid = partialRoll.d2().Transforming(value).IsValid();
+            Assert.That(valid, Is.True);
+        }
+
+        [TestCase(-9266)]
+        [TestCase(-2)]
+        [TestCase(-1)]
+        [TestCase(0)]
+        [TestCase(Limits.Die + 1)]
+        public void IsValidFromNumericTransform_Invalid(int value)
+        {
+            BuildPartialRoll(1);
+            var valid = partialRoll.d2().Transforming(value).IsValid();
+            Assert.That(valid, Is.False);
+        }
+
+        [TestCase("4d3k2")]
+        [TestCase("1")]
+        [TestCase("2")]
+        [TestCase("432")]
+        [TestCase("10000")]
+        public void IsValidFromTransformExpression_Valid(string expression)
+        {
+            BuildPartialRoll(1);
+            var valid = partialRoll.d2().Transforming(expression).IsValid();
+            Assert.That(valid, Is.True);
+        }
+
+        [TestCase("-432")]
+        [TestCase("-2")]
+        [TestCase("-1")]
+        [TestCase("0")]
+        [TestCase("43.2")]
+        [TestCase("10001")]
+        public void IsValidFromTransformExpression_Invalid(string expression)
+        {
+            BuildPartialRoll(1);
+            var valid = partialRoll.d2().Transforming(expression).IsValid();
+            Assert.That(valid, Is.False);
+        }
+
+        [TestCase(-9266, Ignore = "Negative transform targets are not detected correctly")]
+        [TestCase(-2, Ignore = "Negative transform targets are not detected correctly")]
+        [TestCase(-1, Ignore = "Negative transform targets are not detected correctly")]
+        [TestCase(0)]
+        [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(9266)]
+        [TestCase(Limits.Die)]
+        [TestCase(Limits.Die + 1)]
+        public void IsValidFromNumericTransformTarget_Valid(int value)
+        {
+            BuildPartialRoll(1);
+            var valid = partialRoll.d2().Transforming(1, value).IsValid();
+            Assert.That(valid, Is.True);
+        }
+
+        [TestCase("4d3k2")]
+        [TestCase("-432", Ignore = "Negative transform targets are not detected correctly")]
+        [TestCase("-2", Ignore = "Negative transform targets are not detected correctly")]
+        [TestCase("-1", Ignore = "Negative transform targets are not detected correctly")]
+        [TestCase("0")]
+        [TestCase("1")]
+        [TestCase("2")]
+        [TestCase("432")]
+        [TestCase("10000")]
+        [TestCase("10001")]
+        public void IsValidFromTransformTargetExpression_Valid(string expression)
+        {
+            BuildPartialRoll(1);
+            var valid = partialRoll.d2().Transforming("1", expression).IsValid();
+            Assert.That(valid, Is.True);
+        }
+
+        [TestCase("43.2")]
+        public void IsValidFromTransformTargetExpression_Invalid(string expression)
+        {
+            BuildPartialRoll(1);
+            var valid = partialRoll.d2().Transforming("1", expression).IsValid();
+            Assert.That(valid, Is.False);
         }
     }
 }

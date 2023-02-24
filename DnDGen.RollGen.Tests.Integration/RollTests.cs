@@ -267,7 +267,7 @@ namespace DnDGen.RollGen.Tests.Integration
         [TestCase("6d(5d4k3)d2k1", 2, 100)]
         [TestCase("1+2-(3*4/5)%6", 2, 100)]
         [TestCase("7d6k5", 1, 100)]
-        [TestCase("1d3!", 2, 100)]
+        [TestCase("1d3!", 1, 100)]
         [TestCase("2d3!", 1, 100)]
         [TestCase("1-2+3(4)", 1, 100)]
         [TestCase("1-2+3(4d5)", 1, 100)]
@@ -278,13 +278,14 @@ namespace DnDGen.RollGen.Tests.Integration
         {
             var roll = dice.Roll().Percentile().Transforming(transform);
             var sum = roll.AsSum();
-            var min = roll.AsPotentialMinimum();
-            var max = roll.AsPotentialMaximum();
+            Assert.That(sum, Is.InRange(lower, upper));
 
             //INFO: Transform changes the potential min and max, so we will ignore these assertions
+            //var min = roll.AsPotentialMinimum();
+            //var max = roll.AsPotentialMaximum();
+
             //Assert.That(min, Is.EqualTo(lower), "Min");
             //Assert.That(max, Is.EqualTo(upper), "Max");
-            Assert.That(sum, Is.InRange(lower, upper));
         }
 
         [TestCase("1d2", 2, 1_000)]

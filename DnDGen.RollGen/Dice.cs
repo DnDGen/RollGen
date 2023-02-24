@@ -26,5 +26,8 @@ namespace DnDGen.RollGen
         /// <param name="roll">The value to be described.</param>
         /// <param name="descriptions">A list of descriptions, starting with the worst and ending with the best. Defaults to [Bad, Good]</param>
         string Describe(string rollExpression, int roll, params string[] descriptions);
+        /// <summary>Will say whether the roll expression is valid to be parsed by RollGen</summary>
+        /// <param name="rollExpression">The roll expression to be validated.</param>
+        bool IsValid(string rollExpression);
     }
 }

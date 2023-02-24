@@ -358,5 +358,47 @@ namespace DnDGen.RollGen.Tests.Integration
             var rolls = dice.Roll(4).d6().Keeping(3).AsSum();
             Assert.That(rolls, Is.InRange(3, 18));
         }
+
+        [TestCase("3d6+1", true)]
+        [TestCase("(3)d(6)+1", true)]
+        [TestCase("(1d2)d(3d4)+5d6", true)]
+        [TestCase("10000d10000", true)]
+        [TestCase("(100d100)d(100d100)", true)]
+        [TestCase("(100d100d2)d(100d100)", false)]
+        [TestCase("(100d100)d(100d100d2)", false)]
+        [TestCase("(0)d(6)+1", false)]
+        [TestCase("(3.1)d(6)+1", false)]
+        [TestCase("0d6+1", false)]
+        [TestCase("10001d10000", false)]
+        [TestCase("(100d100+1)d(100d100)", false)]
+        [TestCase("(3)d(-6)+1", false)]
+        [TestCase("(3)d(6.1)+1", false)]
+        [TestCase("3d0+1", false)]
+        [TestCase("10000d10001", false)]
+        [TestCase("(100d100)d(100d100+1)", false)]
+        [TestCase("4d6k3", true)]
+        [TestCase("(4)d(6)k(3)", true)]
+        [TestCase("(4)d(6)k(-1)", false)]
+        [TestCase("(4)d(6)k(3.1)", false)]
+        [TestCase("4d6k10000", true)]
+        [TestCase("4d6k10001", false)]
+        [TestCase("4d6k(100d100+1)", false)]
+        [TestCase("3d6t1", true)]
+        [TestCase("3d6t1t2", true)]
+        [TestCase("3d6t7", true)]
+        [TestCase("3d6t0", false)]
+        [TestCase("3d6t6:0", true)]
+        [TestCase("3d6t10001", false)]
+        [TestCase("3d6t6:10001", true)]
+        [TestCase("avg(1d12, 2d6, 3d4, 4d3, 6d2)", true)]
+        [TestCase("bad(1d12, 2d6, 3d4, 4d3, 6d2)", false)]
+        [TestCase("this is not a roll", false)]
+        [TestCase("this contains 3d6, but is not a roll", false)]
+        [TestCase("9266+90210-42*600/1337%1336+96d(783d82%45+922-2022/337)-min(1d2, 3d4, 5d6)+max(1d2, 3d4, 5d6)*avg(1d2, 3d4, 5d6)", true)]
+        public void IsValid(string rollExpression, bool expected)
+        {
+            var actual = dice.IsValid(rollExpression);
+            Assert.That(actual, Is.EqualTo(expected));
+        }
     }
 }
