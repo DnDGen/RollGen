@@ -113,6 +113,7 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
                 / ComputeMaximum(db)
                 % ComputeMaximum(md);
 
+            Assert.That(roll.IsValid(), Is.True, roll.CurrentRollExpression);
             Assert.That(roll.AsSum<double>(), Is.InRange(min, max * 10), roll.CurrentRollExpression);
             Assert.That(roll.AsPotentialMinimum<double>(), Is.EqualTo(min), roll.CurrentRollExpression);
             Assert.That(roll.AsPotentialMaximum<double>(false), Is.EqualTo(max), roll.CurrentRollExpression);
