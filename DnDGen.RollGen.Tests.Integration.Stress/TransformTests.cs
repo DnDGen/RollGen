@@ -49,6 +49,7 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
             var average = (min + max) / 2.0d;
 
             Assert.That(min, Is.LessThanOrEqualTo(max), roll.CurrentRollExpression);
+            Assert.That(roll.IsValid(), Is.True, roll.CurrentRollExpression);
             Assert.That(roll.AsSum(), Is.InRange(min, max), roll.CurrentRollExpression);
             Assert.That(roll.AsPotentialMinimum(), Is.EqualTo(min), roll.CurrentRollExpression);
             Assert.That(roll.AsPotentialMaximum(false), Is.EqualTo(max), roll.CurrentRollExpression);

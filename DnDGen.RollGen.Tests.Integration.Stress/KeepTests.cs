@@ -47,6 +47,7 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
             var min = qMin;
             var max = qMin * die;
 
+            Assert.That(roll.IsValid(), Is.True);
             Assert.That(roll.AsSum(), Is.InRange(min, max));
             Assert.That(roll.AsPotentialMinimum(), Is.EqualTo(min));
             Assert.That(roll.AsPotentialMaximum(false), Is.EqualTo(max));
@@ -58,7 +59,7 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
             var rolls = roll.AsIndividualRolls();
 
             Assert.That(rolls.Count(), Is.EqualTo(qMin));
-            Assert.That(rolls, Has.All.InRange(1, max));
+            Assert.That(rolls, Has.All.InRange(1, die));
         }
 
         private PartialRoll GetRoll(int quantity, int die, int keep) => dice.Roll(quantity).d(die).Keeping(keep);

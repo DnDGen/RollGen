@@ -35,6 +35,7 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 
         private void AssertTotal(PartialRoll roll, double total)
         {
+            Assert.That(roll.IsValid(), Is.True, roll.CurrentRollExpression);
             Assert.That(roll.AsSum<double>(), Is.EqualTo(total), roll.CurrentRollExpression);
             Assert.That(roll.AsPotentialMinimum<double>(), Is.EqualTo(total), roll.CurrentRollExpression);
             Assert.That(roll.AsPotentialMaximum<double>(false), Is.EqualTo(total), roll.CurrentRollExpression);
