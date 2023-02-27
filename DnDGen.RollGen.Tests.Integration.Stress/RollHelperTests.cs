@@ -38,6 +38,7 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
             var roll = getRoll(lower, upper);
 
             Assert.That(roll, Is.Not.Empty.And.Matches("[0-9]d(100|20|12|10|8|6|4|3|2)"), roll);
+            Assert.That(dice.Roll(roll).IsValid(), Is.True, roll);
             Assert.That(dice.Roll(roll).AsPotentialMinimum(), Is.EqualTo(lower), roll);
             Assert.That(dice.Roll(roll).AsPotentialMaximum(), Is.EqualTo(upper), roll);
         }

@@ -61,10 +61,56 @@ var transformedCustomRolls = dice.Roll("3d6t1:2").AsSum(); //Return the sum of t
 
 //Returns a qualitative description of the roll, based on percentages
 var description = dice.Describe("3d6", 9); //Returns "Bad"
-var description = dice.Describe("3d6", 13); //Returns "Good"
-var description = dice.Describe("3d6", 12, "Bad", "Average", "Good"); //Returns "Average"
-var description = dice.Describe("3d6", 6, "Bad", "Average", "Good"); //Returns "Bad"
-var description = dice.Describe("3d6", 16, "Bad", "Average", "Good"); //Returns "Good"
+description = dice.Describe("3d6", 13); //Returns "Good"
+description = dice.Describe("3d6", 12, "Bad", "Average", "Good"); //Returns "Average"
+description = dice.Describe("3d6", 6, "Bad", "Average", "Good"); //Returns "Bad"
+description = dice.Describe("3d6", 16, "Bad", "Average", "Good"); //Returns "Good"
+
+//Returns whether the roll is valid
+var valid = dice.IsValid("3d6+1"); //Returns TRUE
+valid = dice.IsValid("(3)d(6)+1"); //Returns TRUE
+valid = dice.IsValid("(1d2)d(3d4)+5d6"); //Returns TRUE
+valid = dice.IsValid("10000d10000"); //Returns TRUE
+valid = dice.IsValid("(100d100d100)d(100d100d100)"); //Returns TRUE
+
+valid = dice.IsValid("(0)d(6)+1"); //Returns FALSE, because quantity is too low
+valid = dice.IsValid("(3.1)d(6)+1"); //Returns FALSE, because decimals are not allowed for dice operations
+valid = dice.IsValid("0d6+1"); //Returns FALSE, because quantity is too low
+valid = dice.IsValid("10001d10000"); //Returns FALSE, because quantity is too high
+valid = dice.IsValid("(100d100d100+1)d(100d100d100)"); //Returns FALSE, because quantity could potentially be above the 10,000 limit
+
+valid = dice.IsValid("(3)d(-6)+1"); //Returns FALSE, because die is too low
+valid = dice.IsValid("(3)d(6.1)+1"); //Returns FALSE, because decimals are not allowed for dice operations
+valid = dice.IsValid("3d0+1"); //Returns FALSE, because die is too low
+valid = dice.IsValid("10000d10001"); //Returns FALSE, because die is too high
+valid = dice.IsValid("(100d100d100)d(100d100d100+1)"); //Returns FALSE, because die could potentially be above the 10,000 limit
+
+valid = dice.IsValid("4d6k3"); //Returns TRUE
+valid = dice.IsValid("(4)d(6)k(3)"); //Returns TRUE
+valid = dice.IsValid("(4)d(6)k(-1)"); //Returns FALSE, because keep value is too low
+valid = dice.IsValid("(4)d(6)k(3.1)"); //Returns FALSE, because decimals are not allowed for dice operations
+valid = dice.IsValid("4d6k10000"); //Returns TRUE
+valid = dice.IsValid("4d6k10001"); //Returns FALSE, because keep value is too high
+valid = dice.IsValid("4d6k(100d100d100+1)"); //Returns FALSE, because keep value could potentially be above the 10,000 limit
+
+valid = dice.IsValid("2d3!"); //Returns TRUE
+valid = dice.IsValid("2d3!e2"); //Returns TRUE
+valid = dice.IsValid("2d3!e2e1"); //Returns FALSE, because it explodes on all values
+
+valid = dice.IsValid("3d6t1"); //Returns TRUE
+valid = dice.IsValid("3d6t1t2"); //Returns TRUE
+valid = dice.IsValid("3d6t7"); //Returns TRUE
+valid = dice.IsValid("3d6t0"); //Returns FALSE, because transform target is too low
+valid = dice.IsValid("3d6t6:0"); //Returns TRUE
+valid = dice.IsValid("3d6t10001"); //Returns FALSE, because transform target is too high
+valid = dice.IsValid("3d6t6:10001"); //Returns TRUE
+
+valid = dice.IsValid("avg(1d12, 2d6, 3d4, 4d3, 6d2)"); //Returns TRUE, because this is a valid Albatross function
+valid = dice.IsValid("bad(1d12, 2d6, 3d4, 4d3, 6d2)"); //Returns FALSE, because "bad" is not a valid Albatross function
+
+valid = dice.IsValid("this is not a roll"); //Returns FALSE
+valid = dice.IsValid("this contains 3d6, but is not a roll"); //Returns FALSE
+valid = dice.IsValid("9266+90210-42*600/1337%1336+96d(783d82%45+922-2022/337)-min(1d2, 3d4, 5d6)+max(1d2, 3d4, 5d6)*avg(1d2, 3d4, 5d6)"); //Returns TRUE
 
 ```
 
@@ -85,6 +131,10 @@ In regards to the operators one can apply to a roll (Keeping, Exploding, Transfo
 3. Keep
 
 One can specify these commands in any order, as they will be evaluated in their order of operation.  For example, all of these rolls will parse the same: `4d3!t2k1`, `4d3!k1t2`, `4d3t2!k1`, `4d3t2k1!`, `4d3k1!t2`, `4d3k1t2!` - all will be evaluated as `4d3`, exploding on a `3`, then transforming `2` into `3`, then keeping the highest roll.
+
+Beyond this, order of operations is respected as outlined by the Albatross documentation: https://rushuiguan.github.io/expression/articles/operations.html#the-precedence-of-infix-operations
+
+The documentation also outlines supported functions (such as `min` and `max`) that can be used: https://rushuiguan.github.io/expression/articles/operations.html
 
 ### Getting `Dice` Objects
 

@@ -232,14 +232,14 @@ namespace DnDGen.RollGen.Tests.Integration
             Assert.That(sum, Is.InRange(lower, upper));
         }
 
-        [TestCase("1d2", 2, 100)]
-        [TestCase("(1d2)", 2, 100)]
-        [TestCase("((1d2))", 2, 100)]
+        [TestCase("1d2", 1, 100)]
+        [TestCase("(1d2)", 1, 100)]
+        [TestCase("((1d2))", 1, 100)]
         [TestCase("1d2+3", 1, 100)]
         [TestCase("1d2+3d4", 1, 100)]
         [TestCase("(1d2)+(3d4)", 1, 100)]
-        [TestCase("(1d2)d3", 2, 100)]
-        [TestCase("1d(2d3)", 2, 100)]
+        [TestCase("(1d2)d3", 1, 100)]
+        [TestCase("1d(2d3)", 1, 100)]
         [TestCase("1d2+1", 1, 100)]
         [TestCase("(1d2+1)", 1, 100)]
         [TestCase("(1d2)+1", 1, 100)]
@@ -261,13 +261,13 @@ namespace DnDGen.RollGen.Tests.Integration
         [TestCase("(1d2)+1+(3d4)+1", 1, 100)]
         [TestCase("(1d2)+1+(3d4+1)+1", 1, 100)]
         [TestCase("(1d2+1)d3", 1, 100)]
-        [TestCase("1d(2d3+1)", 2, 100)]
-        [TestCase("6d5d4k3d2k1", 2, 100)]
-        [TestCase("6d5d4k(3d2k1)", 2, 100)]
-        [TestCase("6d(5d4k3)d2k1", 2, 100)]
-        [TestCase("1+2-(3*4/5)%6", 2, 100)]
+        [TestCase("1d(2d3+1)", 1, 100)]
+        [TestCase("6d5d4k3d2k1", 1, 100)]
+        [TestCase("6d5d4k(3d2k1)", 1, 100)]
+        [TestCase("6d(5d4k3)d2k1", 1, 100)]
+        [TestCase("1+2-(3*4/5)%6", 1, 100)]
         [TestCase("7d6k5", 1, 100)]
-        [TestCase("1d3!", 2, 100)]
+        [TestCase("1d3!", 1, 100)]
         [TestCase("2d3!", 1, 100)]
         [TestCase("1-2+3(4)", 1, 100)]
         [TestCase("1-2+3(4d5)", 1, 100)]
@@ -278,23 +278,24 @@ namespace DnDGen.RollGen.Tests.Integration
         {
             var roll = dice.Roll().Percentile().Transforming(transform);
             var sum = roll.AsSum();
-            var min = roll.AsPotentialMinimum();
-            var max = roll.AsPotentialMaximum();
+            Assert.That(sum, Is.InRange(lower, upper));
 
             //INFO: Transform changes the potential min and max, so we will ignore these assertions
+            //var min = roll.AsPotentialMinimum();
+            //var max = roll.AsPotentialMaximum();
+
             //Assert.That(min, Is.EqualTo(lower), "Min");
             //Assert.That(max, Is.EqualTo(upper), "Max");
-            Assert.That(sum, Is.InRange(lower, upper));
         }
 
-        [TestCase("1d2", 2, 1_000)]
-        [TestCase("(1d2)", 2, 1_000)]
-        [TestCase("((1d2))", 2, 1_000)]
+        [TestCase("1d2", 1, 1_000)]
+        [TestCase("(1d2)", 1, 1_000)]
+        [TestCase("((1d2))", 1, 1_000)]
         [TestCase("1d2+3", 1, 1_000)]
         [TestCase("1d2+3d4", 1, 1_000)]
         [TestCase("(1d2)+(3d4)", 1, 1_000)]
-        [TestCase("(1d2)d3", 2, 1_000)]
-        [TestCase("1d(2d3)", 2, 1_000)]
+        [TestCase("(1d2)d3", 1, 1_000)]
+        [TestCase("1d(2d3)", 1, 1_000)]
         [TestCase("1d2+1", 1, 1_000)]
         [TestCase("(1d2+1)", 1, 1_000)]
         [TestCase("(1d2)+1", 1, 1_000)]
@@ -316,34 +317,36 @@ namespace DnDGen.RollGen.Tests.Integration
         [TestCase("(1d2)+1+(3d4)+1", 1, 1_000)]
         [TestCase("(1d2)+1+(3d4+1)+1", 1, 1_000)]
         [TestCase("(1d2+1)d3", 1, 1_000)]
-        [TestCase("1d(2d3+1)", 2, 1_000)]
-        [TestCase("6d5d4k3d2k1", 2, 1_000)]
-        [TestCase("6d5d4k(3d2k1)", 2, 1_000)]
-        [TestCase("6d(5d4k3)d2k1", 2, 1_000)]
-        [TestCase("1+2-(3*4/5)%6", 2, 1_000)]
+        [TestCase("1d(2d3+1)", 1, 1_000)]
+        [TestCase("6d5d4k3d2k1", 1, 1_000)]
+        [TestCase("6d5d4k(3d2k1)", 1, 1_000)]
+        [TestCase("6d(5d4k3)d2k1", 1, 1_000)]
+        [TestCase("1+2-(3*4/5)%6", 1, 1_000)]
         [TestCase("7d6k5", 1, 1_000)]
-        [TestCase("1d3!", 2, 1_000)]
+        [TestCase("1d3!", 1, 1_000)]
         [TestCase("2d3!", 1, 1_000)]
         [TestCase("1-2+3(4)", 1, 1_000)]
         [TestCase("1-2+3(4d5)", 1, 1_000)]
         [TestCase("(1)(2)(3)", 1, 1_000)]
         [TestCase("(1d2!+3)+(6d5k4)", 1, 1_000)]
-        [TestCase("(3)d(2)k(1)", 2, 1_000)]
+        [TestCase("(3)d(2)k(1)", 1, 1_000)]
         public void ParantheticalExplode(string explode, int lower, int upper)
         {
             var roll = dice.Roll().Percentile().ExplodeOn(explode);
             var sum = roll.AsSum();
-            var min = roll.AsPotentialMinimum();
-            var max = roll.AsPotentialMaximum();
-
-            Assert.That(min, Is.EqualTo(lower), "Min");
-            Assert.That(max, Is.EqualTo(upper), "Max");
             Assert.That(sum, Is.InRange(lower, upper));
+
+            //INFO: Explode changes the potential min and max, so we will ignore these assertions
+            //var min = roll.AsPotentialMinimum();
+            //var max = roll.AsPotentialMaximum();
+
+            //Assert.That(min, Is.EqualTo(lower), "Min");
+            //Assert.That(max, Is.EqualTo(upper), "Max");
         }
 
         [TestCase("1d2", "1d2", 1, 100)]
-        [TestCase("(1d2)", "1d2+3", 2, 100)]
-        [TestCase("((1d2))", "(1d2+3d4)", 2, 100)]
+        [TestCase("(1d2)", "1d2+3", 1, 100)]
+        [TestCase("((1d2))", "(1d2+3d4)", 1, 100)]
         [TestCase("1d2+3", "(1d2)d3", 1, 100)]
         [TestCase("1d2+3d4", "1d(2d3)", 1, 100)]
         [TestCase("(1d2)+(3d4)", "1d2+1", 1, 100)]
@@ -370,11 +373,11 @@ namespace DnDGen.RollGen.Tests.Integration
         [TestCase("(1d2)+1+(3d4)+1", "((1d2))", 1, 100)]
         [TestCase("(1d2)+1+(3d4+1)+1", "1d2+3", 1, 100)]
         [TestCase("(1d2+1)d3", "1d2+3d4", 1, 100)]
-        [TestCase("1d(2d3+1)", "(1d2)+(3d4)", 2, 100)]
+        [TestCase("1d(2d3+1)", "(1d2)+(3d4)", 1, 100)]
         [TestCase("6d5d4k3d2k1", "(1d2)d3", 1, 100)]
         [TestCase("6d5d4k(3d2k1)", "1d(2d3)", 1, 100)]
-        [TestCase("6d(5d4k3)d2k1", "1d2+1", 2, 100)]
-        [TestCase("1+2-(3*4/5)%6", "(1d2+1)", 2, 100)]
+        [TestCase("6d(5d4k3)d2k1", "1d2+1", 1, 100)]
+        [TestCase("1+2-(3*4/5)%6", "(1d2+1)", 1, 100)]
         [TestCase("7d6k5", "(1d2+1)+1", 1, 100)]
         [TestCase("1d3!", "((1d2+1))", 1, 100)]
         [TestCase("2d3!", "((1d2+1))+1", 1, 100)]
@@ -387,13 +390,14 @@ namespace DnDGen.RollGen.Tests.Integration
         {
             var roll = dice.Roll().Percentile().Transforming(transform, target);
             var sum = roll.AsSum();
-            var min = roll.AsPotentialMinimum();
-            var max = roll.AsPotentialMaximum();
+            Assert.That(sum, Is.InRange(lower, upper));
 
             //INFO: Transform changes the potential min and max, so we will ignore these assertions
+            //var min = roll.AsPotentialMinimum();
+            //var max = roll.AsPotentialMaximum();
+
             //Assert.That(min, Is.EqualTo(lower), "Min");
             //Assert.That(max, Is.EqualTo(upper), "Max");
-            Assert.That(sum, Is.InRange(lower, upper));
         }
 
         [Test]

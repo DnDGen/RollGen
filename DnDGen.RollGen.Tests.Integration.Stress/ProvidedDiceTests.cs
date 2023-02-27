@@ -36,6 +36,7 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
         {
             var average = quantity * (die + 1) / 2.0d;
 
+            Assert.That(roll.IsValid(), Is.True);
             Assert.That(roll.AsSum(), Is.InRange(quantity, quantity * die));
             Assert.That(roll.AsPotentialMinimum(), Is.EqualTo(quantity));
             Assert.That(roll.AsPotentialMaximum(false), Is.EqualTo(quantity * die));

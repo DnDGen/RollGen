@@ -194,5 +194,10 @@ namespace DnDGen.RollGen
 
             return .5;
         }
+
+        public bool IsValid(string rollExpression)
+        {
+            return Roll(rollExpression).IsValid();
+        }
     }
 }
