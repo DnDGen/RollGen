@@ -22,8 +22,8 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 #endif
             };
 
-            //INFO: Non-stress operations take roughly 2.7 minutes, or 5% of the 60 minute runtime
-            options.TimeLimitPercentage = .95;
+            //INFO: Non-stress operations take roughly 4.5 minutes, or 7.5% of the 60 minute runtime. Rounding up to 10% for padding.
+            options.TimeLimitPercentage = .90;
 
             stressor = new Stressor(options);
         }
