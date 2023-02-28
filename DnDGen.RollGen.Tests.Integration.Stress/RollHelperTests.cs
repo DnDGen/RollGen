@@ -34,6 +34,12 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
             stressor.Stress(() => AssertGetRoll((int l, int u) => RollHelper.GetRollWithPerfectDistribution(l, u)));
         }
 
+        [Test]
+        public void StressRollWithPerfectDistribution_AllowNonstandard()
+        {
+            stressor.Stress(() => AssertGetRoll((int l, int u) => RollHelper.GetRollWithPerfectDistribution(l, u, true)));
+        }
+
         private void AssertGetRoll(Func<int, int, string> getRoll)
         {
             var upper = random.Next(Limits.Die) + 1;

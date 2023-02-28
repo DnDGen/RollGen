@@ -148,17 +148,18 @@ namespace DnDGen.RollGen
         /// An example is [1,48] = (1d12-1)*4+1d4
         /// Another example is [5,40] = (1d6-1)*6+1d6+4
         /// This works when the total range is divisible by the standard die (2, 3, 4, 6, 8, 10, 12, 20, 100).
-        /// If the range is not divisible by the standard dice (such as 1-7), then the Most Even distribution is used.
+        /// If the range is not divisible by the standard dice (such as [1,7]), then non-standard dice are used (1dX+Y)
+        /// Or, if non-standard are not allowed, will use the Most Even distribution.
         /// </summary>
         /// <param name="baseQuantity">This is subtracted from the effective range of lower and upper</param>
         /// <param name="lower">The inclusive lower range</param>
         /// <param name="upper">The inclusive upper range</param>
-        public static string GetRollWithPerfectDistribution(int baseQuantity, int lower, int upper)
+        public static string GetRollWithPerfectDistribution(int baseQuantity, int lower, int upper, bool allowNonstandard = false)
         {
             var newLower = lower - baseQuantity;
             var newUpper = upper - baseQuantity;
 
-            return GetRollWithPerfectDistribution(newLower, newUpper);
+            return GetRollWithPerfectDistribution(newLower, newUpper, allowNonstandard);
         }
 
         /// <summary>
@@ -166,11 +167,12 @@ namespace DnDGen.RollGen
         /// An example is [1,48] = (1d12-1)*4+1d4
         /// Another example is [5,40] = (1d6-1)*6+1d6+4
         /// This works when the total range is divisible by the standard die (2, 3, 4, 6, 8, 10, 12, 20, 100).
-        /// If the range is not divisible by the standard dice (such as [1,7]), then the Most Even distribution is used.
+        /// If the range is not divisible by the standard dice (such as [1,7]), then non-standard dice are used (1dX+Y)
+        /// Or, if non-standard are not allowed, will use the Most Even distribution.
         /// </summary>
         /// <param name="lower">The inclusive lower range</param>
         /// <param name="upper">The inclusive upper range</param>
-        public static string GetRollWithPerfectDistribution(int lower, int upper)
+        public static string GetRollWithPerfectDistribution(int lower, int upper, bool allowNonstandard = false)
         {
             if (lower == upper)
                 return lower.ToString();
@@ -194,8 +196,24 @@ namespace DnDGen.RollGen
                 }
             }
 
-            if (range != 1)
+            //In this case, the range cannot be written qwith perfect distribution via standard dice.
+            //Therefore, we will use nonstandard instead.
+            if (range != 1 && allowNonstandard)
+            {
+                var nonStandardFormula = $"1d{upper - lower + 1}";
+
+                var nonStandarddifference = lower - 1;
+                if (nonStandarddifference > 0)
+                    nonStandardFormula += $"+{nonStandarddifference}";
+                else if (nonStandarddifference < 0)
+                    nonStandardFormula += nonStandarddifference.ToString();
+
+                return nonStandardFormula;
+            }
+            else if (range != 1)
+            {
                 return GetRollWithMostEvenDistribution(lower, upper);
+            }
 
             var formula = string.Empty;
 
