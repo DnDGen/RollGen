@@ -6,6 +6,13 @@ namespace DnDGen.RollGen
 {
     public static class RollHelper
     {
+        /// <summary>
+        /// This will return a roll of format XdY+Z
+        /// </summary>
+        /// <param name="baseQuantity">This is subtracted from the effective range of lower and upper</param>
+        /// <param name="lower">The inclusive lower range</param>
+        /// <param name="upper">The inclusive upper range</param>
+        /// <returns></returns>
         public static string GetRollWithFewestDice(int baseQuantity, int lower, int upper)
         {
             var newLower = lower - baseQuantity;
@@ -14,6 +21,11 @@ namespace DnDGen.RollGen
             return GetRollWithFewestDice(newLower, newUpper);
         }
 
+        /// <summary>
+        /// This will return a roll of format XdY+Z
+        /// </summary>
+        /// <param name="lower">The inclusive lower range</param>
+        /// <param name="upper">The inclusive upper range</param>
         public static string GetRollWithFewestDice(int lower, int upper)
         {
             var collections = GetRollCollections(lower, upper);
@@ -26,6 +38,12 @@ namespace DnDGen.RollGen
             return bestMatchingCollection.Build();
         }
 
+        /// <summary>
+        /// This will return a roll of format AdB+EdF+...+XdY+Z
+        /// </summary>
+        /// <param name="baseQuantity">This is subtracted from the effective range of lower and upper</param>
+        /// <param name="lower">The inclusive lower range</param>
+        /// <param name="upper">The inclusive upper range</param>
         public static string GetRollWithMostEvenDistribution(int baseQuantity, int lower, int upper)
         {
             var newLower = lower - baseQuantity;
@@ -34,6 +52,11 @@ namespace DnDGen.RollGen
             return GetRollWithMostEvenDistribution(newLower, newUpper);
         }
 
+        /// <summary>
+        /// This will return a roll of format AdB+CdD+...+XdY+Z
+        /// </summary>
+        /// <param name="lower">The inclusive lower range</param>
+        /// <param name="upper">The inclusive upper range</param>
         public static string GetRollWithMostEvenDistribution(int lower, int upper)
         {
             var collections = GetRollCollections(lower, upper);
@@ -118,6 +141,97 @@ namespace DnDGen.RollGen
                 Die = die,
                 Quantity = newQuantity
             };
+        }
+
+        /// <summary>
+        /// This will return a roll of format (1dA-1)*BC..Y+(1dB-1)*CD..Y+...+(1dX-1)*Y+1dY+Z, where each variable is a standard die.
+        /// An example is [1,48] = (1d12-1)*4+1d4
+        /// Another example is [5,40] = (1d6-1)*6+1d6+4
+        /// This works when the total range is divisible by the standard die (2, 3, 4, 6, 8, 10, 12, 20, 100).
+        /// If the range is not divisible by the standard dice (such as 1-7), then the Most Even distribution is used.
+        /// </summary>
+        /// <param name="baseQuantity">This is subtracted from the effective range of lower and upper</param>
+        /// <param name="lower">The inclusive lower range</param>
+        /// <param name="upper">The inclusive upper range</param>
+        public static string GetRollWithPerfectDistribution(int baseQuantity, int lower, int upper)
+        {
+            var newLower = lower - baseQuantity;
+            var newUpper = upper - baseQuantity;
+
+            return GetRollWithPerfectDistribution(newLower, newUpper);
+        }
+
+        /// <summary>
+        /// This will return a roll of format (1dA-1)*BC..Y+(1dB-1)*CD..Y+...+(1dX-1)*Y+1dY+Z, where each variable is a standard die.
+        /// An example is [1,48] = (1d12-1)*4+1d4
+        /// Another example is [5,40] = (1d6-1)*6+1d6+4
+        /// This works when the total range is divisible by the standard die (2, 3, 4, 6, 8, 10, 12, 20, 100).
+        /// If the range is not divisible by the standard dice (such as [1,7]), then the Most Even distribution is used.
+        /// </summary>
+        /// <param name="lower">The inclusive lower range</param>
+        /// <param name="upper">The inclusive upper range</param>
+        public static string GetRollWithPerfectDistribution(int lower, int upper)
+        {
+            if (lower == upper)
+                return lower.ToString();
+
+            var range = upper - lower + 1;
+            var dice = RollCollection.StandardDice
+                .Where(d => d <= range)
+                .OrderByDescending(d => d)
+                .ToArray();
+            var factors = new Dictionary<int, int>();
+
+            foreach (var die in dice)
+            {
+                while (range % die == 0)
+                {
+                    if (!factors.ContainsKey(die))
+                        factors[die] = 0;
+
+                    factors[die]++;
+                    range /= die;
+                }
+            }
+
+            if (range != 1)
+                return GetRollWithMostEvenDistribution(lower, upper);
+
+            var formula = string.Empty;
+
+            foreach (var die in dice.Where(factors.ContainsKey))
+            {
+                while (factors[die] > 0)
+                {
+                    factors[die]--;
+                    var product = 1;
+
+                    foreach (var f in factors.Select(kvp => Convert.ToInt32(Math.Pow(kvp.Key, kvp.Value))).Where(p => p > 0))
+                    {
+                        product *= f;
+                    }
+
+                    if (formula != string.Empty)
+                        formula += "+";
+
+                    if (product > 1)
+                    {
+                        formula += $"(1d{die}-1)*{product}";
+                    }
+                    else
+                    {
+                        formula += $"1d{die}";
+                    }
+                }
+            }
+
+            var difference = lower - 1;
+            if (difference > 0)
+                formula += $"+{difference}";
+            else if (difference < 0)
+                formula += difference.ToString();
+
+            return formula;
         }
     }
 }
