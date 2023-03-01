@@ -1,4 +1,9 @@
-﻿using NUnit.Framework;
+﻿using Newtonsoft.Json;
+using NUnit.Framework;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 
 namespace DnDGen.RollGen.Tests.Unit
 {
@@ -1443,6 +1448,458 @@ namespace DnDGen.RollGen.Tests.Unit
 
             var matches = collection.Matches(12, 100 + Limits.Die * 2 + 2);
             Assert.That(matches, Is.False);
+        }
+
+        [TestCase(1, 2)]
+        [TestCase(1, 3)]
+        [TestCase(1, 4)]
+        [TestCase(1, 6)]
+        [TestCase(1, 8)]
+        [TestCase(1, 10)]
+        [TestCase(1, 12)]
+        [TestCase(1, 20)]
+        [TestCase(1, 100)]
+        [TestCase(1, 42)]
+        [TestCase(2, 2)]
+        [TestCase(2, 3)]
+        [TestCase(2, 4)]
+        [TestCase(2, 6)]
+        [TestCase(2, 8)]
+        [TestCase(2, 10)]
+        [TestCase(2, 12)]
+        [TestCase(2, 20)]
+        [TestCase(2, 100)]
+        [TestCase(2, 42)]
+        [TestCase(3, 2)]
+        [TestCase(3, 3)]
+        [TestCase(3, 4)]
+        [TestCase(3, 6)]
+        [TestCase(3, 8)]
+        [TestCase(3, 10)]
+        [TestCase(3, 12)]
+        [TestCase(3, 20)]
+        [TestCase(3, 100)]
+        [TestCase(3, 42)]
+        public void ComputeDistribution(int q, int d)
+        {
+            var prototype = new RollPrototype
+            {
+                Quantity = q,
+                Die = d
+            };
+
+            collection.Rolls.Add(prototype);
+            collection.Adjustment = 666;
+
+            var counts = new Dictionary<int, int>();
+            var range = Enumerable.Range(q, q * d - q + 1);
+
+            foreach (var total in range)
+            {
+                counts[total] = 0;
+            }
+
+            foreach (var total in GetRolls(q, d))
+            {
+                counts[total]++;
+            }
+
+            var maxCount = counts.Max(kvp => kvp.Value);
+
+            var distribution = collection.ComputeDistribution();
+            Assert.That(distribution, Is.EqualTo(maxCount), $"Counts: {JsonConvert.SerializeObject(counts)}");
+        }
+
+        private IEnumerable<int> GetRolls(int q, int d)
+        {
+            var range = Enumerable.Range(1, d);
+
+            if (q == 1)
+            {
+                foreach (var roll in range)
+                    yield return roll;
+            }
+            else
+            {
+                foreach (var subroll in GetRolls(q - 1, d))
+                {
+                    foreach (var roll in range)
+                        yield return subroll + roll;
+                }
+            }
+        }
+
+        [TestCase(1, 2, 1, 2)]
+        [TestCase(1, 2, 1, 3)]
+        [TestCase(1, 2, 1, 4)]
+        [TestCase(1, 2, 1, 6)]
+        [TestCase(1, 3, 1, 2)]
+        [TestCase(1, 3, 1, 3)]
+        [TestCase(1, 3, 1, 4)]
+        [TestCase(1, 3, 1, 6)]
+        [TestCase(1, 4, 1, 2)]
+        [TestCase(1, 4, 1, 3)]
+        [TestCase(1, 4, 1, 4)]
+        [TestCase(1, 4, 1, 6)]
+        [TestCase(1, 6, 1, 2)]
+        [TestCase(1, 6, 1, 3)]
+        [TestCase(1, 6, 1, 4)]
+        [TestCase(1, 6, 1, 6)]
+        [TestCase(2, 2, 1, 2)]
+        [TestCase(2, 2, 1, 3)]
+        [TestCase(2, 2, 1, 4)]
+        [TestCase(2, 2, 1, 6)]
+        [TestCase(2, 3, 1, 2)]
+        [TestCase(2, 3, 1, 3)]
+        [TestCase(2, 3, 1, 4)]
+        [TestCase(2, 3, 1, 6)]
+        [TestCase(2, 4, 1, 2)]
+        [TestCase(2, 4, 1, 3)]
+        [TestCase(2, 4, 1, 4)]
+        [TestCase(2, 4, 1, 6)]
+        [TestCase(2, 6, 1, 2)]
+        [TestCase(2, 6, 1, 3)]
+        [TestCase(2, 6, 1, 4)]
+        [TestCase(2, 6, 1, 6)]
+        [TestCase(1, 2, 2, 2)]
+        [TestCase(1, 2, 2, 3)]
+        [TestCase(1, 2, 2, 4)]
+        [TestCase(1, 2, 2, 6)]
+        [TestCase(1, 3, 2, 2)]
+        [TestCase(1, 3, 2, 3)]
+        [TestCase(1, 3, 2, 4)]
+        [TestCase(1, 3, 2, 6)]
+        [TestCase(1, 4, 2, 2)]
+        [TestCase(1, 4, 2, 3)]
+        [TestCase(1, 4, 2, 4)]
+        [TestCase(1, 4, 2, 6)]
+        [TestCase(1, 6, 2, 2)]
+        [TestCase(1, 6, 2, 3)]
+        [TestCase(1, 6, 2, 4)]
+        [TestCase(1, 6, 2, 6)]
+        [TestCase(2, 2, 2, 2)]
+        [TestCase(2, 2, 2, 3)]
+        [TestCase(2, 2, 2, 4)]
+        [TestCase(2, 2, 2, 6)]
+        [TestCase(2, 3, 2, 2)]
+        [TestCase(2, 3, 2, 3)]
+        [TestCase(2, 3, 2, 4)]
+        [TestCase(2, 3, 2, 6)]
+        [TestCase(2, 4, 2, 2)]
+        [TestCase(2, 4, 2, 3)]
+        [TestCase(2, 4, 2, 4)]
+        [TestCase(2, 4, 2, 6)]
+        [TestCase(2, 6, 2, 2)]
+        [TestCase(2, 6, 2, 3)]
+        [TestCase(2, 6, 2, 4)]
+        [TestCase(2, 6, 2, 6)]
+        public void ComputeDistribution_TwoRolls(int q1, int d1, int q2, int d2)
+        {
+            var prototype1 = new RollPrototype
+            {
+                Quantity = q1,
+                Die = d1
+            };
+            var prototype2 = new RollPrototype
+            {
+                Quantity = q2,
+                Die = d2
+            };
+
+            collection.Rolls.Add(prototype1);
+            collection.Rolls.Add(prototype2);
+            collection.Adjustment = 666;
+
+            var counts = new Dictionary<int, int>();
+
+            foreach (var total1 in GetRolls(q1, d1))
+            {
+                foreach (var total2 in GetRolls(q2, d2))
+                {
+                    if (!counts.ContainsKey(total1 + total2))
+                        counts[total1 + total2] = 0;
+
+                    counts[total1 + total2]++;
+                }
+            }
+
+            var maxCount = counts.Max(kvp => kvp.Value);
+
+            var distribution = collection.ComputeDistribution();
+            Assert.That(distribution, Is.EqualTo(maxCount), $"Expected Counts: {JsonConvert.SerializeObject(counts)}");
+        }
+
+        [TestCase(2, 2)]
+        [TestCase(2, 3)]
+        [TestCase(2, 4)]
+        [TestCase(2, 6)]
+        [TestCase(2, 8)]
+        [TestCase(2, 10)]
+        [TestCase(2, 12)]
+        [TestCase(2, 20)]
+        [TestCase(2, 100)]
+        [TestCase(3, 2)]
+        [TestCase(3, 3)]
+        [TestCase(3, 4)]
+        [TestCase(3, 6)]
+        [TestCase(3, 8)]
+        [TestCase(3, 10)]
+        [TestCase(3, 12)]
+        [TestCase(3, 20)]
+        [TestCase(3, 100)]
+        public void ComputeDistribution_TransitiveByMultiplication(int q, int d)
+        {
+            var prototype = new RollPrototype
+            {
+                Quantity = q,
+                Die = d
+            };
+
+            collection.Rolls.Add(prototype);
+            collection.Adjustment = 666;
+
+            var expected = collection.ComputeDistribution();
+
+            collection.Rolls.Clear();
+            while (q-- > 0)
+            {
+                prototype = new RollPrototype
+                {
+                    Quantity = 1,
+                    Die = d
+                };
+
+                collection.Rolls.Add(prototype);
+            }
+
+            var actual = collection.ComputeDistribution();
+
+            Assert.That(actual, Is.EqualTo(expected));
+        }
+
+        [TestCase(2, 3)]
+        [TestCase(2, 4)]
+        [TestCase(2, 6)]
+        [TestCase(2, 8)]
+        [TestCase(2, 10)]
+        [TestCase(2, 12)]
+        [TestCase(2, 20)]
+        [TestCase(2, 100)]
+        [TestCase(3, 2)]
+        [TestCase(3, 4)]
+        [TestCase(3, 6)]
+        [TestCase(3, 8)]
+        [TestCase(3, 10)]
+        [TestCase(3, 12)]
+        [TestCase(3, 20)]
+        [TestCase(3, 100)]
+        [TestCase(4, 2)]
+        [TestCase(4, 3)]
+        [TestCase(4, 6)]
+        [TestCase(4, 8)]
+        [TestCase(4, 10)]
+        [TestCase(4, 12)]
+        [TestCase(4, 20)]
+        [TestCase(4, 100)]
+        [TestCase(6, 2)]
+        [TestCase(6, 3)]
+        [TestCase(6, 4)]
+        [TestCase(6, 8)]
+        [TestCase(6, 10)]
+        [TestCase(6, 12)]
+        [TestCase(6, 20)]
+        [TestCase(6, 100)]
+        public void ComputeDistribution_TransitiveByAddition(int d1, int d2)
+        {
+            var prototype1 = new RollPrototype
+            {
+                Quantity = 1,
+                Die = d1
+            };
+            var prototype2 = new RollPrototype
+            {
+                Quantity = 1,
+                Die = d2
+            };
+
+            collection.Rolls.Add(prototype1);
+            collection.Rolls.Add(prototype2);
+            collection.Adjustment = 666;
+
+            var expected = collection.ComputeDistribution();
+
+            collection.Rolls.Clear();
+            prototype1 = new RollPrototype
+            {
+                Quantity = 1,
+                Die = d2
+            };
+            prototype2 = new RollPrototype
+            {
+                Quantity = 1,
+                Die = d1
+            };
+
+            collection.Rolls.Add(prototype1);
+            collection.Rolls.Add(prototype2);
+
+            var actual = collection.ComputeDistribution();
+
+            Assert.That(actual, Is.EqualTo(expected));
+        }
+
+        [TestCase(1, 2, 1, 3, 1, 4)]
+        [TestCase(1, 3, 1, 4, 1, 6)]
+        [TestCase(1, 4, 1, 6, 1, 2)]
+        [TestCase(1, 2, 1, 3, 2, 4)]
+        [TestCase(1, 3, 1, 4, 2, 6)]
+        [TestCase(1, 4, 1, 6, 2, 2)]
+        [TestCase(1, 2, 2, 3, 1, 4)]
+        [TestCase(1, 3, 2, 4, 1, 6)]
+        [TestCase(1, 4, 2, 6, 1, 2)]
+        [TestCase(1, 2, 2, 3, 2, 4)]
+        [TestCase(1, 3, 2, 4, 2, 6)]
+        [TestCase(1, 4, 2, 6, 2, 2)]
+        [TestCase(2, 2, 2, 3, 1, 4)]
+        [TestCase(2, 3, 2, 4, 1, 6)]
+        [TestCase(2, 4, 2, 6, 1, 2)]
+        [TestCase(2, 2, 2, 3, 2, 4)]
+        [TestCase(2, 3, 2, 4, 2, 6)]
+        [TestCase(2, 4, 2, 6, 2, 2)]
+        public void ComputeDistribution_ThreeRolls(int q1, int d1, int q2, int d2, int q3, int d3)
+        {
+            var prototype1 = new RollPrototype
+            {
+                Quantity = q1,
+                Die = d1
+            };
+            var prototype2 = new RollPrototype
+            {
+                Quantity = q2,
+                Die = d2
+            };
+            var prototype3 = new RollPrototype
+            {
+                Quantity = q3,
+                Die = d3
+            };
+
+            collection.Rolls.Add(prototype1);
+            collection.Rolls.Add(prototype2);
+            collection.Rolls.Add(prototype3);
+            collection.Adjustment = 666;
+
+            var counts = new Dictionary<int, int>();
+
+            foreach (var total1 in GetRolls(q1, d1))
+            {
+                foreach (var total2 in GetRolls(q2, d2))
+                {
+                    foreach (var total3 in GetRolls(q3, d3))
+                    {
+                        if (!counts.ContainsKey(total1 + total2 + total3))
+                            counts[total1 + total2 + total3] = 0;
+
+                        counts[total1 + total2 + total3]++;
+                    }
+                }
+            }
+
+            var maxCount = counts.Max(kvp => kvp.Value);
+
+            var distribution = collection.ComputeDistribution();
+            Assert.That(distribution, Is.EqualTo(maxCount), $"Expected Counts: {JsonConvert.SerializeObject(counts)}");
+        }
+
+        [TestCase(2, 20)]
+        [TestCase(2, 100)]
+        [TestCase(3, 20)]
+        [TestCase(3, 100)]
+        [TestCase(20, 20)]
+        [TestCase(100, 100)]
+        [TestCase(Limits.Quantity, 20)]
+        [TestCase(Limits.Quantity, 100)]
+        [TestCase(Limits.Quantity, Limits.Die)]
+        public void ComputeDistribution_IsFast(int q1, int d1)
+        {
+            var prototype1 = new RollPrototype
+            {
+                Quantity = q1,
+                Die = d1
+            };
+
+            collection.Rolls.Add(prototype1);
+            collection.Adjustment = 666;
+
+            var counts = new Dictionary<int, int>();
+
+            foreach (var total1 in GetRolls(q1, d1))
+            {
+                if (!counts.ContainsKey(total1))
+                    counts[total1] = 0;
+
+                counts[total1]++;
+            }
+
+            var maxCount = counts.Max(kvp => kvp.Value);
+            var stopwatch = new Stopwatch();
+
+            stopwatch.Start();
+            var distribution = collection.ComputeDistribution();
+            stopwatch.Stop();
+
+            Assert.That(distribution, Is.EqualTo(maxCount), $"Expected Counts: {JsonConvert.SerializeObject(counts)}");
+            Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)));
+        }
+
+        [TestCase(2, 20, 2, 12)]
+        [TestCase(2, 100, 2, 20)]
+        [TestCase(2, 100, 3, 20)]
+        [TestCase(3, 10, 4, 12)]
+        [TestCase(3, 100, 2, 20)]
+        [TestCase(3, 100, 3, 20)]
+        [TestCase(20, 100, 20, 20)]
+        [TestCase(100, 100, 100, 20)]
+        [TestCase(Limits.Quantity, 100, Limits.Quantity, 20)]
+        public void ComputeDistribution_TwoRolls_IsFast(int q1, int d1, int q2, int d2)
+        {
+            var prototype1 = new RollPrototype
+            {
+                Quantity = q1,
+                Die = d1
+            };
+            var prototype2 = new RollPrototype
+            {
+                Quantity = q2,
+                Die = d2
+            };
+
+            collection.Rolls.Add(prototype1);
+            collection.Rolls.Add(prototype2);
+            collection.Adjustment = 666;
+
+            var counts = new Dictionary<int, int>();
+
+            foreach (var total1 in GetRolls(q1, d1))
+            {
+                foreach (var total2 in GetRolls(q2, d2))
+                {
+                    if (!counts.ContainsKey(total1 + total2))
+                        counts[total1 + total2] = 0;
+
+                    counts[total1 + total2]++;
+                }
+            }
+
+            var maxCount = counts.Max(kvp => kvp.Value);
+            var stopwatch = new Stopwatch();
+
+            stopwatch.Start();
+            var distribution = collection.ComputeDistribution();
+            stopwatch.Stop();
+
+            Assert.That(distribution, Is.EqualTo(maxCount), $"Expected Counts: {JsonConvert.SerializeObject(counts)}");
+            Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)));
         }
     }
 }
