@@ -101,10 +101,21 @@ namespace DnDGen.RollGen
 
         public int ComputeDistribution()
         {
-            var mode = Rolls.Sum(r => r.Quantity * r.Die) / 2 + Quantities / 2;
-            var count = 0;
+            var mode = (Rolls.Sum(r => r.Quantity * r.Die) + Quantities) / 2;
+            var count = GetRollCount(mode);
 
             //TODO: Figure out how many times mode occurs without computing all roles
+
+            //https://mathworld.wolfram.com/Dice.html
+            //From article: p = target, n = q, s = d
+            //Figure 10
+
+            //https://www.lucamoroni.it/the-dice-roll-sum-problem/
+            //var p = mode;
+            //var n = Quantities;
+
+            //https://anydice.com/, function library for count of value in sequence
+
 
             return count;
 
@@ -122,36 +133,114 @@ namespace DnDGen.RollGen
             //return maxCount;
         }
 
-        private IEnumerable<int> GetRolls(int i = 0)
+        //private IEnumerable<int> GetRolls(int i = 0)
+        //{
+        //    if (i + 1 < Rolls.Count)
+        //    {
+        //        foreach (var subroll in GetRolls(i + 1))
+        //            foreach (var roll in GetRolls(Rolls[i].Quantity, Rolls[i].Die))
+        //                yield return subroll + roll;
+        //    }
+        //    else
+        //    {
+        //        foreach (var roll in GetRolls(Rolls[i].Quantity, Rolls[i].Die))
+        //            yield return roll;
+        //    }
+        //}
+
+        //private IEnumerable<int> GetRolls(int q, int d)
+        //{
+        //    var range = Enumerable.Range(1, d);
+
+        //    if (q == 1)
+        //    {
+        //        foreach (var roll in range)
+        //            yield return roll;
+        //    }
+        //    else
+        //    {
+        //        foreach (var subroll in GetRolls(q - 1, d))
+        //            foreach (var roll in range)
+        //                yield return subroll + roll;
+        //    }
+        //}
+
+        private int GetRollCount(int target, int currentSum = 0, int i = 0)
+        {
+            var count = 0;
+
+            if (i + 1 < Rolls.Count)
+            {
+                foreach(var total in GetTotals(target, i))
+                {
+                    count += GetRollCount(target, currentSum + total, i + 1);
+                }
+            }
+            else
+            {
+                count += GetRollCount(target, currentSum, Rolls[i].Quantity, Rolls[i].Die);
+            }
+
+            return count;
+        }
+
+        private IEnumerable<int> GetTotals(int target, int i)
         {
             if (i + 1 < Rolls.Count)
             {
-                foreach (var subroll in GetRolls(i + 1))
-                    foreach (var roll in GetRolls(Rolls[i].Quantity, Rolls[i].Die))
-                        yield return subroll + roll;
+                foreach (var total in GetTotals(target, Rolls[i].Quantity, Rolls[i].Die))
+                {
+                    foreach (var subtotal in GetTotals(target, i + 1))
+                    {
+                        yield return total + subtotal;
+                    }
+                }
             }
             else
             {
-                foreach (var roll in GetRolls(Rolls[i].Quantity, Rolls[i].Die))
-                    yield return roll;
+                foreach (var total in GetTotals(target, Rolls[i].Quantity, Rolls[i].Die))
+                {
+                    yield return total;
+                }
             }
         }
 
-        private IEnumerable<int> GetRolls(int q, int d)
+        private IEnumerable<int> GetTotals(int target, int q, int d)
         {
-            var range = Enumerable.Range(1, d);
+            var min = Math.Min(d, target);
 
             if (q == 1)
             {
-                foreach (var roll in range)
+                foreach (var roll in Enumerable.Range(1, min))
                     yield return roll;
             }
             else
             {
-                foreach (var subroll in GetRolls(q - 1, d))
-                    foreach (var roll in range)
-                        yield return subroll + roll;
+                foreach (var roll in Enumerable.Range(1, min))
+                    foreach(var subroll in GetTotals(target, q - 1, d))
+                        if (subroll + roll <= target)
+                            yield return subroll + roll;
             }
+        }
+
+        private int GetRollCount(int target, int currentSum, int q, int d)
+        {
+            var count = 0;
+
+            if (q == 1)
+            {
+                if (currentSum < target && currentSum + d >= target)
+                    count++;
+            }
+            else
+            {
+                foreach (var roll in Enumerable.Range(1, d))
+                {
+                    count += GetRollCount(target, currentSum + roll, q - 1, d);
+                }
+            }
+
+            return count;
         }
     }
 }

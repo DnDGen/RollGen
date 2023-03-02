@@ -1815,6 +1815,7 @@ namespace DnDGen.RollGen.Tests.Unit
         [TestCase(2, 100)]
         [TestCase(3, 20)]
         [TestCase(3, 100)]
+        [TestCase(10, 6)]
         [TestCase(20, 20)]
         [TestCase(100, 100)]
         [TestCase(Limits.Quantity, 20)]
