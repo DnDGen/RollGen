@@ -1,9 +1,6 @@
-﻿using Newtonsoft.Json;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 
 namespace DnDGen.RollGen.Tests.Unit
 {
@@ -1450,37 +1447,39 @@ namespace DnDGen.RollGen.Tests.Unit
             Assert.That(matches, Is.False);
         }
 
-        [TestCase(1, 2)]
-        [TestCase(1, 3)]
-        [TestCase(1, 4)]
-        [TestCase(1, 6)]
-        [TestCase(1, 8)]
-        [TestCase(1, 10)]
-        [TestCase(1, 12)]
-        [TestCase(1, 20)]
-        [TestCase(1, 100)]
-        [TestCase(1, 42)]
-        [TestCase(2, 2)]
-        [TestCase(2, 3)]
-        [TestCase(2, 4)]
-        [TestCase(2, 6)]
-        [TestCase(2, 8)]
-        [TestCase(2, 10)]
-        [TestCase(2, 12)]
-        [TestCase(2, 20)]
-        [TestCase(2, 100)]
-        [TestCase(2, 42)]
-        [TestCase(3, 2)]
-        [TestCase(3, 3)]
-        [TestCase(3, 4)]
-        [TestCase(3, 6)]
-        [TestCase(3, 8)]
-        [TestCase(3, 10)]
-        [TestCase(3, 12)]
-        [TestCase(3, 20)]
-        [TestCase(3, 100)]
-        [TestCase(3, 42)]
-        public void ComputeDistribution(int q, int d)
+        [TestCase(1, 2, 1)]
+        [TestCase(1, 3, 1)]
+        [TestCase(1, 4, 1)]
+        [TestCase(1, 6, 1)]
+        [TestCase(1, 8, 1)]
+        [TestCase(1, 10, 1)]
+        [TestCase(1, 12, 1)]
+        [TestCase(1, 20, 1)]
+        [TestCase(1, 100, 1)]
+        [TestCase(1, 42, 1)]
+        [TestCase(2, 2, 2)]
+        [TestCase(2, 3, 3)]
+        [TestCase(2, 4, 4)]
+        [TestCase(2, 6, 6)]
+        [TestCase(2, 8, 8)]
+        [TestCase(2, 10, 10)]
+        [TestCase(2, 12, 12)]
+        [TestCase(2, 20, 20)]
+        [TestCase(2, 100, 100)]
+        [TestCase(2, 42, 42)]
+        [TestCase(3, 2, 3)] //37.5% * 2^3 = 3
+        [TestCase(3, 3, 7)] //25.93% * 3^3 = 7
+        [TestCase(3, 4, 12)] //18.75% * 4^3 = 12
+        [TestCase(3, 6, 27)] //12.5% * 6^3 = 27
+        [TestCase(3, 8, 48)] //9.38% * 8^3 = 48
+        [TestCase(3, 10, 75)] //7.5% * 10^3 = 75
+        [TestCase(3, 12, 108)] //6.25% * 12^3 = 108
+        [TestCase(3, 20, 300)] //3.75% * 20^3 = 300
+        [TestCase(3, 100, 7500)] //0.75% * 100^3 = 7500
+        [TestCase(3, 42, 1323)] //1.79% * 42^3 = 1326 (rounding error of 3)
+        [TestCase(10, 10, 432457640)] //4.32% * 10^10 = 432457640
+        [TestCase(17, 2, 24310)] //18.55% * 2^17 = 24314 (rounding error of 4)
+        public void ComputeDistribution(int q, int d, int D)
         {
             var prototype = new RollPrototype
             {
@@ -1491,109 +1490,313 @@ namespace DnDGen.RollGen.Tests.Unit
             collection.Rolls.Add(prototype);
             collection.Adjustment = 666;
 
-            var counts = new Dictionary<int, int>();
-            var range = Enumerable.Range(q, q * d - q + 1);
-
-            foreach (var total in range)
-            {
-                counts[total] = 0;
-            }
-
-            foreach (var total in GetRolls(q, d))
-            {
-                counts[total]++;
-            }
-
-            var maxCount = counts.Max(kvp => kvp.Value);
-
             var distribution = collection.ComputeDistribution();
-            Assert.That(distribution, Is.EqualTo(maxCount), $"Counts: {JsonConvert.SerializeObject(counts)}");
+            Assert.That(distribution, Is.EqualTo(D));
         }
 
-        private IEnumerable<int> GetRolls(int q, int d)
-        {
-            var range = Enumerable.Range(1, d);
-
-            if (q == 1)
-            {
-                foreach (var roll in range)
-                    yield return roll;
-            }
-            else
-            {
-                foreach (var subroll in GetRolls(q - 1, d))
-                {
-                    foreach (var roll in range)
-                        yield return subroll + roll;
-                }
-            }
-        }
-
-        [TestCase(1, 2, 1, 2)]
-        [TestCase(1, 2, 1, 3)]
-        [TestCase(1, 2, 1, 4)]
-        [TestCase(1, 2, 1, 6)]
-        [TestCase(1, 3, 1, 2)]
-        [TestCase(1, 3, 1, 3)]
-        [TestCase(1, 3, 1, 4)]
-        [TestCase(1, 3, 1, 6)]
-        [TestCase(1, 4, 1, 2)]
-        [TestCase(1, 4, 1, 3)]
-        [TestCase(1, 4, 1, 4)]
-        [TestCase(1, 4, 1, 6)]
-        [TestCase(1, 6, 1, 2)]
-        [TestCase(1, 6, 1, 3)]
-        [TestCase(1, 6, 1, 4)]
-        [TestCase(1, 6, 1, 6)]
-        [TestCase(2, 2, 1, 2)]
-        [TestCase(2, 2, 1, 3)]
-        [TestCase(2, 2, 1, 4)]
-        [TestCase(2, 2, 1, 6)]
-        [TestCase(2, 3, 1, 2)]
-        [TestCase(2, 3, 1, 3)]
-        [TestCase(2, 3, 1, 4)]
-        [TestCase(2, 3, 1, 6)]
-        [TestCase(2, 4, 1, 2)]
-        [TestCase(2, 4, 1, 3)]
-        [TestCase(2, 4, 1, 4)]
-        [TestCase(2, 4, 1, 6)]
-        [TestCase(2, 6, 1, 2)]
-        [TestCase(2, 6, 1, 3)]
-        [TestCase(2, 6, 1, 4)]
-        [TestCase(2, 6, 1, 6)]
-        [TestCase(1, 2, 2, 2)]
-        [TestCase(1, 2, 2, 3)]
-        [TestCase(1, 2, 2, 4)]
-        [TestCase(1, 2, 2, 6)]
-        [TestCase(1, 3, 2, 2)]
-        [TestCase(1, 3, 2, 3)]
-        [TestCase(1, 3, 2, 4)]
-        [TestCase(1, 3, 2, 6)]
-        [TestCase(1, 4, 2, 2)]
-        [TestCase(1, 4, 2, 3)]
-        [TestCase(1, 4, 2, 4)]
-        [TestCase(1, 4, 2, 6)]
-        [TestCase(1, 6, 2, 2)]
-        [TestCase(1, 6, 2, 3)]
-        [TestCase(1, 6, 2, 4)]
-        [TestCase(1, 6, 2, 6)]
-        [TestCase(2, 2, 2, 2)]
-        [TestCase(2, 2, 2, 3)]
-        [TestCase(2, 2, 2, 4)]
-        [TestCase(2, 2, 2, 6)]
-        [TestCase(2, 3, 2, 2)]
-        [TestCase(2, 3, 2, 3)]
-        [TestCase(2, 3, 2, 4)]
-        [TestCase(2, 3, 2, 6)]
-        [TestCase(2, 4, 2, 2)]
-        [TestCase(2, 4, 2, 3)]
-        [TestCase(2, 4, 2, 4)]
-        [TestCase(2, 4, 2, 6)]
-        [TestCase(2, 6, 2, 2)]
-        [TestCase(2, 6, 2, 3)]
-        [TestCase(2, 6, 2, 4)]
-        [TestCase(2, 6, 2, 6)]
-        public void ComputeDistribution_TwoRolls(int q1, int d1, int q2, int d2)
+        [TestCase(1, 2, 1, 2, 2)]
+        [TestCase(1, 2, 1, 3, 2)] //33.33% * 2*3 = 2
+        [TestCase(1, 2, 1, 4, 2)] //25% * 2*4 = 2
+        [TestCase(1, 2, 1, 6, 2)]
+        [TestCase(1, 2, 1, 8, 2)]
+        [TestCase(1, 2, 1, 10, 2)]
+        [TestCase(1, 2, 1, 12, 2)]
+        [TestCase(1, 2, 1, 20, 2)] //5% * 2*20 = 2
+        [TestCase(1, 2, 1, 100, 2)] //1% * 2*100 = 2
+        [TestCase(1, 2, 1, 42, 2)]
+        [TestCase(1, 3, 1, 2, 2)] //33.33% * 3*2 = 2
+        [TestCase(1, 3, 1, 3, 3)]
+        [TestCase(1, 3, 1, 4, 3)] //25% * 3*4 = 3
+        [TestCase(1, 3, 1, 6, 3)]
+        [TestCase(1, 3, 1, 8, 3)]
+        [TestCase(1, 3, 1, 10, 3)]
+        [TestCase(1, 3, 1, 12, 3)]
+        [TestCase(1, 3, 1, 20, 3)] //5% * 3*20 = 3
+        [TestCase(1, 3, 1, 100, 3)] //1% * 3*100 = 3
+        [TestCase(1, 3, 1, 42, 3)]
+        [TestCase(1, 4, 1, 2, 2)]
+        [TestCase(1, 4, 1, 3, 3)]
+        [TestCase(1, 4, 1, 4, 4)]
+        [TestCase(1, 4, 1, 6, 4)]
+        [TestCase(1, 4, 1, 8, 4)]
+        [TestCase(1, 4, 1, 10, 4)]
+        [TestCase(1, 4, 1, 12, 4)]
+        [TestCase(1, 4, 1, 20, 4)]
+        [TestCase(1, 4, 1, 100, 4)]
+        [TestCase(1, 4, 1, 42, 4)]
+        [TestCase(1, 6, 1, 2, 2)]
+        [TestCase(1, 6, 1, 3, 3)]
+        [TestCase(1, 6, 1, 4, 4)]
+        [TestCase(1, 6, 1, 6, 6)]
+        [TestCase(1, 6, 1, 8, 6)]
+        [TestCase(1, 6, 1, 10, 6)]
+        [TestCase(1, 6, 1, 12, 6)]
+        [TestCase(1, 6, 1, 20, 6)]
+        [TestCase(1, 6, 1, 100, 6)]
+        [TestCase(1, 6, 1, 42, 6)]
+        [TestCase(1, 8, 1, 2, 2)]
+        [TestCase(1, 8, 1, 3, 3)]
+        [TestCase(1, 8, 1, 4, 4)]
+        [TestCase(1, 8, 1, 6, 6)]
+        [TestCase(1, 8, 1, 8, 8)]
+        [TestCase(1, 8, 1, 10, 8)]
+        [TestCase(1, 8, 1, 12, 8)]
+        [TestCase(1, 8, 1, 20, 8)]
+        [TestCase(1, 8, 1, 100, 8)]
+        [TestCase(1, 8, 1, 42, 8)]
+        [TestCase(1, 10, 1, 2, 2)]
+        [TestCase(1, 10, 1, 3, 3)]
+        [TestCase(1, 10, 1, 4, 4)]
+        [TestCase(1, 10, 1, 6, 6)]
+        [TestCase(1, 10, 1, 8, 8)]
+        [TestCase(1, 10, 1, 10, 10)]
+        [TestCase(1, 10, 1, 12, 10)]
+        [TestCase(1, 10, 1, 20, 10)]
+        [TestCase(1, 10, 1, 100, 10)]
+        [TestCase(1, 10, 1, 42, 10)]
+        [TestCase(1, 12, 1, 2, 2)]
+        [TestCase(1, 12, 1, 3, 3)]
+        [TestCase(1, 12, 1, 4, 4)]
+        [TestCase(1, 12, 1, 6, 6)]
+        [TestCase(1, 12, 1, 8, 8)]
+        [TestCase(1, 12, 1, 10, 10)]
+        [TestCase(1, 12, 1, 12, 12)]
+        [TestCase(1, 12, 1, 20, 12)]
+        [TestCase(1, 12, 1, 100, 12)]
+        [TestCase(1, 12, 1, 42, 12)]
+        [TestCase(1, 20, 1, 2, 2)]
+        [TestCase(1, 20, 1, 3, 3)]
+        [TestCase(1, 20, 1, 4, 4)]
+        [TestCase(1, 20, 1, 6, 6)]
+        [TestCase(1, 20, 1, 8, 8)]
+        [TestCase(1, 20, 1, 10, 10)]
+        [TestCase(1, 20, 1, 12, 12)]
+        [TestCase(1, 20, 1, 20, 20)]
+        [TestCase(1, 20, 1, 100, 20)]
+        [TestCase(1, 20, 1, 42, 20)]
+        [TestCase(1, 100, 1, 2, 2)]
+        [TestCase(1, 100, 1, 3, 3)]
+        [TestCase(1, 100, 1, 4, 4)]
+        [TestCase(1, 100, 1, 6, 6)]
+        [TestCase(1, 100, 1, 8, 8)]
+        [TestCase(1, 100, 1, 10, 10)]
+        [TestCase(1, 100, 1, 12, 12)]
+        [TestCase(1, 100, 1, 20, 20)]
+        [TestCase(1, 100, 1, 100, 100)]
+        [TestCase(1, 100, 1, 42, 42)]
+        [TestCase(1, 42, 1, 2, 2)]
+        [TestCase(1, 42, 1, 3, 3)]
+        [TestCase(1, 42, 1, 4, 4)]
+        [TestCase(1, 42, 1, 6, 6)]
+        [TestCase(1, 42, 1, 8, 8)]
+        [TestCase(1, 42, 1, 10, 10)]
+        [TestCase(1, 42, 1, 12, 12)]
+        [TestCase(1, 42, 1, 20, 20)]
+        [TestCase(1, 42, 1, 100, 42)]
+        [TestCase(1, 42, 1, 42, 42)]
+        [TestCase(1, 2, 2, 2, 3)]
+        [TestCase(1, 2, 2, 3, 5)] //27.78% * 2*3^2 = 5
+        [TestCase(1, 2, 2, 4, 7)] //21.88% * 2*4^2 = 7
+        [TestCase(1, 2, 2, 6, 11)] //15.28% * 2*6^2 = 11. Tentative: maxdie*2-1
+        [TestCase(1, 2, 2, 8, 15)]
+        [TestCase(1, 2, 2, 10, 19)]
+        [TestCase(1, 2, 2, 12, 23)]
+        [TestCase(1, 2, 2, 20, 39)]
+        [TestCase(1, 2, 2, 100, 199)]
+        [TestCase(1, 2, 2, 42, 83)] //2.35% * 2*42^2 = 83
+        [TestCase(1, 3, 2, 2, 4)] //33.33% * 3*2^2 = 4
+        [TestCase(1, 3, 2, 3, 7)]
+        [TestCase(1, 3, 2, 4, 10)] //20.83% * 3*4^2 = 10
+        [TestCase(1, 3, 2, 6, 16)] //14.81% * 3*6^2 = 16
+        [TestCase(1, 3, 2, 8, 22)] //11.46% * 3*8^2 = 22. Tentative: maxdie*3-2
+        [TestCase(1, 3, 2, 10, 28)]
+        [TestCase(1, 3, 2, 12, 34)]
+        [TestCase(1, 3, 2, 20, 58)]
+        [TestCase(1, 3, 2, 100, 298)]
+        [TestCase(1, 3, 2, 42, 124)] //2.34% * 3*42^2 = 124
+        [TestCase(1, 4, 2, 2, 4)] //25% * 4*2^2 = 4. 2*4-4
+        [TestCase(1, 4, 2, 3, 8)] //22.22% * 4*3^2 = 8. 3*4-4
+        [TestCase(1, 4, 2, 4, 12)]
+        [TestCase(1, 4, 2, 6, 20)] //13.89% * 4*6^2 = 20
+        [TestCase(1, 4, 2, 8, 28)] //10.94% * 4*8^2 = 28. Tentative: maxdie*4-4
+        [TestCase(1, 4, 2, 10, 36)]
+        [TestCase(1, 4, 2, 12, 44)]
+        [TestCase(1, 4, 2, 20, 76)]
+        [TestCase(1, 4, 2, 100, 396)]
+        [TestCase(1, 4, 2, 42, 164)] //2.32% * 4*42^2 = 164
+        [TestCase(1, 6, 2, 2, 4)] //16.67% * 6*2^2 = 4. 2*6-8
+        [TestCase(1, 6, 2, 3, 9)] //16.67% * 6*3^2 = 9. 3*6-9
+        [TestCase(1, 6, 2, 4, 15)] //15.63% * 6*4^2 = 15. 4*6-9
+        [TestCase(1, 6, 2, 6, 27)]
+        [TestCase(1, 6, 2, 8, 39)] //10.16% * 6*8^2 = 39. 8*6-9
+        [TestCase(1, 6, 2, 10, 51)]
+        [TestCase(1, 6, 2, 12, 63)]
+        [TestCase(1, 6, 2, 20, 111)]
+        [TestCase(1, 6, 2, 100, 591)]
+        [TestCase(1, 6, 2, 42, 243)] //2.3% * 6*42^2 = 243
+        [TestCase(1, 8, 2, 2, 4)]
+        [TestCase(1, 8, 2, 3, 9)]
+        [TestCase(1, 8, 2, 4, 16)]
+        [TestCase(1, 8, 2, 6, 36)]
+        [TestCase(1, 8, 2, 8, 48)]
+        [TestCase(1, 8, 2, 10, 64)]
+        [TestCase(1, 8, 2, 12, 80)]
+        [TestCase(1, 8, 2, 20, 144)]
+        [TestCase(1, 8, 2, 100, 784)]
+        [TestCase(1, 8, 2, 42, 8)]
+        [TestCase(1, 10, 2, 2, 4)]
+        [TestCase(1, 10, 2, 3, 9)]
+        [TestCase(1, 10, 2, 4, 16)]
+        [TestCase(1, 10, 2, 6, 35)]
+        [TestCase(1, 10, 2, 8, 55)]
+        [TestCase(1, 10, 2, 10, 75)]
+        [TestCase(1, 10, 2, 12, 95)]
+        [TestCase(1, 10, 2, 20, 175)]
+        [TestCase(1, 10, 2, 100, 975)]
+        [TestCase(1, 10, 2, 42, 395)]
+        [TestCase(1, 12, 2, 2, 4)]
+        [TestCase(1, 12, 2, 3, 9)]
+        [TestCase(1, 12, 2, 4, 16)]
+        [TestCase(1, 12, 2, 6, 36)]
+        [TestCase(1, 12, 2, 8, 60)]
+        [TestCase(1, 12, 2, 10, 84)]
+        [TestCase(1, 12, 2, 12, 108)]
+        [TestCase(1, 12, 2, 20, 204)]
+        [TestCase(1, 12, 2, 100, 1164)]
+        [TestCase(1, 12, 2, 42, 468)]
+        [TestCase(1, 20, 2, 2, 4)]
+        [TestCase(1, 20, 2, 3, 9)]
+        [TestCase(1, 20, 2, 4, 16)]
+        [TestCase(1, 20, 2, 6, 36)]
+        [TestCase(1, 20, 2, 8, 64)]
+        [TestCase(1, 20, 2, 10, 100)]
+        [TestCase(1, 20, 2, 12, 140)]
+        [TestCase(1, 20, 2, 20, 300)]
+        [TestCase(1, 20, 2, 100, 1900)]
+        [TestCase(1, 20, 2, 42, 740)]
+        [TestCase(1, 100, 2, 2, 4)]
+        [TestCase(1, 100, 2, 3, 9)]
+        [TestCase(1, 100, 2, 4, 16)]
+        [TestCase(1, 100, 2, 6, 36)]
+        [TestCase(1, 100, 2, 8, 64)]
+        [TestCase(1, 100, 2, 10, 100)]
+        [TestCase(1, 100, 2, 12, 144)]
+        [TestCase(1, 100, 2, 20, 400)]
+        [TestCase(1, 100, 2, 100, 7500)]
+        [TestCase(1, 100, 2, 42, 1764)]
+        [TestCase(1, 42, 2, 2, 4)]
+        [TestCase(1, 42, 2, 3, 9)]
+        [TestCase(1, 42, 2, 4, 16)]
+        [TestCase(1, 42, 2, 6, 36)]
+        [TestCase(1, 42, 2, 8, 64)]
+        [TestCase(1, 42, 2, 10, 100)]
+        [TestCase(1, 42, 2, 12, 144)]
+        [TestCase(1, 42, 2, 20, 400)]
+        [TestCase(1, 42, 2, 100, 3759)]
+        [TestCase(1, 42, 2, 42, 1323)]
+        [TestCase(2, 2, 1, 2, 3)]
+        [TestCase(2, 2, 2, 2, 3)]
+        [TestCase(2, 2, 2, 3, 5)]
+        [TestCase(2, 2, 2, 4, 7)]
+        [TestCase(2, 2, 2, 6, 11)]
+        [TestCase(2, 2, 2, 8, 15)]
+        [TestCase(2, 2, 2, 10, 19)]
+        [TestCase(2, 2, 2, 12, 23)]
+        [TestCase(2, 2, 2, 20, 39)]
+        [TestCase(2, 2, 2, 100, 199)]
+        [TestCase(2, 2, 2, 42, 83)]
+        [TestCase(2, 3, 2, 2, 4)]
+        [TestCase(2, 3, 2, 3, 7)]
+        [TestCase(2, 3, 2, 4, 10)]
+        [TestCase(2, 3, 2, 6, 16)]
+        [TestCase(2, 3, 2, 8, 22)]
+        [TestCase(2, 3, 2, 10, 28)]
+        [TestCase(2, 3, 2, 12, 24)]
+        [TestCase(2, 3, 2, 20, 58)]
+        [TestCase(2, 3, 2, 100, 298)]
+        [TestCase(2, 3, 2, 42, 124)]
+        [TestCase(2, 4, 2, 2, 4)]
+        [TestCase(2, 4, 2, 3, 8)]
+        [TestCase(2, 4, 2, 4, 12)]
+        [TestCase(2, 4, 2, 6, 20)]
+        [TestCase(2, 4, 2, 8, 28)]
+        [TestCase(2, 4, 2, 10, 36)]
+        [TestCase(2, 4, 2, 12, 44)]
+        [TestCase(2, 4, 2, 20, 76)]
+        [TestCase(2, 4, 2, 100, 396)]
+        [TestCase(2, 4, 2, 42, 164)]
+        [TestCase(2, 6, 2, 2, 4)]
+        [TestCase(2, 6, 2, 3, 9)]
+        [TestCase(2, 6, 2, 4, 15)]
+        [TestCase(2, 6, 2, 6, 27)]
+        [TestCase(2, 6, 2, 8, 218)] //9.46% * 6^2*8^2 = 218
+        [TestCase(2, 6, 2, 10, 51)]
+        [TestCase(2, 6, 2, 12, 63)]
+        [TestCase(2, 6, 2, 20, 111)]
+        [TestCase(2, 6, 2, 100, 591)]
+        [TestCase(2, 6, 2, 42, 243)]
+        [TestCase(2, 8, 2, 2, 2)]
+        [TestCase(2, 8, 2, 3, 3)]
+        [TestCase(2, 8, 2, 4, 4)]
+        [TestCase(2, 8, 2, 6, 6)]
+        [TestCase(2, 8, 2, 8, 8)]
+        [TestCase(2, 8, 2, 10, 8)]
+        [TestCase(2, 8, 2, 12, 8)]
+        [TestCase(2, 8, 2, 20, 8)]
+        [TestCase(2, 8, 2, 100, 8)]
+        [TestCase(2, 8, 2, 42, 8)]
+        [TestCase(2, 10, 2, 2, 2)]
+        [TestCase(2, 10, 2, 3, 3)]
+        [TestCase(2, 10, 2, 4, 4)]
+        [TestCase(2, 10, 2, 6, 6)]
+        [TestCase(2, 10, 2, 8, 8)]
+        [TestCase(2, 10, 2, 10, 10)]
+        [TestCase(2, 10, 2, 12, 10)]
+        [TestCase(2, 10, 2, 20, 10)]
+        [TestCase(2, 10, 2, 100, 10)]
+        [TestCase(2, 10, 2, 42, 10)]
+        [TestCase(2, 12, 2, 2, 2)]
+        [TestCase(2, 12, 2, 3, 3)]
+        [TestCase(2, 12, 2, 4, 4)]
+        [TestCase(2, 12, 2, 6, 6)]
+        [TestCase(2, 12, 2, 8, 8)]
+        [TestCase(2, 12, 2, 10, 10)]
+        [TestCase(2, 12, 2, 12, 12)]
+        [TestCase(2, 12, 2, 20, 12)]
+        [TestCase(2, 12, 2, 100, 12)]
+        [TestCase(2, 12, 2, 42, 12)]
+        [TestCase(2, 20, 2, 2, 2)]
+        [TestCase(2, 20, 2, 3, 3)]
+        [TestCase(2, 20, 2, 4, 4)]
+        [TestCase(2, 20, 2, 6, 6)]
+        [TestCase(2, 20, 2, 8, 8)]
+        [TestCase(2, 20, 2, 10, 10)]
+        [TestCase(2, 20, 2, 12, 12)]
+        [TestCase(2, 20, 2, 20, 20)]
+        [TestCase(2, 20, 2, 100, 20)]
+        [TestCase(2, 20, 2, 42, 20)]
+        [TestCase(2, 100, 2, 2, 2)]
+        [TestCase(2, 100, 2, 3, 3)]
+        [TestCase(2, 100, 2, 4, 4)]
+        [TestCase(2, 100, 2, 6, 6)]
+        [TestCase(2, 100, 2, 8, 8)]
+        [TestCase(2, 100, 2, 10, 10)]
+        [TestCase(2, 100, 2, 12, 12)]
+        [TestCase(2, 100, 2, 20, 20)]
+        [TestCase(2, 100, 2, 100, 100)]
+        [TestCase(2, 100, 2, 42, 42)]
+        [TestCase(2, 42, 2, 2, 2)]
+        [TestCase(2, 42, 2, 3, 3)]
+        [TestCase(2, 42, 2, 4, 4)]
+        [TestCase(2, 42, 2, 6, 6)]
+        [TestCase(2, 42, 2, 8, 8)]
+        [TestCase(2, 42, 2, 10, 10)]
+        [TestCase(2, 42, 2, 12, 12)]
+        [TestCase(2, 42, 2, 20, 20)]
+        [TestCase(2, 42, 2, 100, 42)]
+        [TestCase(2, 42, 2, 42, 42)]
+        [TestCase(2, 10, 8, 10, 432457640)]
+        public void ComputeDistribution_TwoRolls(int q1, int d1, int q2, int d2, int D)
         {
             var prototype1 = new RollPrototype
             {
@@ -1610,23 +1813,8 @@ namespace DnDGen.RollGen.Tests.Unit
             collection.Rolls.Add(prototype2);
             collection.Adjustment = 666;
 
-            var counts = new Dictionary<int, int>();
-
-            foreach (var total1 in GetRolls(q1, d1))
-            {
-                foreach (var total2 in GetRolls(q2, d2))
-                {
-                    if (!counts.ContainsKey(total1 + total2))
-                        counts[total1 + total2] = 0;
-
-                    counts[total1 + total2]++;
-                }
-            }
-
-            var maxCount = counts.Max(kvp => kvp.Value);
-
             var distribution = collection.ComputeDistribution();
-            Assert.That(distribution, Is.EqualTo(maxCount), $"Expected Counts: {JsonConvert.SerializeObject(counts)}");
+            Assert.That(distribution, Is.EqualTo(D));
         }
 
         [TestCase(2, 2)]
@@ -1748,25 +1936,26 @@ namespace DnDGen.RollGen.Tests.Unit
             Assert.That(actual, Is.EqualTo(expected));
         }
 
-        [TestCase(1, 2, 1, 3, 1, 4)]
-        [TestCase(1, 3, 1, 4, 1, 6)]
-        [TestCase(1, 4, 1, 6, 1, 2)]
-        [TestCase(1, 2, 1, 3, 2, 4)]
-        [TestCase(1, 3, 1, 4, 2, 6)]
-        [TestCase(1, 4, 1, 6, 2, 2)]
-        [TestCase(1, 2, 2, 3, 1, 4)]
-        [TestCase(1, 3, 2, 4, 1, 6)]
-        [TestCase(1, 4, 2, 6, 1, 2)]
-        [TestCase(1, 2, 2, 3, 2, 4)]
-        [TestCase(1, 3, 2, 4, 2, 6)]
-        [TestCase(1, 4, 2, 6, 2, 2)]
-        [TestCase(2, 2, 2, 3, 1, 4)]
-        [TestCase(2, 3, 2, 4, 1, 6)]
-        [TestCase(2, 4, 2, 6, 1, 2)]
-        [TestCase(2, 2, 2, 3, 2, 4)]
-        [TestCase(2, 3, 2, 4, 2, 6)]
-        [TestCase(2, 4, 2, 6, 2, 2)]
-        public void ComputeDistribution_ThreeRolls(int q1, int d1, int q2, int d2, int q3, int d3)
+        [TestCase(1, 2, 1, 3, 1, 4, 6)] //25% * 2*3*4 = 6
+        [TestCase(1, 3, 1, 4, 1, 6, 12)] //16.67% * 3*4*6 = 12
+        [TestCase(1, 4, 1, 6, 1, 2, 8)] //16.67% * 4*6*2 = 8
+        [TestCase(1, 2, 1, 3, 2, 4, 19)] //19.79% * 2*3*4^2 = 19
+        [TestCase(1, 3, 1, 4, 2, 6, 58)] //13.43% * 3*4*6^2 = 58
+        [TestCase(1, 4, 1, 6, 2, 2, 16)] //16.67% * 4*6*2^2 = 16
+        [TestCase(1, 2, 2, 3, 1, 4, 16)] //22.22% * 2*3^2*4 = 16
+        [TestCase(1, 3, 2, 4, 1, 6, 43)] //14.93% * 3*4^2*6 = 43
+        [TestCase(1, 4, 2, 6, 1, 2, 40)] //13.89% * 4*6^2*2 = 40
+        [TestCase(1, 2, 2, 3, 2, 4, 53)] //18.4% * 2*3^2*4^2 = 53
+        [TestCase(1, 3, 2, 4, 2, 6, 220)] //12.73% * 3*4^2*6^2 = 220
+        [TestCase(1, 4, 2, 6, 2, 2, 78)] //13.54% * 4*6^2*2^2 = 78
+        [TestCase(2, 2, 2, 3, 1, 4, 30)] //20.83% * 2^2*3^2*4 = 30
+        [TestCase(2, 3, 2, 4, 1, 6, 124)] //14.35% * 3^2*4^2*6 = 124
+        [TestCase(2, 4, 2, 6, 1, 2, 148)] //12.85% * 4^2*6^2*2 = 148
+        [TestCase(2, 2, 2, 3, 2, 4, 106)] //18.4% * 2^2*3^2*4^2 = 106
+        [TestCase(2, 3, 2, 4, 2, 6, 640)] //12.35% * 3^2*4^2*6^2 = 640
+        [TestCase(2, 4, 2, 6, 2, 2, 296)] //12.85% * 4^2*6^2*2^2 = 296
+        [TestCase(1, 10, 1, 10, 8, 10, 432457640)]
+        public void ComputeDistribution_ThreeRolls(int q1, int d1, int q2, int d2, int q3, int d3, int D)
         {
             var prototype1 = new RollPrototype
             {
@@ -1789,39 +1978,57 @@ namespace DnDGen.RollGen.Tests.Unit
             collection.Rolls.Add(prototype3);
             collection.Adjustment = 666;
 
-            var counts = new Dictionary<int, int>();
-
-            foreach (var total1 in GetRolls(q1, d1))
-            {
-                foreach (var total2 in GetRolls(q2, d2))
-                {
-                    foreach (var total3 in GetRolls(q3, d3))
-                    {
-                        if (!counts.ContainsKey(total1 + total2 + total3))
-                            counts[total1 + total2 + total3] = 0;
-
-                        counts[total1 + total2 + total3]++;
-                    }
-                }
-            }
-
-            var maxCount = counts.Max(kvp => kvp.Value);
-
             var distribution = collection.ComputeDistribution();
-            Assert.That(distribution, Is.EqualTo(maxCount), $"Expected Counts: {JsonConvert.SerializeObject(counts)}");
+            Assert.That(distribution, Is.EqualTo(D));
         }
 
-        [TestCase(2, 20)]
-        [TestCase(2, 100)]
-        [TestCase(3, 20)]
-        [TestCase(3, 100)]
-        [TestCase(10, 6)]
-        [TestCase(20, 20)]
-        [TestCase(100, 100)]
-        [TestCase(Limits.Quantity, 20)]
-        [TestCase(Limits.Quantity, 100)]
-        [TestCase(Limits.Quantity, Limits.Die)]
-        public void ComputeDistribution_IsFast(int q1, int d1)
+        [TestCase(3, 2, 3)]
+        [TestCase(3, 6, 27)]
+        [TestCase(3, 10, 75)]
+        [TestCase(3, 20, 300)] //3.75% * 20^3 = 300
+        [TestCase(3, 100, 7500)] //0.75% * 100^3 = 7500
+        [TestCase(3, Limits.Die, 75000000)] //0.75% * 10,000^3 = 7500000000
+        [TestCase(4, 2, 6)]
+        [TestCase(4, 6, 146)]
+        [TestCase(4, 10, 670)]
+        [TestCase(4, 20, 5340)]
+        [TestCase(4, 100, 666700)]
+        [TestCase(4, Limits.Die, 946739120)]
+        [TestCase(5, 2, 10)]
+        [TestCase(5, 6, 780)]
+        [TestCase(5, 10, 6000)]
+        [TestCase(5, 20, 95875)]
+        [TestCase(5, 100, 59896875)]
+        [TestCase(5, Limits.Die, int.MaxValue)]
+        [TestCase(10, 2, 252)]
+        [TestCase(10, 6, 4395456)] //7.27% * 6^10 = 4395891, rounding error
+        [TestCase(10, 10, 432457640)]
+        [TestCase(10, 20, 1590283184)]
+        [TestCase(10, 100, int.MaxValue)]
+        [TestCase(10, Limits.Die, int.MaxValue)]
+        [TestCase(20, 2, 184756)]
+        [TestCase(20, 6, 1673505640)]
+        [TestCase(20, 10, int.MaxValue)]
+        [TestCase(20, 20, int.MaxValue)]
+        [TestCase(20, 100, int.MaxValue)]
+        [TestCase(20, Limits.Die, int.MaxValue)]
+        [TestCase(100, 2, int.MaxValue)]
+        [TestCase(100, 6, int.MaxValue)]
+        [TestCase(100, 10, int.MaxValue)]
+        [TestCase(100, 20, int.MaxValue)]
+        [TestCase(100, 100, int.MaxValue)]
+        [TestCase(100, Limits.Die, int.MaxValue)]
+        [TestCase(Limits.Quantity, 2, int.MaxValue)]
+        [TestCase(Limits.Quantity, 3, int.MaxValue)]
+        [TestCase(Limits.Quantity, 4, int.MaxValue)]
+        [TestCase(Limits.Quantity, 6, int.MaxValue)]
+        [TestCase(Limits.Quantity, 8, int.MaxValue)]
+        [TestCase(Limits.Quantity, 10, int.MaxValue)]
+        [TestCase(Limits.Quantity, 12, int.MaxValue)]
+        [TestCase(Limits.Quantity, 20, int.MaxValue)]
+        [TestCase(Limits.Quantity, 100, int.MaxValue)]
+        [TestCase(Limits.Quantity, Limits.Die, int.MaxValue)]
+        public void ComputeDistribution_IsFast(int q1, int d1, int D)
         {
             var prototype1 = new RollPrototype
             {
@@ -1832,37 +2039,26 @@ namespace DnDGen.RollGen.Tests.Unit
             collection.Rolls.Add(prototype1);
             collection.Adjustment = 666;
 
-            var counts = new Dictionary<int, int>();
-
-            foreach (var total1 in GetRolls(q1, d1))
-            {
-                if (!counts.ContainsKey(total1))
-                    counts[total1] = 0;
-
-                counts[total1]++;
-            }
-
-            var maxCount = counts.Max(kvp => kvp.Value);
             var stopwatch = new Stopwatch();
 
             stopwatch.Start();
             var distribution = collection.ComputeDistribution();
             stopwatch.Stop();
 
-            Assert.That(distribution, Is.EqualTo(maxCount), $"Expected Counts: {JsonConvert.SerializeObject(counts)}");
+            Assert.That(distribution, Is.EqualTo(D));
             Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)));
         }
 
-        [TestCase(2, 20, 2, 12)]
-        [TestCase(2, 100, 2, 20)]
-        [TestCase(2, 100, 3, 20)]
-        [TestCase(3, 10, 4, 12)]
-        [TestCase(3, 100, 2, 20)]
-        [TestCase(3, 100, 3, 20)]
-        [TestCase(20, 100, 20, 20)]
-        [TestCase(100, 100, 100, 20)]
-        [TestCase(Limits.Quantity, 100, Limits.Quantity, 20)]
-        public void ComputeDistribution_TwoRolls_IsFast(int q1, int d1, int q2, int d2)
+        [TestCase(2, 20, 2, 12, 2310)] //4.01% * 20^2*12^2 = 2310
+        [TestCase(2, 100, 2, 20, 37200)] //0.93% * 100^2*20^2 = 37200
+        [TestCase(2, 100, 3, 20, 736000)] //0.92% * 100^2*20^3 = 736000
+        [TestCase(3, 10, 4, 12, 947635)] //4.57% * 10^3*12^4 = 947635
+        [TestCase(3, 100, 2, 20, 2960000)] //0.74% * 100^3*20^2 = 2960000
+        [TestCase(3, 100, 3, 20, 59200000)] //0.74% * 100^3*20^3 = 59200000
+        [TestCase(20, 100, 20, 20, int.MaxValue)]
+        [TestCase(100, 100, 100, 20, int.MaxValue)]
+        [TestCase(Limits.Quantity, 100, Limits.Quantity, 20, int.MaxValue)]
+        public void ComputeDistribution_TwoRolls_IsFast(int q1, int d1, int q2, int d2, int D)
         {
             var prototype1 = new RollPrototype
             {
@@ -1879,27 +2075,13 @@ namespace DnDGen.RollGen.Tests.Unit
             collection.Rolls.Add(prototype2);
             collection.Adjustment = 666;
 
-            var counts = new Dictionary<int, int>();
-
-            foreach (var total1 in GetRolls(q1, d1))
-            {
-                foreach (var total2 in GetRolls(q2, d2))
-                {
-                    if (!counts.ContainsKey(total1 + total2))
-                        counts[total1 + total2] = 0;
-
-                    counts[total1 + total2]++;
-                }
-            }
-
-            var maxCount = counts.Max(kvp => kvp.Value);
             var stopwatch = new Stopwatch();
 
             stopwatch.Start();
             var distribution = collection.ComputeDistribution();
             stopwatch.Stop();
 
-            Assert.That(distribution, Is.EqualTo(maxCount), $"Expected Counts: {JsonConvert.SerializeObject(counts)}");
+            Assert.That(distribution, Is.EqualTo(D));
             Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)));
         }
     }

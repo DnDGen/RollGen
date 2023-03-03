@@ -99,148 +99,126 @@ namespace DnDGen.RollGen
             return lowerDifference + upperDifference;
         }
 
+        /// <summary>
+        /// This computes the Distribution (D) of a set of dice rolls. 1dX has a D = 1, or perfect distribution. D = 4 means the average occurs in 4 permutations.
+        /// The methodology this follows was explained by Jasper Flick at anydice.com
+        /// His explanation:
+        /// 
+        ///  AnyDice is based on combinatorics and probability theory. It treats dice as sets of (value, probability) tuples. An operation like d2 + d2 goes like this:
+        ///
+        ///  { (1, 1/2), (2, 1/2) } + { (1, 1/2), (1, 1/2) } = { (1 + 1 = 2, 1 / 2 * 1 / 2 = 1 / 4) + (1 + 2 or 2 + 1 = 3, 1 / 4 + 1 / 4 = 1 / 2) +(2 + 2 = 4, 1 / 4) } = { (2, 1 / 4), (3, 1 / 2), (4, 1 / 4) }
+        ///
+        ///  10d10 has 10^10 ordered permutations, but you don't care about order when summing so we're dealing with unordered sampling with replacement (19 choose 10) which is only 92378 permutations.You just need to keep track of the probabilities. That's what the set approach does.
+        ///  I already showed you d2 + d2, which yields the set for 2d2. To get 3d2 you do the exact same thing but now 2d2 + d2. The same way you can go from d10 + d10 to 10d10. It can be done with a double loop that's blazingly fast, calculating 100d10 in a few microseconds.
+        ///
+        /// </summary>
+        /// <returns></returns>
         public int ComputeDistribution()
         {
-            var mode = (Rolls.Sum(r => r.Quantity * r.Die) + Quantities) / 2;
-            var count = GetRollCount(mode);
+            if (Quantities == 0)
+                return 0;
 
-            //TODO: Figure out how many times mode occurs without computing all roles
+            if (Quantities == 1)
+                return 1;
 
-            //https://mathworld.wolfram.com/Dice.html
-            //From article: p = target, n = q, s = d
-            //Figure 10
+            if (Quantities == 2)
+                return Rolls.Min(r => r.Die);
 
-            //https://www.lucamoroni.it/the-dice-roll-sum-problem/
-            //var p = mode;
-            //var n = Quantities;
+            var permutations = 1L;
 
-            //https://anydice.com/, function library for count of value in sequence
+            try
+            {
+                permutations = Rolls
+                    .Select(r => Convert.ToInt64(Math.Pow(r.Die, r.Quantity)))
+                    .Aggregate(1L, (acc, val) => acc * val);
+            }
+            catch
+            {
+                return int.MaxValue;
+            }
 
+            //var probabilities = Enumerable.Range(1, Rolls[0].Die).ToDictionary(r => r, r => 1d / Rolls[0].Die);
+            //var mode = (Rolls.Sum(r => r.Quantity * r.Die) + Quantities) / 2;
+            //var remainingMax = permutations;
 
-            return count;
-
-            //var counts = new Dictionary<int, int>();
-
-            //foreach (var total in GetRolls())
+            //for (var i = 0; i < Rolls.Count; i++)
             //{
-            //    if (!counts.ContainsKey(total))
-            //        counts[total] = 0;
+            //    if (i == Rolls.Count - 1)
+            //        remainingMax = 0;
+            //    else
+            //        remainingMax /= Convert.ToInt64(Math.Pow(Rolls[i].Die, Rolls[i].Quantity));
 
-            //    counts[total]++;
+            //    var q = Rolls[i].Quantity;
+            //    if (i == 0)
+            //        q--;
+
+            //    while (q-- > 0)
+            //    {
+            //        var newProbabilities = Enumerable.Range(1, Rolls[i].Die).ToDictionary(r => r, r => 1d / Rolls[i].Die);
+            //        var newTotals = new Dictionary<int, double>();
+
+            //        foreach (var p1 in probabilities)
+            //        {
+            //            foreach (var p2 in newProbabilities)
+            //            {
+            //                var newSum = p1.Key + p2.Key;
+            //                if (newSum + q * Rolls[i].Die + remainingMax < mode)
+            //                    continue;
+
+            //                if (newSum > mode)
+            //                    continue;
+
+            //                if (!newTotals.ContainsKey(newSum))
+            //                    newTotals[newSum] = 0;
+
+            //                newTotals[newSum] += p1.Value * p2.Value;
+            //            }
+            //        }
+
+            //        probabilities = newTotals;
+            //    }
             //}
 
-            //var maxCount = counts.Max(kvp => kvp.Value);
-            //return maxCount;
-        }
+            //try
+            //{
+            //    return Convert.ToInt32(probabilities[mode] * permutations);
+            //}
+            //catch
+            //{
+            //    return int.MaxValue;
+            //}
 
-        //private IEnumerable<int> GetRolls(int i = 0)
-        //{
-        //    if (i + 1 < Rolls.Count)
-        //    {
-        //        foreach (var subroll in GetRolls(i + 1))
-        //            foreach (var roll in GetRolls(Rolls[i].Quantity, Rolls[i].Die))
-        //                yield return subroll + roll;
-        //    }
-        //    else
-        //    {
-        //        foreach (var roll in GetRolls(Rolls[i].Quantity, Rolls[i].Die))
-        //            yield return roll;
-        //    }
-        //}
+            var mode = (Rolls.Sum(r => r.Quantity * r.Die) + Quantities) / 2;
+            var rolls = new Dictionary<int, int>() { { mode, 1 } };
+            var remainingMax = Upper - Adjustment;
 
-        //private IEnumerable<int> GetRolls(int q, int d)
-        //{
-        //    var range = Enumerable.Range(1, d);
-
-        //    if (q == 1)
-        //    {
-        //        foreach (var roll in range)
-        //            yield return roll;
-        //    }
-        //    else
-        //    {
-        //        foreach (var subroll in GetRolls(q - 1, d))
-        //            foreach (var roll in range)
-        //                yield return subroll + roll;
-        //    }
-        //}
-
-        private int GetRollCount(int target, int currentSum = 0, int i = 0)
-        {
-            var count = 0;
-
-            if (i + 1 < Rolls.Count)
+            for (var i = 0; i < Rolls.Count; i++)
             {
-                foreach(var total in GetTotals(target, i))
+                var nextRolls = Enumerable.Range(1, Rolls[i].Die);
+                var q = Rolls[i].Quantity;
+
+                while (q-- > 0)
                 {
-                    count += GetRollCount(target, currentSum + total, i + 1);
-                }
-            }
-            else
-            {
-                count += GetRollCount(target, currentSum, Rolls[i].Quantity, Rolls[i].Die);
-            }
+                    var newRolls = new Dictionary<int, int>();
 
-            return count;
-        }
-
-        private IEnumerable<int> GetTotals(int target, int i)
-        {
-            if (i + 1 < Rolls.Count)
-            {
-                foreach (var total in GetTotals(target, Rolls[i].Quantity, Rolls[i].Die))
-                {
-                    foreach (var subtotal in GetTotals(target, i + 1))
+                    foreach (var r1 in rolls.Where(r => r.Key - remainingMax <= 0))
                     {
-                        yield return total + subtotal;
+                        foreach (var r2 in nextRolls.Where(r => r1.Key - r >= 0))
+                        {
+                            var newSum = r1.Key - r2;
+                            if (!newRolls.ContainsKey(newSum))
+                                newRolls[newSum] = 0;
+
+                            newRolls[newSum] += r1.Value;
+                        }
                     }
-                }
-            }
-            else
-            {
-                foreach (var total in GetTotals(target, Rolls[i].Quantity, Rolls[i].Die))
-                {
-                    yield return total;
-                }
-            }
-        }
 
-        private IEnumerable<int> GetTotals(int target, int q, int d)
-        {
-            var min = Math.Min(d, target);
-
-            if (q == 1)
-            {
-                foreach (var roll in Enumerable.Range(1, min))
-                    yield return roll;
-            }
-            else
-            {
-                foreach (var roll in Enumerable.Range(1, min))
-                    foreach(var subroll in GetTotals(target, q - 1, d))
-                        if (subroll + roll <= target)
-                            yield return subroll + roll;
-            }
-        }
-
-        private int GetRollCount(int target, int currentSum, int q, int d)
-        {
-            var count = 0;
-
-            if (q == 1)
-            {
-                if (currentSum < target && currentSum + d >= target)
-                    count++;
-            }
-            else
-            {
-                foreach (var roll in Enumerable.Range(1, d))
-                {
-                    count += GetRollCount(target, currentSum + roll, q - 1, d);
+                    remainingMax -= Rolls[i].Die;
+                    rolls = newRolls;
                 }
             }
 
-            return count;
+            return rolls[0];
         }
     }
 }
