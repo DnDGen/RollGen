@@ -80,15 +80,31 @@ namespace DnDGen.RollGen
             return rank;
         }
 
-        public int GetRankingForMostEvenDistribution(int lower, int upper)
+        public long GetRankingForMostEvenDistribution(int lower, int upper)
         {
             if (!Matches(lower, upper))
-                return int.MaxValue;
+                return long.MaxValue;
 
             if (!Rolls.Any())
                 return 0;
 
             return ComputeDistribution();
+        }
+
+        public long GetAlternativeRankingForMostEvenDistribution(int lower, int upper)
+        {
+            if (!Matches(lower, upper))
+                return long.MaxValue;
+
+            if (!Rolls.Any())
+                return 0;
+
+            var rank = 0;
+            rank += Quantities * 100_000;
+            rank += Rolls.Count * 1_000;
+            rank += StandardDice.Max() - Rolls.Max(r => r.Die);
+
+            return rank;
         }
 
         private int RangeDifference(int lower, int upper)
@@ -113,7 +129,7 @@ namespace DnDGen.RollGen
         ///
         /// </summary>
         /// <returns></returns>
-        public int ComputeDistribution()
+        public long ComputeDistribution()
         {
             if (Quantities == 0)
                 return 0;
@@ -124,72 +140,8 @@ namespace DnDGen.RollGen
             if (Quantities == 2)
                 return Rolls.Min(r => r.Die);
 
-            var permutations = 1L;
-
-            try
-            {
-                permutations = Rolls
-                    .Select(r => Convert.ToInt64(Math.Pow(r.Die, r.Quantity)))
-                    .Aggregate(1L, (acc, val) => acc * val);
-            }
-            catch
-            {
-                return int.MaxValue;
-            }
-
-            //var probabilities = Enumerable.Range(1, Rolls[0].Die).ToDictionary(r => r, r => 1d / Rolls[0].Die);
-            //var mode = (Rolls.Sum(r => r.Quantity * r.Die) + Quantities) / 2;
-            //var remainingMax = permutations;
-
-            //for (var i = 0; i < Rolls.Count; i++)
-            //{
-            //    if (i == Rolls.Count - 1)
-            //        remainingMax = 0;
-            //    else
-            //        remainingMax /= Convert.ToInt64(Math.Pow(Rolls[i].Die, Rolls[i].Quantity));
-
-            //    var q = Rolls[i].Quantity;
-            //    if (i == 0)
-            //        q--;
-
-            //    while (q-- > 0)
-            //    {
-            //        var newProbabilities = Enumerable.Range(1, Rolls[i].Die).ToDictionary(r => r, r => 1d / Rolls[i].Die);
-            //        var newTotals = new Dictionary<int, double>();
-
-            //        foreach (var p1 in probabilities)
-            //        {
-            //            foreach (var p2 in newProbabilities)
-            //            {
-            //                var newSum = p1.Key + p2.Key;
-            //                if (newSum + q * Rolls[i].Die + remainingMax < mode)
-            //                    continue;
-
-            //                if (newSum > mode)
-            //                    continue;
-
-            //                if (!newTotals.ContainsKey(newSum))
-            //                    newTotals[newSum] = 0;
-
-            //                newTotals[newSum] += p1.Value * p2.Value;
-            //            }
-            //        }
-
-            //        probabilities = newTotals;
-            //    }
-            //}
-
-            //try
-            //{
-            //    return Convert.ToInt32(probabilities[mode] * permutations);
-            //}
-            //catch
-            //{
-            //    return int.MaxValue;
-            //}
-
             var mode = (Rolls.Sum(r => r.Quantity * r.Die) + Quantities) / 2;
-            var rolls = new Dictionary<int, int>() { { mode, 1 } };
+            var rolls = new Dictionary<int, long>() { { mode, 1 } };
             var remainingMax = Upper - Adjustment;
 
             for (var i = 0; i < Rolls.Count; i++)
@@ -199,7 +151,7 @@ namespace DnDGen.RollGen
 
                 while (q-- > 0)
                 {
-                    var newRolls = new Dictionary<int, int>();
+                    var newRolls = new Dictionary<int, long>();
 
                     foreach (var r1 in rolls.Where(r => r.Key - remainingMax <= 0))
                     {
@@ -210,6 +162,11 @@ namespace DnDGen.RollGen
                                 newRolls[newSum] = 0;
 
                             newRolls[newSum] += r1.Value;
+
+                            //INFO: This means we went so high that we wrapped around
+                            //Need to return max - 1, so it doesn't conflict with rolls that do not match the range
+                            if (newRolls[newSum] < 1)
+                                return long.MaxValue - 1;
                         }
                     }
 

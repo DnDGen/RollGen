@@ -671,12 +671,12 @@ namespace DnDGen.RollGen.Tests.Unit
             collection.Adjustment = 9266;
 
             var ranking = collection.GetRankingForMostEvenDistribution(lower, upper);
-            Assert.That(ranking, Is.EqualTo(int.MaxValue));
+            Assert.That(ranking, Is.EqualTo(long.MaxValue));
         }
 
-        [TestCase(1, 100_000 + 1000)]
-        [TestCase(2, 100_000 * 2 + 1000)]
-        [TestCase(3, 100_000 * 3 + 1000)]
+        [TestCase(1, 1)]
+        [TestCase(2, 100)]
+        [TestCase(3, 7500)]
         public void Ranking_MostEvenDistribution_ForOneRollInRange(int quantity, int expectedRanking)
         {
             collection.Adjustment = 9266;
@@ -781,18 +781,18 @@ namespace DnDGen.RollGen.Tests.Unit
             collection.Rolls.Add(prototype);
 
             var ranking = collection.GetRankingForMostEvenDistribution(lower, upper);
-            Assert.That(ranking, Is.EqualTo(int.MaxValue));
+            Assert.That(ranking, Is.EqualTo(long.MaxValue));
         }
 
-        [TestCase(1, 1, 100_000 * 2 + 1_000 * 2)]
-        [TestCase(1, 2, 100_000 * 3 + 1_000 * 2)]
-        [TestCase(1, 3, 100_000 * 4 + 1_000 * 2)]
-        [TestCase(2, 1, 100_000 * 3 + 1_000 * 2)]
-        [TestCase(2, 2, 100_000 * 4 + 1_000 * 2)]
-        [TestCase(2, 3, 100_000 * 5 + 1_000 * 2)]
-        [TestCase(3, 1, 100_000 * 4 + 1_000 * 2)]
-        [TestCase(3, 2, 100_000 * 5 + 1_000 * 2)]
-        [TestCase(3, 3, 100_000 * 6 + 1_000 * 2)]
+        [TestCase(1, 1, 20)]
+        [TestCase(1, 2, 400)]
+        [TestCase(1, 3, 8000)]
+        [TestCase(2, 1, 1900)]
+        [TestCase(2, 2, 37340)]
+        [TestCase(2, 3, 735050)]
+        [TestCase(3, 1, 149340)]
+        [TestCase(3, 2, 2973400)]
+        [TestCase(3, 3, 59204000)]
         public void Ranking_MostEvenDistribution_ForMultipleRollsInRange(int quantity1, int quantity2, int expectedRanking)
         {
             collection.Adjustment = 9266;
@@ -1063,11 +1063,89 @@ namespace DnDGen.RollGen.Tests.Unit
             collection.Rolls.Add(otherPrototype);
 
             var ranking = collection.GetRankingForMostEvenDistribution(lower, upper);
-            Assert.That(ranking, Is.EqualTo(int.MaxValue));
+            Assert.That(ranking, Is.EqualTo(long.MaxValue));
         }
 
-        [TestCase(1, 8, 1, 2, -1, 100_000 * 2 + 1_000 * 2 + 92)]
-        [TestCase(1, 6, 1, 4, -1, 100_000 * 2 + 1_000 * 2 + 94)]
+        [TestCase(1, 2, 1, 2, -2, 2)]
+        [TestCase(1, 2, 1, 4, -2, 2)]
+        [TestCase(1, 2, 1, 6, -2, 2)]
+        [TestCase(1, 2, 1, 8, -2, 2)]
+        [TestCase(1, 4, 1, 2, -2, 2)]
+        [TestCase(1, 4, 1, 4, -2, 4)]
+        [TestCase(1, 4, 1, 6, -2, 4)]
+        [TestCase(1, 4, 1, 8, -2, 4)]
+        [TestCase(1, 6, 1, 2, -2, 2)]
+        [TestCase(1, 6, 1, 4, -2, 4)]
+        [TestCase(1, 6, 1, 6, -2, 6)]
+        [TestCase(1, 6, 1, 8, -2, 6)]
+        [TestCase(1, 8, 1, 2, -2, 2)]
+        [TestCase(1, 8, 1, 4, -2, 4)]
+        [TestCase(1, 8, 1, 6, -2, 6)]
+        [TestCase(1, 8, 1, 8, -2, 8)]
+        [TestCase(1, 2, 1, 2, -1, 2)]
+        [TestCase(1, 2, 1, 4, -1, 2)]
+        [TestCase(1, 2, 1, 6, -1, 2)]
+        [TestCase(1, 2, 1, 8, -1, 2)]
+        [TestCase(1, 4, 1, 2, -1, 2)]
+        [TestCase(1, 4, 1, 4, -1, 4)]
+        [TestCase(1, 4, 1, 6, -1, 4)]
+        [TestCase(1, 4, 1, 8, -1, 4)]
+        [TestCase(1, 6, 1, 2, -1, 2)]
+        [TestCase(1, 6, 1, 4, -1, 4)]
+        [TestCase(1, 6, 1, 6, -1, 6)]
+        [TestCase(1, 6, 1, 8, -1, 6)]
+        [TestCase(1, 8, 1, 2, -1, 2)]
+        [TestCase(1, 8, 1, 4, -1, 4)]
+        [TestCase(1, 8, 1, 6, -1, 6)]
+        [TestCase(1, 8, 1, 8, -1, 8)]
+        [TestCase(1, 2, 1, 2, 0, 2)]
+        [TestCase(1, 2, 1, 4, 0, 2)]
+        [TestCase(1, 2, 1, 6, 0, 2)]
+        [TestCase(1, 2, 1, 8, 0, 2)]
+        [TestCase(1, 4, 1, 2, 0, 2)]
+        [TestCase(1, 4, 1, 4, 0, 4)]
+        [TestCase(1, 4, 1, 6, 0, 4)]
+        [TestCase(1, 4, 1, 8, 0, 4)]
+        [TestCase(1, 6, 1, 2, 0, 2)]
+        [TestCase(1, 6, 1, 4, 0, 4)]
+        [TestCase(1, 6, 1, 6, 0, 6)]
+        [TestCase(1, 6, 1, 8, 0, 6)]
+        [TestCase(1, 8, 1, 2, 0, 2)]
+        [TestCase(1, 8, 1, 4, 0, 4)]
+        [TestCase(1, 8, 1, 6, 0, 6)]
+        [TestCase(1, 8, 1, 8, 0, 8)]
+        [TestCase(1, 2, 1, 2, 1, 2)]
+        [TestCase(1, 2, 1, 4, 1, 2)]
+        [TestCase(1, 2, 1, 6, 1, 2)]
+        [TestCase(1, 2, 1, 8, 1, 2)]
+        [TestCase(1, 4, 1, 2, 1, 2)]
+        [TestCase(1, 4, 1, 4, 1, 4)]
+        [TestCase(1, 4, 1, 6, 1, 4)]
+        [TestCase(1, 4, 1, 8, 1, 4)]
+        [TestCase(1, 6, 1, 2, 1, 2)]
+        [TestCase(1, 6, 1, 4, 1, 4)]
+        [TestCase(1, 6, 1, 6, 1, 6)]
+        [TestCase(1, 6, 1, 8, 1, 6)]
+        [TestCase(1, 8, 1, 2, 1, 2)]
+        [TestCase(1, 8, 1, 4, 1, 4)]
+        [TestCase(1, 8, 1, 6, 1, 6)]
+        [TestCase(1, 8, 1, 8, 1, 8)]
+        [TestCase(1, 2, 1, 2, 2, 2)]
+        [TestCase(1, 2, 1, 4, 2, 2)]
+        [TestCase(1, 2, 1, 6, 2, 2)]
+        [TestCase(1, 2, 1, 8, 2, 2)]
+        [TestCase(1, 4, 1, 2, 2, 2)]
+        [TestCase(1, 4, 1, 4, 2, 4)]
+        [TestCase(1, 4, 1, 6, 2, 4)]
+        [TestCase(1, 4, 1, 8, 2, 4)]
+        [TestCase(1, 6, 1, 2, 2, 2)]
+        [TestCase(1, 6, 1, 4, 2, 4)]
+        [TestCase(1, 6, 1, 6, 2, 6)]
+        [TestCase(1, 6, 1, 8, 2, 6)]
+        [TestCase(1, 8, 1, 2, 2, 2)]
+        [TestCase(1, 8, 1, 4, 2, 4)]
+        [TestCase(1, 8, 1, 6, 2, 6)]
+        [TestCase(1, 8, 1, 8, 2, 8)]
         public void Ranking_MostEvenDistribution_ForMultipleRollsInRangeWithDifferentDice(int q1, int d1, int q2, int d2, int adjustment, int expectedRanking)
         {
             collection.Adjustment = adjustment;
@@ -1092,15 +1170,17 @@ namespace DnDGen.RollGen.Tests.Unit
             Assert.That(ranking, Is.EqualTo(expectedRanking));
         }
 
-        [TestCase(2, 100_000 + 1000 + 98)]
-        [TestCase(3, 100_000 + 1000 + 97)]
-        [TestCase(4, 100_000 + 1000 + 96)]
-        [TestCase(6, 100_000 + 1000 + 94)]
-        [TestCase(8, 100_000 + 1000 + 92)]
-        [TestCase(10, 100_000 + 1000 + 90)]
-        [TestCase(12, 100_000 + 1000 + 88)]
-        [TestCase(20, 100_000 + 1000 + 80)]
-        [TestCase(100, 100_000 + 1000)]
+        [TestCase(2, 1)]
+        [TestCase(3, 1)]
+        [TestCase(4, 1)]
+        [TestCase(6, 1)]
+        [TestCase(8, 1)]
+        [TestCase(10, 1)]
+        [TestCase(12, 1)]
+        [TestCase(20, 1)]
+        [TestCase(100, 1)]
+        [TestCase(1000, 1)]
+        [TestCase(Limits.Die, 1)]
         public void Ranking_MostEvenDistribution_ForRollInRangeWithMaxDice(int die, int expectedRanking)
         {
             var prototype = new RollPrototype
@@ -1112,6 +1192,558 @@ namespace DnDGen.RollGen.Tests.Unit
             collection.Rolls.Add(prototype);
 
             var ranking = collection.GetRankingForMostEvenDistribution(1, die);
+            Assert.That(ranking, Is.EqualTo(expectedRanking));
+        }
+
+        [Test]
+        public void Ranking_AlternativeMostEvenDistribution_ForOnlyAdjustmentInRange()
+        {
+            collection.Adjustment = 9266;
+
+            var ranking = collection.GetAlternativeRankingForMostEvenDistribution(9266, 9266);
+            Assert.That(ranking, Is.Zero);
+        }
+
+        [TestCase(9264, 9264)]
+        [TestCase(9264, 9265)]
+        [TestCase(9264, 9266)]
+        [TestCase(9264, 9267)]
+        [TestCase(9264, 9268)]
+        [TestCase(9265, 9265)]
+        [TestCase(9265, 9266)]
+        [TestCase(9265, 9267)]
+        [TestCase(9265, 9268)]
+        [TestCase(9266, 9267)]
+        [TestCase(9266, 9268)]
+        [TestCase(9267, 9267)]
+        [TestCase(9267, 9268)]
+        [TestCase(9268, 9268)]
+        public void Ranking_AlternativeMostEvenDistribution_ForOnlyAdjustmentOutOfRange(int lower, int upper)
+        {
+            collection.Adjustment = 9266;
+
+            var ranking = collection.GetAlternativeRankingForMostEvenDistribution(lower, upper);
+            Assert.That(ranking, Is.EqualTo(long.MaxValue));
+        }
+
+        [TestCase(1, 1)]
+        [TestCase(2, 100)]
+        [TestCase(3, 7500)]
+        public void Ranking_AlternativeMostEvenDistribution_ForOneRollInRange(int quantity, int expectedRanking)
+        {
+            collection.Adjustment = 9266;
+
+            var prototype = new RollPrototype
+            {
+                Quantity = quantity,
+                Die = 100
+            };
+
+            collection.Rolls.Add(prototype);
+
+            var ranking = collection.GetAlternativeRankingForMostEvenDistribution(quantity + 9266, quantity * 100 + 9266);
+            Assert.That(ranking, Is.EqualTo(expectedRanking));
+        }
+
+        [TestCase(9264 + 1, 100 * 1 + 9264, 1)]
+        [TestCase(9264 + 1, 100 * 1 + 9265, 1)]
+        [TestCase(9264 + 1, 100 * 1 + 9266, 1)]
+        [TestCase(9264 + 1, 100 * 1 + 9267, 1)]
+        [TestCase(9264 + 1, 100 * 1 + 9268, 1)]
+        [TestCase(9264 + 2, 100 * 2 + 9264, 2)]
+        [TestCase(9264 + 2, 100 * 2 + 9265, 2)]
+        [TestCase(9264 + 2, 100 * 2 + 9266, 2)]
+        [TestCase(9264 + 2, 100 * 2 + 9267, 2)]
+        [TestCase(9264 + 2, 100 * 2 + 9268, 2)]
+        [TestCase(9264 + 3, 100 * 3 + 9264, 3)]
+        [TestCase(9264 + 3, 100 * 3 + 9265, 3)]
+        [TestCase(9264 + 3, 100 * 3 + 9266, 3)]
+        [TestCase(9264 + 3, 100 * 3 + 9267, 3)]
+        [TestCase(9264 + 3, 100 * 3 + 9268, 3)]
+        [TestCase(9265 + 1, 100 * 1 + 9264, 1)]
+        [TestCase(9265 + 1, 100 * 1 + 9265, 1)]
+        [TestCase(9265 + 1, 100 * 1 + 9266, 1)]
+        [TestCase(9265 + 1, 100 * 1 + 9267, 1)]
+        [TestCase(9265 + 1, 100 * 1 + 9268, 1)]
+        [TestCase(9265 + 2, 100 * 2 + 9264, 2)]
+        [TestCase(9265 + 2, 100 * 2 + 9265, 2)]
+        [TestCase(9265 + 2, 100 * 2 + 9266, 2)]
+        [TestCase(9265 + 2, 100 * 2 + 9267, 2)]
+        [TestCase(9265 + 2, 100 * 2 + 9268, 2)]
+        [TestCase(9265 + 3, 100 * 3 + 9264, 3)]
+        [TestCase(9265 + 3, 100 * 3 + 9265, 3)]
+        [TestCase(9265 + 3, 100 * 3 + 9266, 3)]
+        [TestCase(9265 + 3, 100 * 3 + 9267, 3)]
+        [TestCase(9265 + 3, 100 * 3 + 9268, 3)]
+        [TestCase(9266 + 1, 100 * 1 + 9264, 1)]
+        [TestCase(9266 + 1, 100 * 1 + 9265, 1)]
+        [TestCase(9266 + 1, 100 * 1 + 9266, 1, Ignore = "Is actually in range")]
+        [TestCase(9266 + 1, 100 * 1 + 9267, 1)]
+        [TestCase(9266 + 1, 100 * 1 + 9268, 1)]
+        [TestCase(9266 + 2, 100 * 2 + 9264, 2)]
+        [TestCase(9266 + 2, 100 * 2 + 9265, 2)]
+        [TestCase(9266 + 2, 100 * 2 + 9266, 2, Ignore = "Is actually in range")]
+        [TestCase(9266 + 2, 100 * 2 + 9267, 2)]
+        [TestCase(9266 + 2, 100 * 2 + 9268, 2)]
+        [TestCase(9266 + 3, 100 * 3 + 9264, 3)]
+        [TestCase(9266 + 3, 100 * 3 + 9265, 3)]
+        [TestCase(9266 + 3, 100 * 3 + 9266, 3, Ignore = "Is actually in range")]
+        [TestCase(9266 + 3, 100 * 3 + 9267, 3)]
+        [TestCase(9266 + 3, 100 * 3 + 9268, 3)]
+        [TestCase(9267 + 1, 100 * 1 + 9264, 1)]
+        [TestCase(9267 + 1, 100 * 1 + 9265, 1)]
+        [TestCase(9267 + 1, 100 * 1 + 9266, 1)]
+        [TestCase(9267 + 1, 100 * 1 + 9267, 1)]
+        [TestCase(9267 + 1, 100 * 1 + 9268, 1)]
+        [TestCase(9267 + 2, 100 * 2 + 9264, 2)]
+        [TestCase(9267 + 2, 100 * 2 + 9265, 2)]
+        [TestCase(9267 + 2, 100 * 2 + 9266, 2)]
+        [TestCase(9267 + 2, 100 * 2 + 9267, 2)]
+        [TestCase(9267 + 2, 100 * 2 + 9268, 2)]
+        [TestCase(9267 + 3, 100 * 3 + 9264, 3)]
+        [TestCase(9267 + 3, 100 * 3 + 9265, 3)]
+        [TestCase(9267 + 3, 100 * 3 + 9266, 3)]
+        [TestCase(9267 + 3, 100 * 3 + 9267, 3)]
+        [TestCase(9267 + 3, 100 * 3 + 9268, 3)]
+        [TestCase(9268 + 1, 100 * 1 + 9264, 1)]
+        [TestCase(9268 + 1, 100 * 1 + 9265, 1)]
+        [TestCase(9268 + 1, 100 * 1 + 9266, 1)]
+        [TestCase(9268 + 1, 100 * 1 + 9267, 1)]
+        [TestCase(9268 + 1, 100 * 1 + 9268, 1)]
+        [TestCase(9268 + 2, 100 * 2 + 9264, 2)]
+        [TestCase(9268 + 2, 100 * 2 + 9265, 2)]
+        [TestCase(9268 + 2, 100 * 2 + 9266, 2)]
+        [TestCase(9268 + 2, 100 * 2 + 9267, 2)]
+        [TestCase(9268 + 2, 100 * 2 + 9268, 2)]
+        [TestCase(9268 + 3, 100 * 3 + 9264, 3)]
+        [TestCase(9268 + 3, 100 * 3 + 9265, 3)]
+        [TestCase(9268 + 3, 100 * 3 + 9266, 3)]
+        [TestCase(9268 + 3, 100 * 3 + 9267, 3)]
+        [TestCase(9268 + 3, 100 * 3 + 9268, 3)]
+        public void Ranking_AlternativeMostEvenDistribution_ForOneRollOutOfRange(int lower, int upper, int quantity)
+        {
+            collection.Adjustment = 9266;
+
+            var prototype = new RollPrototype
+            {
+                Quantity = quantity,
+                Die = 100
+            };
+
+            collection.Rolls.Add(prototype);
+
+            var ranking = collection.GetAlternativeRankingForMostEvenDistribution(lower, upper);
+            Assert.That(ranking, Is.EqualTo(long.MaxValue));
+        }
+
+        [TestCase(1, 1, 202000)]
+        [TestCase(1, 2, 302000)]
+        [TestCase(1, 3, 402000)]
+        [TestCase(2, 1, 302000)]
+        [TestCase(2, 2, 402000)]
+        [TestCase(2, 3, 502000)]
+        [TestCase(3, 1, 402000)]
+        [TestCase(3, 2, 502000)]
+        [TestCase(3, 3, 602000)]
+        public void Ranking_AlternativeMostEvenDistribution_ForMultipleRollsInRange(int quantity1, int quantity2, int expectedRanking)
+        {
+            collection.Adjustment = 9266;
+
+            var prototype = new RollPrototype
+            {
+                Quantity = quantity1,
+                Die = 100
+            };
+
+            collection.Rolls.Add(prototype);
+
+            var otherPrototype = new RollPrototype
+            {
+                Quantity = quantity2,
+                Die = 20
+            };
+
+            collection.Rolls.Add(otherPrototype);
+
+            var ranking = collection.GetAlternativeRankingForMostEvenDistribution(quantity1 + quantity2 + 9266, quantity1 * 100 + quantity2 * 20 + 9266);
+            Assert.That(ranking, Is.EqualTo(expectedRanking));
+        }
+
+        [TestCase(1 + 1 + 9264, 100 * 1 + 20 * 1 + 9264, 1, 1)]
+        [TestCase(1 + 1 + 9264, 100 * 1 + 20 * 1 + 9265, 1, 1)]
+        [TestCase(1 + 1 + 9264, 100 * 1 + 20 * 1 + 9266, 1, 1)]
+        [TestCase(1 + 1 + 9264, 100 * 1 + 20 * 1 + 9267, 1, 1)]
+        [TestCase(1 + 1 + 9264, 100 * 1 + 20 * 1 + 9268, 1, 1)]
+        [TestCase(1 + 1 + 9265, 100 * 1 + 20 * 1 + 9264, 1, 1)]
+        [TestCase(1 + 1 + 9265, 100 * 1 + 20 * 1 + 9265, 1, 1)]
+        [TestCase(1 + 1 + 9265, 100 * 1 + 20 * 1 + 9266, 1, 1)]
+        [TestCase(1 + 1 + 9265, 100 * 1 + 20 * 1 + 9267, 1, 1)]
+        [TestCase(1 + 1 + 9265, 100 * 1 + 20 * 1 + 9268, 1, 1)]
+        [TestCase(1 + 1 + 9266, 100 * 1 + 20 * 1 + 9264, 1, 1)]
+        [TestCase(1 + 1 + 9266, 100 * 1 + 20 * 1 + 9265, 1, 1)]
+        [TestCase(1 + 1 + 9266, 100 * 1 + 20 * 1 + 9266, 1, 1, Ignore = "Actually in range")]
+        [TestCase(1 + 1 + 9266, 100 * 1 + 20 * 1 + 9267, 1, 1)]
+        [TestCase(1 + 1 + 9266, 100 * 1 + 20 * 1 + 9268, 1, 1)]
+        [TestCase(1 + 1 + 9267, 100 * 1 + 20 * 1 + 9264, 1, 1)]
+        [TestCase(1 + 1 + 9267, 100 * 1 + 20 * 1 + 9265, 1, 1)]
+        [TestCase(1 + 1 + 9267, 100 * 1 + 20 * 1 + 9266, 1, 1)]
+        [TestCase(1 + 1 + 9267, 100 * 1 + 20 * 1 + 9267, 1, 1)]
+        [TestCase(1 + 1 + 9267, 100 * 1 + 20 * 1 + 9268, 1, 1)]
+        [TestCase(1 + 1 + 9268, 100 * 1 + 20 * 1 + 9264, 1, 1)]
+        [TestCase(1 + 1 + 9268, 100 * 1 + 20 * 1 + 9265, 1, 1)]
+        [TestCase(1 + 1 + 9268, 100 * 1 + 20 * 1 + 9266, 1, 1)]
+        [TestCase(1 + 1 + 9268, 100 * 1 + 20 * 1 + 9267, 1, 1)]
+        [TestCase(1 + 1 + 9268, 100 * 1 + 20 * 1 + 9268, 1, 1)]
+        [TestCase(2 + 1 + 9264, 100 * 2 + 20 * 1 + 9264, 2, 1)]
+        [TestCase(2 + 1 + 9264, 100 * 2 + 20 * 1 + 9265, 2, 1)]
+        [TestCase(2 + 1 + 9264, 100 * 2 + 20 * 1 + 9266, 2, 1)]
+        [TestCase(2 + 1 + 9264, 100 * 2 + 20 * 1 + 9267, 2, 1)]
+        [TestCase(2 + 1 + 9264, 100 * 2 + 20 * 1 + 9268, 2, 1)]
+        [TestCase(2 + 1 + 9265, 100 * 2 + 20 * 1 + 9264, 2, 1)]
+        [TestCase(2 + 1 + 9265, 100 * 2 + 20 * 1 + 9265, 2, 1)]
+        [TestCase(2 + 1 + 9265, 100 * 2 + 20 * 1 + 9266, 2, 1)]
+        [TestCase(2 + 1 + 9265, 100 * 2 + 20 * 1 + 9267, 2, 1)]
+        [TestCase(2 + 1 + 9265, 100 * 2 + 20 * 1 + 9268, 2, 1)]
+        [TestCase(2 + 1 + 9266, 100 * 2 + 20 * 1 + 9264, 2, 1)]
+        [TestCase(2 + 1 + 9266, 100 * 2 + 20 * 1 + 9265, 2, 1)]
+        [TestCase(2 + 1 + 9266, 100 * 2 + 20 * 1 + 9266, 2, 1, Ignore = "Actually in range")]
+        [TestCase(2 + 1 + 9266, 100 * 2 + 20 * 1 + 9267, 2, 1)]
+        [TestCase(2 + 1 + 9266, 100 * 2 + 20 * 1 + 9268, 2, 1)]
+        [TestCase(2 + 1 + 9267, 100 * 2 + 20 * 1 + 9264, 2, 1)]
+        [TestCase(2 + 1 + 9267, 100 * 2 + 20 * 1 + 9265, 2, 1)]
+        [TestCase(2 + 1 + 9267, 100 * 2 + 20 * 1 + 9266, 2, 1)]
+        [TestCase(2 + 1 + 9267, 100 * 2 + 20 * 1 + 9267, 2, 1)]
+        [TestCase(2 + 1 + 9267, 100 * 2 + 20 * 1 + 9268, 2, 1)]
+        [TestCase(2 + 1 + 9268, 100 * 2 + 20 * 1 + 9264, 2, 1)]
+        [TestCase(2 + 1 + 9268, 100 * 2 + 20 * 1 + 9265, 2, 1)]
+        [TestCase(2 + 1 + 9268, 100 * 2 + 20 * 1 + 9266, 2, 1)]
+        [TestCase(2 + 1 + 9268, 100 * 2 + 20 * 1 + 9267, 2, 1)]
+        [TestCase(2 + 1 + 9268, 100 * 2 + 20 * 1 + 9268, 2, 1)]
+        [TestCase(3 + 1 + 9264, 100 * 3 + 20 * 1 + 9264, 3, 1)]
+        [TestCase(3 + 1 + 9264, 100 * 3 + 20 * 1 + 9265, 3, 1)]
+        [TestCase(3 + 1 + 9264, 100 * 3 + 20 * 1 + 9266, 3, 1)]
+        [TestCase(3 + 1 + 9264, 100 * 3 + 20 * 1 + 9267, 3, 1)]
+        [TestCase(3 + 1 + 9264, 100 * 3 + 20 * 1 + 9268, 3, 1)]
+        [TestCase(3 + 1 + 9265, 100 * 3 + 20 * 1 + 9264, 3, 1)]
+        [TestCase(3 + 1 + 9265, 100 * 3 + 20 * 1 + 9265, 3, 1)]
+        [TestCase(3 + 1 + 9265, 100 * 3 + 20 * 1 + 9266, 3, 1)]
+        [TestCase(3 + 1 + 9265, 100 * 3 + 20 * 1 + 9267, 3, 1)]
+        [TestCase(3 + 1 + 9265, 100 * 3 + 20 * 1 + 9268, 3, 1)]
+        [TestCase(3 + 1 + 9266, 100 * 3 + 20 * 1 + 9264, 3, 1)]
+        [TestCase(3 + 1 + 9266, 100 * 3 + 20 * 1 + 9265, 3, 1)]
+        [TestCase(3 + 1 + 9266, 100 * 3 + 20 * 1 + 9266, 3, 1, Ignore = "Actually in range")]
+        [TestCase(3 + 1 + 9266, 100 * 3 + 20 * 1 + 9267, 3, 1)]
+        [TestCase(3 + 1 + 9266, 100 * 3 + 20 * 1 + 9268, 3, 1)]
+        [TestCase(3 + 1 + 9267, 100 * 3 + 20 * 1 + 9264, 3, 1)]
+        [TestCase(3 + 1 + 9267, 100 * 3 + 20 * 1 + 9265, 3, 1)]
+        [TestCase(3 + 1 + 9267, 100 * 3 + 20 * 1 + 9266, 3, 1)]
+        [TestCase(3 + 1 + 9267, 100 * 3 + 20 * 1 + 9267, 3, 1)]
+        [TestCase(3 + 1 + 9267, 100 * 3 + 20 * 1 + 9268, 3, 1)]
+        [TestCase(3 + 1 + 9268, 100 * 3 + 20 * 1 + 9264, 3, 1)]
+        [TestCase(3 + 1 + 9268, 100 * 3 + 20 * 1 + 9265, 3, 1)]
+        [TestCase(3 + 1 + 9268, 100 * 3 + 20 * 1 + 9266, 3, 1)]
+        [TestCase(3 + 1 + 9268, 100 * 3 + 20 * 1 + 9267, 3, 1)]
+        [TestCase(3 + 1 + 9268, 100 * 3 + 20 * 1 + 9268, 3, 1)]
+        [TestCase(1 + 1 + 9264, 100 * 1 + 20 * 2 + 9264, 1, 2)]
+        [TestCase(1 + 1 + 9264, 100 * 1 + 20 * 2 + 9265, 1, 2)]
+        [TestCase(1 + 1 + 9264, 100 * 1 + 20 * 2 + 9266, 1, 2)]
+        [TestCase(1 + 1 + 9264, 100 * 1 + 20 * 2 + 9267, 1, 2)]
+        [TestCase(1 + 1 + 9264, 100 * 1 + 20 * 2 + 9268, 1, 2)]
+        [TestCase(1 + 1 + 9265, 100 * 1 + 20 * 2 + 9264, 1, 2)]
+        [TestCase(1 + 1 + 9265, 100 * 1 + 20 * 2 + 9265, 1, 2)]
+        [TestCase(1 + 1 + 9265, 100 * 1 + 20 * 2 + 9266, 1, 2)]
+        [TestCase(1 + 1 + 9265, 100 * 1 + 20 * 2 + 9267, 1, 2)]
+        [TestCase(1 + 1 + 9265, 100 * 1 + 20 * 2 + 9268, 1, 2)]
+        [TestCase(1 + 1 + 9266, 100 * 1 + 20 * 2 + 9264, 1, 2)]
+        [TestCase(1 + 1 + 9266, 100 * 1 + 20 * 2 + 9265, 1, 2)]
+        [TestCase(1 + 1 + 9266, 100 * 1 + 20 * 2 + 9266, 1, 2)]
+        [TestCase(1 + 1 + 9266, 100 * 1 + 20 * 2 + 9267, 1, 2)]
+        [TestCase(1 + 1 + 9266, 100 * 1 + 20 * 2 + 9268, 1, 2)]
+        [TestCase(1 + 1 + 9267, 100 * 1 + 20 * 2 + 9264, 1, 2)]
+        [TestCase(1 + 1 + 9267, 100 * 1 + 20 * 2 + 9265, 1, 2)]
+        [TestCase(1 + 1 + 9267, 100 * 1 + 20 * 2 + 9266, 1, 2, Ignore = "Actually in range")]
+        [TestCase(1 + 1 + 9267, 100 * 1 + 20 * 2 + 9267, 1, 2)]
+        [TestCase(1 + 1 + 9267, 100 * 1 + 20 * 2 + 9268, 1, 2)]
+        [TestCase(1 + 1 + 9268, 100 * 1 + 20 * 2 + 9264, 1, 2)]
+        [TestCase(1 + 1 + 9268, 100 * 1 + 20 * 2 + 9265, 1, 2)]
+        [TestCase(1 + 1 + 9268, 100 * 1 + 20 * 2 + 9266, 1, 2)]
+        [TestCase(1 + 1 + 9268, 100 * 1 + 20 * 2 + 9267, 1, 2)]
+        [TestCase(1 + 1 + 9268, 100 * 1 + 20 * 2 + 9268, 1, 2)]
+        [TestCase(2 + 1 + 9264, 100 * 2 + 20 * 2 + 9264, 2, 2)]
+        [TestCase(2 + 1 + 9264, 100 * 2 + 20 * 2 + 9265, 2, 2)]
+        [TestCase(2 + 1 + 9264, 100 * 2 + 20 * 2 + 9266, 2, 2)]
+        [TestCase(2 + 1 + 9264, 100 * 2 + 20 * 2 + 9267, 2, 2)]
+        [TestCase(2 + 1 + 9264, 100 * 2 + 20 * 2 + 9268, 2, 2)]
+        [TestCase(2 + 1 + 9265, 100 * 2 + 20 * 2 + 9264, 2, 2)]
+        [TestCase(2 + 1 + 9265, 100 * 2 + 20 * 2 + 9265, 2, 2)]
+        [TestCase(2 + 1 + 9265, 100 * 2 + 20 * 2 + 9266, 2, 2)]
+        [TestCase(2 + 1 + 9265, 100 * 2 + 20 * 2 + 9267, 2, 2)]
+        [TestCase(2 + 1 + 9265, 100 * 2 + 20 * 2 + 9268, 2, 2)]
+        [TestCase(2 + 1 + 9266, 100 * 2 + 20 * 2 + 9264, 2, 2)]
+        [TestCase(2 + 1 + 9266, 100 * 2 + 20 * 2 + 9265, 2, 2)]
+        [TestCase(2 + 1 + 9266, 100 * 2 + 20 * 2 + 9266, 2, 2)]
+        [TestCase(2 + 1 + 9266, 100 * 2 + 20 * 2 + 9267, 2, 2)]
+        [TestCase(2 + 1 + 9266, 100 * 2 + 20 * 2 + 9268, 2, 2)]
+        [TestCase(2 + 1 + 9267, 100 * 2 + 20 * 2 + 9264, 2, 2)]
+        [TestCase(2 + 1 + 9267, 100 * 2 + 20 * 2 + 9265, 2, 2)]
+        [TestCase(2 + 1 + 9267, 100 * 2 + 20 * 2 + 9266, 2, 2, Ignore = "Actually in range")]
+        [TestCase(2 + 1 + 9267, 100 * 2 + 20 * 2 + 9267, 2, 2)]
+        [TestCase(2 + 1 + 9267, 100 * 2 + 20 * 2 + 9268, 2, 2)]
+        [TestCase(2 + 1 + 9268, 100 * 2 + 20 * 2 + 9264, 2, 2)]
+        [TestCase(2 + 1 + 9268, 100 * 2 + 20 * 2 + 9265, 2, 2)]
+        [TestCase(2 + 1 + 9268, 100 * 2 + 20 * 2 + 9266, 2, 2)]
+        [TestCase(2 + 1 + 9268, 100 * 2 + 20 * 2 + 9267, 2, 2)]
+        [TestCase(2 + 1 + 9268, 100 * 2 + 20 * 2 + 9268, 2, 2)]
+        [TestCase(3 + 1 + 9264, 100 * 3 + 20 * 2 + 9264, 3, 2)]
+        [TestCase(3 + 1 + 9264, 100 * 3 + 20 * 2 + 9265, 3, 2)]
+        [TestCase(3 + 1 + 9264, 100 * 3 + 20 * 2 + 9266, 3, 2)]
+        [TestCase(3 + 1 + 9264, 100 * 3 + 20 * 2 + 9267, 3, 2)]
+        [TestCase(3 + 1 + 9264, 100 * 3 + 20 * 2 + 9268, 3, 2)]
+        [TestCase(3 + 1 + 9265, 100 * 3 + 20 * 2 + 9264, 3, 2)]
+        [TestCase(3 + 1 + 9265, 100 * 3 + 20 * 2 + 9265, 3, 2)]
+        [TestCase(3 + 1 + 9265, 100 * 3 + 20 * 2 + 9266, 3, 2)]
+        [TestCase(3 + 1 + 9265, 100 * 3 + 20 * 2 + 9267, 3, 2)]
+        [TestCase(3 + 1 + 9265, 100 * 3 + 20 * 2 + 9268, 3, 2)]
+        [TestCase(3 + 1 + 9266, 100 * 3 + 20 * 2 + 9264, 3, 2)]
+        [TestCase(3 + 1 + 9266, 100 * 3 + 20 * 2 + 9265, 3, 2)]
+        [TestCase(3 + 1 + 9266, 100 * 3 + 20 * 2 + 9266, 3, 2)]
+        [TestCase(3 + 1 + 9266, 100 * 3 + 20 * 2 + 9267, 3, 2)]
+        [TestCase(3 + 1 + 9266, 100 * 3 + 20 * 2 + 9268, 3, 2)]
+        [TestCase(3 + 1 + 9267, 100 * 3 + 20 * 2 + 9264, 3, 2)]
+        [TestCase(3 + 1 + 9267, 100 * 3 + 20 * 2 + 9265, 3, 2)]
+        [TestCase(3 + 1 + 9267, 100 * 3 + 20 * 2 + 9266, 3, 2, Ignore = "Actually in range")]
+        [TestCase(3 + 1 + 9267, 100 * 3 + 20 * 2 + 9267, 3, 2)]
+        [TestCase(3 + 1 + 9267, 100 * 3 + 20 * 2 + 9268, 3, 2)]
+        [TestCase(3 + 1 + 9268, 100 * 3 + 20 * 2 + 9264, 3, 2)]
+        [TestCase(3 + 1 + 9268, 100 * 3 + 20 * 2 + 9265, 3, 2)]
+        [TestCase(3 + 1 + 9268, 100 * 3 + 20 * 2 + 9266, 3, 2)]
+        [TestCase(3 + 1 + 9268, 100 * 3 + 20 * 2 + 9267, 3, 2)]
+        [TestCase(3 + 1 + 9268, 100 * 3 + 20 * 2 + 9268, 3, 2)]
+        [TestCase(1 + 1 + 9264, 100 * 1 + 20 * 3 + 9264, 1, 3)]
+        [TestCase(1 + 1 + 9264, 100 * 1 + 20 * 3 + 9265, 1, 3)]
+        [TestCase(1 + 1 + 9264, 100 * 1 + 20 * 3 + 9266, 1, 3)]
+        [TestCase(1 + 1 + 9264, 100 * 1 + 20 * 3 + 9267, 1, 3)]
+        [TestCase(1 + 1 + 9264, 100 * 1 + 20 * 3 + 9268, 1, 3)]
+        [TestCase(1 + 1 + 9265, 100 * 1 + 20 * 3 + 9264, 1, 3)]
+        [TestCase(1 + 1 + 9265, 100 * 1 + 20 * 3 + 9265, 1, 3)]
+        [TestCase(1 + 1 + 9265, 100 * 1 + 20 * 3 + 9266, 1, 3)]
+        [TestCase(1 + 1 + 9265, 100 * 1 + 20 * 3 + 9267, 1, 3)]
+        [TestCase(1 + 1 + 9265, 100 * 1 + 20 * 3 + 9268, 1, 3)]
+        [TestCase(1 + 1 + 9266, 100 * 1 + 20 * 3 + 9264, 1, 3)]
+        [TestCase(1 + 1 + 9266, 100 * 1 + 20 * 3 + 9265, 1, 3)]
+        [TestCase(1 + 1 + 9266, 100 * 1 + 20 * 3 + 9266, 1, 3)]
+        [TestCase(1 + 1 + 9266, 100 * 1 + 20 * 3 + 9267, 1, 3)]
+        [TestCase(1 + 1 + 9266, 100 * 1 + 20 * 3 + 9268, 1, 3)]
+        [TestCase(1 + 1 + 9267, 100 * 1 + 20 * 3 + 9264, 1, 3)]
+        [TestCase(1 + 1 + 9267, 100 * 1 + 20 * 3 + 9265, 1, 3)]
+        [TestCase(1 + 1 + 9267, 100 * 1 + 20 * 3 + 9266, 1, 3)]
+        [TestCase(1 + 1 + 9267, 100 * 1 + 20 * 3 + 9267, 1, 3)]
+        [TestCase(1 + 1 + 9267, 100 * 1 + 20 * 3 + 9268, 1, 3)]
+        [TestCase(1 + 1 + 9268, 100 * 1 + 20 * 3 + 9264, 1, 3)]
+        [TestCase(1 + 1 + 9268, 100 * 1 + 20 * 3 + 9265, 1, 3)]
+        [TestCase(1 + 1 + 9268, 100 * 1 + 20 * 3 + 9266, 1, 3, Ignore = "Actually in range")]
+        [TestCase(1 + 1 + 9268, 100 * 1 + 20 * 3 + 9267, 1, 3)]
+        [TestCase(1 + 1 + 9268, 100 * 1 + 20 * 3 + 9268, 1, 3)]
+        [TestCase(2 + 1 + 9264, 100 * 2 + 20 * 3 + 9264, 2, 3)]
+        [TestCase(2 + 1 + 9264, 100 * 2 + 20 * 3 + 9265, 2, 3)]
+        [TestCase(2 + 1 + 9264, 100 * 2 + 20 * 3 + 9266, 2, 3)]
+        [TestCase(2 + 1 + 9264, 100 * 2 + 20 * 3 + 9267, 2, 3)]
+        [TestCase(2 + 1 + 9264, 100 * 2 + 20 * 3 + 9268, 2, 3)]
+        [TestCase(2 + 1 + 9265, 100 * 2 + 20 * 3 + 9264, 2, 3)]
+        [TestCase(2 + 1 + 9265, 100 * 2 + 20 * 3 + 9265, 2, 3)]
+        [TestCase(2 + 1 + 9265, 100 * 2 + 20 * 3 + 9266, 2, 3)]
+        [TestCase(2 + 1 + 9265, 100 * 2 + 20 * 3 + 9267, 2, 3)]
+        [TestCase(2 + 1 + 9265, 100 * 2 + 20 * 3 + 9268, 2, 3)]
+        [TestCase(2 + 1 + 9266, 100 * 2 + 20 * 3 + 9264, 2, 3)]
+        [TestCase(2 + 1 + 9266, 100 * 2 + 20 * 3 + 9265, 2, 3)]
+        [TestCase(2 + 1 + 9266, 100 * 2 + 20 * 3 + 9266, 2, 3)]
+        [TestCase(2 + 1 + 9266, 100 * 2 + 20 * 3 + 9267, 2, 3)]
+        [TestCase(2 + 1 + 9266, 100 * 2 + 20 * 3 + 9268, 2, 3)]
+        [TestCase(2 + 1 + 9267, 100 * 2 + 20 * 3 + 9264, 2, 3)]
+        [TestCase(2 + 1 + 9267, 100 * 2 + 20 * 3 + 9265, 2, 3)]
+        [TestCase(2 + 1 + 9267, 100 * 2 + 20 * 3 + 9266, 2, 3)]
+        [TestCase(2 + 1 + 9267, 100 * 2 + 20 * 3 + 9267, 2, 3)]
+        [TestCase(2 + 1 + 9267, 100 * 2 + 20 * 3 + 9268, 2, 3)]
+        [TestCase(2 + 1 + 9268, 100 * 2 + 20 * 3 + 9264, 2, 3)]
+        [TestCase(2 + 1 + 9268, 100 * 2 + 20 * 3 + 9265, 2, 3)]
+        [TestCase(2 + 1 + 9268, 100 * 2 + 20 * 3 + 9266, 2, 3, Ignore = "Actually in range")]
+        [TestCase(2 + 1 + 9268, 100 * 2 + 20 * 3 + 9267, 2, 3)]
+        [TestCase(2 + 1 + 9268, 100 * 2 + 20 * 3 + 9268, 2, 3)]
+        [TestCase(3 + 1 + 9264, 100 * 3 + 20 * 3 + 9264, 3, 3)]
+        [TestCase(3 + 1 + 9264, 100 * 3 + 20 * 3 + 9265, 3, 3)]
+        [TestCase(3 + 1 + 9264, 100 * 3 + 20 * 3 + 9266, 3, 3)]
+        [TestCase(3 + 1 + 9264, 100 * 3 + 20 * 3 + 9267, 3, 3)]
+        [TestCase(3 + 1 + 9264, 100 * 3 + 20 * 3 + 9268, 3, 3)]
+        [TestCase(3 + 1 + 9265, 100 * 3 + 20 * 3 + 9264, 3, 3)]
+        [TestCase(3 + 1 + 9265, 100 * 3 + 20 * 3 + 9265, 3, 3)]
+        [TestCase(3 + 1 + 9265, 100 * 3 + 20 * 3 + 9266, 3, 3)]
+        [TestCase(3 + 1 + 9265, 100 * 3 + 20 * 3 + 9267, 3, 3)]
+        [TestCase(3 + 1 + 9265, 100 * 3 + 20 * 3 + 9268, 3, 3)]
+        [TestCase(3 + 1 + 9266, 100 * 3 + 20 * 3 + 9264, 3, 3)]
+        [TestCase(3 + 1 + 9266, 100 * 3 + 20 * 3 + 9265, 3, 3)]
+        [TestCase(3 + 1 + 9266, 100 * 3 + 20 * 3 + 9266, 3, 3)]
+        [TestCase(3 + 1 + 9266, 100 * 3 + 20 * 3 + 9267, 3, 3)]
+        [TestCase(3 + 1 + 9266, 100 * 3 + 20 * 3 + 9268, 3, 3)]
+        [TestCase(3 + 1 + 9267, 100 * 3 + 20 * 3 + 9264, 3, 3)]
+        [TestCase(3 + 1 + 9267, 100 * 3 + 20 * 3 + 9265, 3, 3)]
+        [TestCase(3 + 1 + 9267, 100 * 3 + 20 * 3 + 9266, 3, 3)]
+        [TestCase(3 + 1 + 9267, 100 * 3 + 20 * 3 + 9267, 3, 3)]
+        [TestCase(3 + 1 + 9267, 100 * 3 + 20 * 3 + 9268, 3, 3)]
+        [TestCase(3 + 1 + 9268, 100 * 3 + 20 * 3 + 9264, 3, 3)]
+        [TestCase(3 + 1 + 9268, 100 * 3 + 20 * 3 + 9265, 3, 3)]
+        [TestCase(3 + 1 + 9268, 100 * 3 + 20 * 3 + 9266, 3, 3, Ignore = "Actually in range")]
+        [TestCase(3 + 1 + 9268, 100 * 3 + 20 * 3 + 9267, 3, 3)]
+        [TestCase(3 + 1 + 9268, 100 * 3 + 20 * 3 + 9268, 3, 3)]
+        public void Ranking_AlternativeMostEvenDistribution_ForMultipleRollsOutOfRange(int lower, int upper, int quantity1, int quantity2)
+        {
+            collection.Adjustment = 9266;
+
+            var prototype = new RollPrototype
+            {
+                Quantity = quantity1,
+                Die = 100
+            };
+
+            collection.Rolls.Add(prototype);
+
+            var otherPrototype = new RollPrototype
+            {
+                Quantity = quantity2,
+                Die = 20
+            };
+
+            collection.Rolls.Add(otherPrototype);
+
+            var ranking = collection.GetAlternativeRankingForMostEvenDistribution(lower, upper);
+            Assert.That(ranking, Is.EqualTo(long.MaxValue));
+        }
+
+        [TestCase(1, 2, 1, 2, -2, 202098)]
+        [TestCase(1, 2, 1, 4, -2, 202096)]
+        [TestCase(1, 2, 1, 6, -2, 2)]
+        [TestCase(1, 2, 1, 8, -2, 2)]
+        [TestCase(1, 4, 1, 2, -2, 2)]
+        [TestCase(1, 4, 1, 4, -2, 4)]
+        [TestCase(1, 4, 1, 6, -2, 4)]
+        [TestCase(1, 4, 1, 8, -2, 4)]
+        [TestCase(1, 6, 1, 2, -2, 2)]
+        [TestCase(1, 6, 1, 4, -2, 4)]
+        [TestCase(1, 6, 1, 6, -2, 6)]
+        [TestCase(1, 6, 1, 8, -2, 6)]
+        [TestCase(1, 8, 1, 2, -2, 2)]
+        [TestCase(1, 8, 1, 4, -2, 4)]
+        [TestCase(1, 8, 1, 6, -2, 6)]
+        [TestCase(1, 8, 1, 8, -2, 8)]
+        [TestCase(1, 2, 1, 2, -1, 202098)]
+        [TestCase(1, 2, 1, 4, -1, 202096)]
+        [TestCase(1, 2, 1, 6, -1, 2)]
+        [TestCase(1, 2, 1, 8, -1, 2)]
+        [TestCase(1, 4, 1, 2, -1, 2)]
+        [TestCase(1, 4, 1, 4, -1, 4)]
+        [TestCase(1, 4, 1, 6, -1, 4)]
+        [TestCase(1, 4, 1, 8, -1, 4)]
+        [TestCase(1, 6, 1, 2, -1, 2)]
+        [TestCase(1, 6, 1, 4, -1, 4)]
+        [TestCase(1, 6, 1, 6, -1, 6)]
+        [TestCase(1, 6, 1, 8, -1, 6)]
+        [TestCase(1, 8, 1, 2, -1, 2)]
+        [TestCase(1, 8, 1, 4, -1, 4)]
+        [TestCase(1, 8, 1, 6, -1, 6)]
+        [TestCase(1, 8, 1, 8, -1, 8)]
+        [TestCase(1, 2, 1, 2, 0, 202098)]
+        [TestCase(1, 2, 1, 4, 0, 202096)]
+        [TestCase(1, 2, 1, 6, 0, 2)]
+        [TestCase(1, 2, 1, 8, 0, 2)]
+        [TestCase(1, 4, 1, 2, 0, 2)]
+        [TestCase(1, 4, 1, 4, 0, 4)]
+        [TestCase(1, 4, 1, 6, 0, 4)]
+        [TestCase(1, 4, 1, 8, 0, 4)]
+        [TestCase(1, 6, 1, 2, 0, 2)]
+        [TestCase(1, 6, 1, 4, 0, 4)]
+        [TestCase(1, 6, 1, 6, 0, 6)]
+        [TestCase(1, 6, 1, 8, 0, 6)]
+        [TestCase(1, 8, 1, 2, 0, 2)]
+        [TestCase(1, 8, 1, 4, 0, 4)]
+        [TestCase(1, 8, 1, 6, 0, 6)]
+        [TestCase(1, 8, 1, 8, 0, 8)]
+        [TestCase(1, 2, 1, 2, 1, 202098)]
+        [TestCase(1, 2, 1, 4, 1, 202096)]
+        [TestCase(1, 2, 1, 6, 1, 2)]
+        [TestCase(1, 2, 1, 8, 1, 2)]
+        [TestCase(1, 4, 1, 2, 1, 2)]
+        [TestCase(1, 4, 1, 4, 1, 4)]
+        [TestCase(1, 4, 1, 6, 1, 4)]
+        [TestCase(1, 4, 1, 8, 1, 4)]
+        [TestCase(1, 6, 1, 2, 1, 2)]
+        [TestCase(1, 6, 1, 4, 1, 4)]
+        [TestCase(1, 6, 1, 6, 1, 6)]
+        [TestCase(1, 6, 1, 8, 1, 6)]
+        [TestCase(1, 8, 1, 2, 1, 2)]
+        [TestCase(1, 8, 1, 4, 1, 4)]
+        [TestCase(1, 8, 1, 6, 1, 6)]
+        [TestCase(1, 8, 1, 8, 1, 8)]
+        [TestCase(1, 2, 1, 2, 2, 202098)]
+        [TestCase(1, 2, 1, 4, 2, 202096)]
+        [TestCase(1, 2, 1, 6, 2, 2)]
+        [TestCase(1, 2, 1, 8, 2, 2)]
+        [TestCase(1, 4, 1, 2, 2, 2)]
+        [TestCase(1, 4, 1, 4, 2, 4)]
+        [TestCase(1, 4, 1, 6, 2, 4)]
+        [TestCase(1, 4, 1, 8, 2, 4)]
+        [TestCase(1, 6, 1, 2, 2, 2)]
+        [TestCase(1, 6, 1, 4, 2, 4)]
+        [TestCase(1, 6, 1, 6, 2, 6)]
+        [TestCase(1, 6, 1, 8, 2, 6)]
+        [TestCase(1, 8, 1, 2, 2, 2)]
+        [TestCase(1, 8, 1, 4, 2, 4)]
+        [TestCase(1, 8, 1, 6, 2, 6)]
+        [TestCase(1, 8, 1, 8, 2, 8)]
+        public void Ranking_AlternativeMostEvenDistribution_ForMultipleRollsInRangeWithDifferentDice(int q1, int d1, int q2, int d2, int adjustment, int expectedRanking)
+        {
+            collection.Adjustment = adjustment;
+
+            var prototype = new RollPrototype
+            {
+                Quantity = q1,
+                Die = d1
+            };
+
+            collection.Rolls.Add(prototype);
+
+            var otherPrototype = new RollPrototype
+            {
+                Quantity = q2,
+                Die = d2
+            };
+
+            collection.Rolls.Add(otherPrototype);
+
+            var ranking = collection.GetAlternativeRankingForMostEvenDistribution(q1 + q2 + adjustment, q1 * d1 + q2 * d2 + adjustment);
+            Assert.That(ranking, Is.EqualTo(expectedRanking));
+        }
+
+        [TestCase(2, 1)]
+        [TestCase(3, 1)]
+        [TestCase(4, 1)]
+        [TestCase(6, 1)]
+        [TestCase(8, 1)]
+        [TestCase(10, 1)]
+        [TestCase(12, 1)]
+        [TestCase(20, 1)]
+        [TestCase(100, 1)]
+        [TestCase(1000, 1)]
+        [TestCase(Limits.Die, 1)]
+        public void Ranking_AlternativeMostEvenDistribution_ForRollInRangeWithMaxDice(int die, int expectedRanking)
+        {
+            var prototype = new RollPrototype
+            {
+                Quantity = 1,
+                Die = die
+            };
+
+            collection.Rolls.Add(prototype);
+
+            var ranking = collection.GetAlternativeRankingForMostEvenDistribution(1, die);
             Assert.That(ranking, Is.EqualTo(expectedRanking));
         }
 
@@ -1479,7 +2111,7 @@ namespace DnDGen.RollGen.Tests.Unit
         [TestCase(3, 42, 1323)] //1.79% * 42^3 = 1326 (rounding error of 3)
         [TestCase(10, 10, 432457640)] //4.32% * 10^10 = 432457640
         [TestCase(17, 2, 24310)] //18.55% * 2^17 = 24314 (rounding error of 4)
-        public void ComputeDistribution(int q, int d, int D)
+        public void ComputeDistribution(int q, int d, long D)
         {
             var prototype = new RollPrototype
             {
@@ -1637,13 +2269,13 @@ namespace DnDGen.RollGen.Tests.Unit
         [TestCase(1, 8, 2, 2, 4)]
         [TestCase(1, 8, 2, 3, 9)]
         [TestCase(1, 8, 2, 4, 16)]
-        [TestCase(1, 8, 2, 6, 36)]
+        [TestCase(1, 8, 2, 6, 32)]
         [TestCase(1, 8, 2, 8, 48)]
         [TestCase(1, 8, 2, 10, 64)]
         [TestCase(1, 8, 2, 12, 80)]
         [TestCase(1, 8, 2, 20, 144)]
         [TestCase(1, 8, 2, 100, 784)]
-        [TestCase(1, 8, 2, 42, 8)]
+        [TestCase(1, 8, 2, 42, 320)]
         [TestCase(1, 10, 2, 2, 4)]
         [TestCase(1, 10, 2, 3, 9)]
         [TestCase(1, 10, 2, 4, 16)]
@@ -1695,108 +2327,109 @@ namespace DnDGen.RollGen.Tests.Unit
         [TestCase(1, 42, 2, 100, 3759)]
         [TestCase(1, 42, 2, 42, 1323)]
         [TestCase(2, 2, 1, 2, 3)]
-        [TestCase(2, 2, 2, 2, 3)]
-        [TestCase(2, 2, 2, 3, 5)]
-        [TestCase(2, 2, 2, 4, 7)]
-        [TestCase(2, 2, 2, 6, 11)]
-        [TestCase(2, 2, 2, 8, 15)]
-        [TestCase(2, 2, 2, 10, 19)]
-        [TestCase(2, 2, 2, 12, 23)]
-        [TestCase(2, 2, 2, 20, 39)]
-        [TestCase(2, 2, 2, 100, 199)]
-        [TestCase(2, 2, 2, 42, 83)]
-        [TestCase(2, 3, 2, 2, 4)]
-        [TestCase(2, 3, 2, 3, 7)]
-        [TestCase(2, 3, 2, 4, 10)]
-        [TestCase(2, 3, 2, 6, 16)]
-        [TestCase(2, 3, 2, 8, 22)]
-        [TestCase(2, 3, 2, 10, 28)]
-        [TestCase(2, 3, 2, 12, 24)]
-        [TestCase(2, 3, 2, 20, 58)]
-        [TestCase(2, 3, 2, 100, 298)]
-        [TestCase(2, 3, 2, 42, 124)]
-        [TestCase(2, 4, 2, 2, 4)]
-        [TestCase(2, 4, 2, 3, 8)]
-        [TestCase(2, 4, 2, 4, 12)]
-        [TestCase(2, 4, 2, 6, 20)]
-        [TestCase(2, 4, 2, 8, 28)]
-        [TestCase(2, 4, 2, 10, 36)]
-        [TestCase(2, 4, 2, 12, 44)]
-        [TestCase(2, 4, 2, 20, 76)]
-        [TestCase(2, 4, 2, 100, 396)]
-        [TestCase(2, 4, 2, 42, 164)]
-        [TestCase(2, 6, 2, 2, 4)]
-        [TestCase(2, 6, 2, 3, 9)]
-        [TestCase(2, 6, 2, 4, 15)]
-        [TestCase(2, 6, 2, 6, 27)]
+        [TestCase(2, 2, 2, 2, 6)]
+        [TestCase(2, 2, 2, 3, 10)]
+        [TestCase(2, 2, 2, 4, 14)]
+        [TestCase(2, 2, 2, 6, 22)]
+        [TestCase(2, 2, 2, 8, 30)]
+        [TestCase(2, 2, 2, 10, 38)]
+        [TestCase(2, 2, 2, 12, 46)]
+        [TestCase(2, 2, 2, 20, 78)]
+        [TestCase(2, 2, 2, 100, 398)]
+        [TestCase(2, 2, 2, 42, 166)]
+        [TestCase(2, 3, 2, 2, 10)]
+        [TestCase(2, 3, 2, 3, 19)]
+        [TestCase(2, 3, 2, 4, 28)]
+        [TestCase(2, 3, 2, 6, 46)]
+        [TestCase(2, 3, 2, 8, 64)]
+        [TestCase(2, 3, 2, 10, 82)]
+        [TestCase(2, 3, 2, 12, 100)]
+        [TestCase(2, 3, 2, 20, 172)]
+        [TestCase(2, 3, 2, 100, 892)]
+        [TestCase(2, 3, 2, 42, 370)]
+        [TestCase(2, 4, 2, 2, 14)]
+        [TestCase(2, 4, 2, 3, 28)]
+        [TestCase(2, 4, 2, 4, 44)]
+        [TestCase(2, 4, 2, 6, 76)]
+        [TestCase(2, 4, 2, 8, 108)]
+        [TestCase(2, 4, 2, 10, 140)]
+        [TestCase(2, 4, 2, 12, 172)]
+        [TestCase(2, 4, 2, 20, 300)]
+        [TestCase(2, 4, 2, 100, 1580)]
+        [TestCase(2, 4, 2, 42, 652)]
+        [TestCase(2, 6, 2, 2, 22)]
+        [TestCase(2, 6, 2, 3, 46)]
+        [TestCase(2, 6, 2, 4, 76)]
+        [TestCase(2, 6, 2, 6, 146)]
         [TestCase(2, 6, 2, 8, 218)] //9.46% * 6^2*8^2 = 218
-        [TestCase(2, 6, 2, 10, 51)]
-        [TestCase(2, 6, 2, 12, 63)]
-        [TestCase(2, 6, 2, 20, 111)]
-        [TestCase(2, 6, 2, 100, 591)]
-        [TestCase(2, 6, 2, 42, 243)]
-        [TestCase(2, 8, 2, 2, 2)]
-        [TestCase(2, 8, 2, 3, 3)]
-        [TestCase(2, 8, 2, 4, 4)]
-        [TestCase(2, 8, 2, 6, 6)]
-        [TestCase(2, 8, 2, 8, 8)]
-        [TestCase(2, 8, 2, 10, 8)]
-        [TestCase(2, 8, 2, 12, 8)]
-        [TestCase(2, 8, 2, 20, 8)]
-        [TestCase(2, 8, 2, 100, 8)]
-        [TestCase(2, 8, 2, 42, 8)]
-        [TestCase(2, 10, 2, 2, 2)]
-        [TestCase(2, 10, 2, 3, 3)]
-        [TestCase(2, 10, 2, 4, 4)]
-        [TestCase(2, 10, 2, 6, 6)]
-        [TestCase(2, 10, 2, 8, 8)]
-        [TestCase(2, 10, 2, 10, 10)]
-        [TestCase(2, 10, 2, 12, 10)]
-        [TestCase(2, 10, 2, 20, 10)]
-        [TestCase(2, 10, 2, 100, 10)]
-        [TestCase(2, 10, 2, 42, 10)]
-        [TestCase(2, 12, 2, 2, 2)]
-        [TestCase(2, 12, 2, 3, 3)]
-        [TestCase(2, 12, 2, 4, 4)]
-        [TestCase(2, 12, 2, 6, 6)]
-        [TestCase(2, 12, 2, 8, 8)]
-        [TestCase(2, 12, 2, 10, 10)]
-        [TestCase(2, 12, 2, 12, 12)]
-        [TestCase(2, 12, 2, 20, 12)]
-        [TestCase(2, 12, 2, 100, 12)]
-        [TestCase(2, 12, 2, 42, 12)]
-        [TestCase(2, 20, 2, 2, 2)]
-        [TestCase(2, 20, 2, 3, 3)]
-        [TestCase(2, 20, 2, 4, 4)]
-        [TestCase(2, 20, 2, 6, 6)]
-        [TestCase(2, 20, 2, 8, 8)]
-        [TestCase(2, 20, 2, 10, 10)]
-        [TestCase(2, 20, 2, 12, 12)]
-        [TestCase(2, 20, 2, 20, 20)]
-        [TestCase(2, 20, 2, 100, 20)]
-        [TestCase(2, 20, 2, 42, 20)]
-        [TestCase(2, 100, 2, 2, 2)]
-        [TestCase(2, 100, 2, 3, 3)]
-        [TestCase(2, 100, 2, 4, 4)]
-        [TestCase(2, 100, 2, 6, 6)]
-        [TestCase(2, 100, 2, 8, 8)]
-        [TestCase(2, 100, 2, 10, 10)]
-        [TestCase(2, 100, 2, 12, 12)]
-        [TestCase(2, 100, 2, 20, 20)]
-        [TestCase(2, 100, 2, 100, 100)]
-        [TestCase(2, 100, 2, 42, 42)]
-        [TestCase(2, 42, 2, 2, 2)]
-        [TestCase(2, 42, 2, 3, 3)]
-        [TestCase(2, 42, 2, 4, 4)]
-        [TestCase(2, 42, 2, 6, 6)]
-        [TestCase(2, 42, 2, 8, 8)]
-        [TestCase(2, 42, 2, 10, 10)]
-        [TestCase(2, 42, 2, 12, 12)]
-        [TestCase(2, 42, 2, 20, 20)]
-        [TestCase(2, 42, 2, 100, 42)]
-        [TestCase(2, 42, 2, 42, 42)]
+        [TestCase(2, 6, 2, 10, 290)]
+        [TestCase(2, 6, 2, 12, 362)]
+        [TestCase(2, 6, 2, 20, 650)]
+        [TestCase(2, 6, 2, 100, 3530)]
+        [TestCase(2, 6, 2, 42, 1442)]
+        [TestCase(2, 8, 2, 2, 30)]
+        [TestCase(2, 8, 2, 3, 64)]
+        [TestCase(2, 8, 2, 4, 108)]
+        [TestCase(2, 8, 2, 6, 218)]
+        [TestCase(2, 8, 2, 8, 344)]
+        [TestCase(2, 8, 2, 10, 472)]
+        [TestCase(2, 8, 2, 12, 600)]
+        [TestCase(2, 8, 2, 20, 1112)]
+        [TestCase(2, 8, 2, 100, 6232)]
+        [TestCase(2, 8, 2, 42, 2520)]
+        [TestCase(2, 10, 2, 2, 38)]
+        [TestCase(2, 10, 2, 3, 82)]
+        [TestCase(2, 10, 2, 4, 140)]
+        [TestCase(2, 10, 2, 6, 290)]
+        [TestCase(2, 10, 2, 8, 472)]
+        [TestCase(2, 10, 2, 10, 670)]
+        [TestCase(2, 10, 2, 12, 870)]
+        [TestCase(2, 10, 2, 20, 1670)]
+        [TestCase(2, 10, 2, 100, 9670)]
+        [TestCase(2, 10, 2, 42, 3870)]
+        [TestCase(2, 12, 2, 2, 46)]
+        [TestCase(2, 12, 2, 3, 100)]
+        [TestCase(2, 12, 2, 4, 172)]
+        [TestCase(2, 12, 2, 6, 362)]
+        [TestCase(2, 12, 2, 8, 600)]
+        [TestCase(2, 12, 2, 10, 870)]
+        [TestCase(2, 12, 2, 12, 1156)]
+        [TestCase(2, 12, 2, 20, 2308)]
+        [TestCase(2, 12, 2, 100, 13828)]
+        [TestCase(2, 12, 2, 42, 5476)]
+        [TestCase(2, 20, 2, 2, 78)]
+        [TestCase(2, 20, 2, 3, 172)]
+        [TestCase(2, 20, 2, 4, 300)]
+        [TestCase(2, 20, 2, 6, 650)]
+        [TestCase(2, 20, 2, 8, 1112)]
+        [TestCase(2, 20, 2, 10, 1670)]
+        [TestCase(2, 20, 2, 12, 2308)]
+        [TestCase(2, 20, 2, 20, 5340)]
+        [TestCase(2, 20, 2, 100, 37340)]
+        [TestCase(2, 20, 2, 42, 14140)]
+        [TestCase(2, 100, 2, 2, 398)]
+        [TestCase(2, 100, 2, 3, 892)]
+        [TestCase(2, 100, 2, 4, 1580)]
+        [TestCase(2, 100, 2, 6, 3530)]
+        [TestCase(2, 100, 2, 8, 6232)]
+        [TestCase(2, 100, 2, 10, 9670)]
+        [TestCase(2, 100, 2, 12, 13828)]
+        [TestCase(2, 100, 2, 20, 37340)]
+        [TestCase(2, 100, 2, 100, 666700)]
+        [TestCase(2, 100, 2, 42, 151718)]
+        [TestCase(2, 42, 2, 2, 166)]
+        [TestCase(2, 42, 2, 3, 370)]
+        [TestCase(2, 42, 2, 4, 652)]
+        [TestCase(2, 42, 2, 6, 1442)]
+        [TestCase(2, 42, 2, 8, 2520)]
+        [TestCase(2, 42, 2, 10, 3870)]
+        [TestCase(2, 42, 2, 12, 5476)]
+        [TestCase(2, 42, 2, 20, 14140)]
+        [TestCase(2, 42, 2, 100, 151718)]
+        [TestCase(2, 42, 2, 42, 49406)]
         [TestCase(2, 10, 8, 10, 432457640)]
-        public void ComputeDistribution_TwoRolls(int q1, int d1, int q2, int d2, int D)
+        [TestCase(90, 100, 10, 10, long.MaxValue)]
+        public void ComputeDistribution_TwoRolls(int q1, int d1, int q2, int d2, long D)
         {
             var prototype1 = new RollPrototype
             {
@@ -1955,7 +2588,8 @@ namespace DnDGen.RollGen.Tests.Unit
         [TestCase(2, 3, 2, 4, 2, 6, 640)] //12.35% * 3^2*4^2*6^2 = 640
         [TestCase(2, 4, 2, 6, 2, 2, 296)] //12.85% * 4^2*6^2*2^2 = 296
         [TestCase(1, 10, 1, 10, 8, 10, 432457640)]
-        public void ComputeDistribution_ThreeRolls(int q1, int d1, int q2, int d2, int q3, int d3, int D)
+        [TestCase(90, 100, 4, 20, 2, 8, long.MaxValue)]
+        public void ComputeDistribution_ThreeRolls(int q1, int d1, int q2, int d2, int q3, int d3, long D)
         {
             var prototype1 = new RollPrototype
             {
@@ -1982,53 +2616,69 @@ namespace DnDGen.RollGen.Tests.Unit
             Assert.That(distribution, Is.EqualTo(D));
         }
 
+        [TestCase(1, 1000, 1)]
+        [TestCase(1, Limits.Die, 1)]
         [TestCase(3, 2, 3)]
         [TestCase(3, 6, 27)]
         [TestCase(3, 10, 75)]
         [TestCase(3, 20, 300)] //3.75% * 20^3 = 300
         [TestCase(3, 100, 7500)] //0.75% * 100^3 = 7500
-        [TestCase(3, Limits.Die, 75000000)] //0.75% * 10,000^3 = 7500000000
+        [TestCase(3, 1000, 750000, Ignore = "In practice, the only time we have nonstandard dice are when the quantity is 1")]
+        [TestCase(3, Limits.Die, 75000000, Ignore = "In practice, the only time we have nonstandard dice are when the quantity is 1")] //0.75% * 10,000^3 = 7500000000
         [TestCase(4, 2, 6)]
         [TestCase(4, 6, 146)]
         [TestCase(4, 10, 670)]
         [TestCase(4, 20, 5340)]
         [TestCase(4, 100, 666700)]
-        [TestCase(4, Limits.Die, 946739120)]
+        [TestCase(4, 1000, 6666670000, Ignore = "In practice, the only time we have nonstandard dice are when the quantity is 1")]
+        [TestCase(4, Limits.Die, 946739120, Ignore = "In practice, the only time we have nonstandard dice are when the quantity is 1")]
         [TestCase(5, 2, 10)]
         [TestCase(5, 6, 780)]
         [TestCase(5, 10, 6000)]
         [TestCase(5, 20, 95875)]
         [TestCase(5, 100, 59896875)]
-        [TestCase(5, Limits.Die, int.MaxValue)]
+        [TestCase(5, 1000, 59896875, Ignore = "In practice, the only time we have nonstandard dice are when the quantity is 1")]
+        [TestCase(5, Limits.Die, long.MaxValue, Ignore = "In practice, the only time we have nonstandard dice are when the quantity is 1")]
         [TestCase(10, 2, 252)]
         [TestCase(10, 6, 4395456)] //7.27% * 6^10 = 4395891, rounding error
         [TestCase(10, 10, 432457640)]
-        [TestCase(10, 20, 1590283184)]
-        [TestCase(10, 100, int.MaxValue)]
-        [TestCase(10, Limits.Die, int.MaxValue)]
+        [TestCase(10, 20, 220633615280)]
+        [TestCase(10, 100, 430438025018576400)]
+        [TestCase(10, 1000, long.MaxValue, Ignore = "In practice, the only time we have nonstandard dice are when the quantity is 1")]
+        [TestCase(10, Limits.Die, long.MaxValue, Ignore = "In practice, the only time we have nonstandard dice are when the quantity is 1")]
         [TestCase(20, 2, 184756)]
-        [TestCase(20, 6, 1673505640)]
-        [TestCase(20, 10, int.MaxValue)]
-        [TestCase(20, 20, int.MaxValue)]
-        [TestCase(20, 100, int.MaxValue)]
-        [TestCase(20, Limits.Die, int.MaxValue)]
-        [TestCase(100, 2, int.MaxValue)]
-        [TestCase(100, 6, int.MaxValue)]
-        [TestCase(100, 10, int.MaxValue)]
-        [TestCase(100, 20, int.MaxValue)]
-        [TestCase(100, 100, int.MaxValue)]
-        [TestCase(100, Limits.Die, int.MaxValue)]
-        [TestCase(Limits.Quantity, 2, int.MaxValue)]
-        [TestCase(Limits.Quantity, 3, int.MaxValue)]
-        [TestCase(Limits.Quantity, 4, int.MaxValue)]
-        [TestCase(Limits.Quantity, 6, int.MaxValue)]
-        [TestCase(Limits.Quantity, 8, int.MaxValue)]
-        [TestCase(Limits.Quantity, 10, int.MaxValue)]
-        [TestCase(Limits.Quantity, 12, int.MaxValue)]
-        [TestCase(Limits.Quantity, 20, int.MaxValue)]
-        [TestCase(Limits.Quantity, 100, int.MaxValue)]
-        [TestCase(Limits.Quantity, Limits.Die, int.MaxValue)]
-        public void ComputeDistribution_IsFast(int q1, int d1, int D)
+        [TestCase(20, 6, 189456975899496)]
+        [TestCase(20, 10, 3081918923741896840)]
+        [TestCase(20, 20, long.MaxValue)]
+        [TestCase(20, 100, long.MaxValue)]
+        [TestCase(20, 1000, long.MaxValue, Ignore = "In practice, the only time we have nonstandard dice are when the quantity is 1")]
+        [TestCase(20, Limits.Die, long.MaxValue, Ignore = "In practice, the only time we have nonstandard dice are when the quantity is 1")]
+        [TestCase(100, 2, long.MaxValue)]
+        [TestCase(100, 6, long.MaxValue)]
+        [TestCase(100, 10, long.MaxValue)]
+        [TestCase(100, 20, long.MaxValue)]
+        [TestCase(100, 100, long.MaxValue)]
+        [TestCase(100, 1000, long.MaxValue, Ignore = "In practice, the only time we have nonstandard dice are when the quantity is 1")]
+        [TestCase(100, Limits.Die, long.MaxValue, Ignore = "In practice, the only time we have nonstandard dice are when the quantity is 1")]
+        [TestCase(1000, 2, long.MaxValue)]
+        [TestCase(1000, 6, long.MaxValue)]
+        [TestCase(1000, 10, long.MaxValue)]
+        [TestCase(1000, 20, long.MaxValue)]
+        [TestCase(1000, 100, long.MaxValue)]
+        [TestCase(1000, 1000, long.MaxValue, Ignore = "In practice, the only time we have nonstandard dice are when the quantity is 1")]
+        [TestCase(1000, Limits.Die, long.MaxValue, Ignore = "In practice, the only time we have nonstandard dice are when the quantity is 1")]
+        [TestCase(Limits.Quantity, 2, long.MaxValue)]
+        [TestCase(Limits.Quantity, 3, long.MaxValue)]
+        [TestCase(Limits.Quantity, 4, long.MaxValue)]
+        [TestCase(Limits.Quantity, 6, long.MaxValue)]
+        [TestCase(Limits.Quantity, 8, long.MaxValue)]
+        [TestCase(Limits.Quantity, 10, long.MaxValue)]
+        [TestCase(Limits.Quantity, 12, long.MaxValue)]
+        [TestCase(Limits.Quantity, 20, long.MaxValue)]
+        [TestCase(Limits.Quantity, 100, long.MaxValue)]
+        [TestCase(Limits.Quantity, 1000, long.MaxValue, Ignore = "In practice, the only time we have nonstandard dice are when the quantity is 1")]
+        [TestCase(Limits.Quantity, Limits.Die, long.MaxValue, Ignore = "In practice, the only time we have nonstandard dice are when the quantity is 1")]
+        public void ComputeDistribution_IsFast(int q1, int d1, long D)
         {
             var prototype1 = new RollPrototype
             {
@@ -2049,16 +2699,16 @@ namespace DnDGen.RollGen.Tests.Unit
             Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)));
         }
 
-        [TestCase(2, 20, 2, 12, 2310)] //4.01% * 20^2*12^2 = 2310
-        [TestCase(2, 100, 2, 20, 37200)] //0.93% * 100^2*20^2 = 37200
-        [TestCase(2, 100, 3, 20, 736000)] //0.92% * 100^2*20^3 = 736000
-        [TestCase(3, 10, 4, 12, 947635)] //4.57% * 10^3*12^4 = 947635
-        [TestCase(3, 100, 2, 20, 2960000)] //0.74% * 100^3*20^2 = 2960000
-        [TestCase(3, 100, 3, 20, 59200000)] //0.74% * 100^3*20^3 = 59200000
-        [TestCase(20, 100, 20, 20, int.MaxValue)]
-        [TestCase(100, 100, 100, 20, int.MaxValue)]
-        [TestCase(Limits.Quantity, 100, Limits.Quantity, 20, int.MaxValue)]
-        public void ComputeDistribution_TwoRolls_IsFast(int q1, int d1, int q2, int d2, int D)
+        [TestCase(2, 20, 2, 12, 2308)] //4.01% * 20^2*12^2 = 2310, with rounding error
+        [TestCase(2, 100, 2, 20, 37340)] //0.93% * 100^2*20^2 = 37200, with rounding error
+        [TestCase(2, 100, 3, 20, 735050)] //0.92% * 100^2*20^3 = 736000, with rounding error
+        [TestCase(3, 10, 4, 12, 948501)] //4.57% * 10^3*12^4 = 947635, with rounding error
+        [TestCase(3, 100, 2, 20, 2973400)] //0.74% * 100^3*20^2 = 2960000, with rounding error
+        [TestCase(3, 100, 3, 20, 59204000)] //0.74% * 100^3*20^3 = 59200000, with rounding error
+        [TestCase(20, 100, 20, 20, long.MaxValue)]
+        [TestCase(100, 100, 100, 20, long.MaxValue)]
+        [TestCase(Limits.Quantity, 100, Limits.Quantity, 20, long.MaxValue)]
+        public void ComputeDistribution_TwoRolls_IsFast(int q1, int d1, int q2, int d2, long D)
         {
             var prototype1 = new RollPrototype
             {

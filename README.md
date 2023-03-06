@@ -44,9 +44,12 @@ var rolledSentence = dice.ReplaceExpressionWithTotal("This contains a roll of 4d
 var rolledComplexSentenceMin = dice.ReplaceWrappedExpressions<double>("Fireball does {min(4d6,10) + 0.5} damage"); //returns "Fireball does 7.5 damage"
 var rolledComplexSentenceMax = dice.ReplaceWrappedExpressions<double>("Fireball does {max(4d6,10) + 0.5} damage"); //returns "Fireball does 15.5 damage"
 
+var optimizedRollWithFewestDice = RollHelper.GetRollWithFewestDice(1, 9); //returns "4d3-3", because it uses only 1 kind of dice compared to "1d8+1d2-1"
 var optimizedRoll = RollHelper.GetRollWithMostEvenDistribution(4, 9); //returns "1d6+3", which is the most evenly-distributed roll possible, whether optimizing for dice or distribution
 var optimizedRollWithMultipleDice = RollHelper.GetRollWithMostEvenDistribution(1, 9); //returns "1d8+1d2-1", because it more evenly-distributed than "4d3-3"
-var optimizedRollWithFewestDice = RollHelper.GetRollWithFewestDice(1, 9); //returns "4d3-3", because it uses only 1 kind of dice compared to "1d8+1d2-1"
+var optimizedRollWithMultipliers = RollHelper.GetRollWithMostEvenDistribution(1, 36, allowMultipliers: true); //returns "(1d6-1)*6+1d6"
+var optimizedRollWithNonstandardDice = RollHelper.GetRollWithMostEvenDistribution(1, 36, allowNonstandardDice: true); //returns "1d36"
+var optimizedRollWithMultipliersAndNonstandardDice = RollHelper.GetRollWithMostEvenDistribution(1, 45, true, true); //returns "(1d3-1)*15+(1d3-1)*5+1d5"
 
 var explodedRolls = dice.Roll(4).d6().Explode().AsIndividualRolls(); //If a 6 is rolled, then an additional roll is performed.  I.E., 3 + 6 + 5 + 4 + 1
 var expressionExplodedRolls = dice.Roll("3d4!").AsSum(); //Return the sum of the rolls, including bonus rolls from explosion on rolls of 4
