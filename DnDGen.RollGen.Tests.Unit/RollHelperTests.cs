@@ -1,10 +1,20 @@
 ﻿using NUnit.Framework;
+using System;
+using System.Diagnostics;
 
 namespace DnDGen.RollGen.Tests.Unit
 {
     [TestFixture]
     public class RollHelperTests
     {
+        private Stopwatch stopwatch;
+
+        [SetUp]
+        public void Setup()
+        {
+            stopwatch = new Stopwatch();
+        }
+
         [TestCase(-2, -2, "-2")]
         [TestCase(-2, -1, "1d2-3")]
         [TestCase(-2, 0, "1d3-3")]
@@ -329,8 +339,12 @@ namespace DnDGen.RollGen.Tests.Unit
         [TestCase(90_210, 90_210, "90210")]
         public void GetRollWithFewestDice(int lower, int upper, string expectedRoll)
         {
+            stopwatch.Start();
             var roll = RollHelper.GetRollWithFewestDice(lower, upper);
+            stopwatch.Stop();
+
             Assert.That(roll, Is.EqualTo(expectedRoll));
+            Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)));
         }
 
         [TestCase(1, 2, 2, "1")]
@@ -344,14 +358,18 @@ namespace DnDGen.RollGen.Tests.Unit
         [TestCase(15, 22, 45, "23d2-16")]
         public void GetRollWithFewestDice_WithBaseAmount(int baseAmount, int lower, int upper, string expectedRoll)
         {
+            stopwatch.Start();
             var roll = RollHelper.GetRollWithFewestDice(baseAmount, lower, upper);
+            stopwatch.Stop();
+
             Assert.That(roll, Is.EqualTo(expectedRoll));
+            Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)));
         }
 
         [TestCase(-2, -2, "-2")]
         [TestCase(-2, -1, "1d2-3")]
         [TestCase(-2, 0, "1d3-3")]
-        [TestCase(-2, 2, "2d3-4")]
+        [TestCase(-2, 2, "1d4+1d2-4")]
         [TestCase(-2, 3, "1d6-3")]
         [TestCase(-1, -1, "-1")]
         [TestCase(-1, 0, "1d2-2")]
@@ -385,15 +403,15 @@ namespace DnDGen.RollGen.Tests.Unit
         [TestCase(2, 3, "1d2+1")]
         [TestCase(2, 4, "1d3+1")]
         [TestCase(2, 5, "1d4+1")]
-        [TestCase(2, 6, "2d3")]
+        [TestCase(2, 6, "1d4+1d2")]
         [TestCase(2, 7, "1d6+1")]
-        [TestCase(2, 8, "2d4")]
+        [TestCase(2, 8, "1d6+1d2")]
         [TestCase(2, 10, "1d8+1d2")]
-        [TestCase(2, 12, "2d6")]
+        [TestCase(2, 12, "1d10+1d2")]
         [TestCase(2, 13, "1d12+1")]
         [TestCase(2, 15, "1d12+1d3")]
-        [TestCase(2, 20, "2d10")]
-        [TestCase(2, 24, "2d12")]
+        [TestCase(2, 20, "1d12+1d8")]
+        [TestCase(2, 24, "1d20+1d4")]
         [TestCase(2, 40, "2d20")]
         [TestCase(2, 200, "2d100")]
         [TestCase(3, 3, "3")]
@@ -401,69 +419,69 @@ namespace DnDGen.RollGen.Tests.Unit
         [TestCase(3, 5, "1d3+2")]
         [TestCase(3, 6, "1d4+2")]
         [TestCase(3, 8, "1d6+2")]
-        [TestCase(3, 9, "2d4+1")]
+        [TestCase(3, 9, "1d6+1d2+1")]
         [TestCase(3, 10, "1d8+2")]
         [TestCase(3, 12, "1d10+2")]
-        [TestCase(3, 13, "2d6+1")]
-        [TestCase(3, 18, "3d6")]
-        [TestCase(3, 20, "1d12+2d4")]
+        [TestCase(3, 13, "1d10+1d2+1")]
+        [TestCase(3, 18, "1d12+1d4+1d2")]
+        [TestCase(3, 20, "1d12+1d6+1d2")]
         [TestCase(3, 24, "1d20+1d3+1")]
-        [TestCase(3, 28, "1d20+2d4")]
-        [TestCase(3, 30, "3d10")]
-        [TestCase(3, 36, "3d12")]
+        [TestCase(3, 28, "1d20+1d6+1d2")]
+        [TestCase(3, 30, "1d20+1d8+1d2")]
+        [TestCase(3, 36, "1d20+1d12+1d4")]
         [TestCase(4, 4, "4")]
         [TestCase(4, 5, "1d2+3")]
         [TestCase(4, 6, "1d3+3")]
         [TestCase(4, 7, "1d4+3")]
-        [TestCase(4, 8, "2d3+2")]
+        [TestCase(4, 8, "1d4+1d2+2")]
         [TestCase(4, 9, "1d6+3")]
-        [TestCase(4, 10, "2d4+2")]
+        [TestCase(4, 10, "1d6+1d2+2")]
         [TestCase(4, 12, "1d8+1d2+2")]
         [TestCase(4, 16, "1d12+1d2+2")]
         [TestCase(4, 24, "1d20+1d2+2")]
         [TestCase(4, 32, "1d20+1d10+2")]
-        [TestCase(4, 40, "4d10")]
-        [TestCase(4, 48, "4d12")]
+        [TestCase(4, 40, "1d20+1d12+1d6+1d2")]
+        [TestCase(4, 48, "2d20+1d6+1d2")]
         [TestCase(5, 5, "5")]
         [TestCase(5, 8, "1d4+4")]
-        [TestCase(5, 9, "2d3+3")]
+        [TestCase(5, 9, "1d4+1d2+3")]
         [TestCase(5, 10, "1d6+4")]
         [TestCase(5, 12, "1d8+4")]
         [TestCase(5, 13, "1d8+1d2+3")]
         [TestCase(5, 14, "1d10+4")]
         [TestCase(5, 16, "1d12+4")]
         [TestCase(5, 18, "1d12+1d3+3")]
-        [TestCase(5, 20, "3d6+2")]
-        [TestCase(5, 30, "1d20+2d4+2")]
-        [TestCase(5, 40, "1d20+1d10+1d8+2")]
+        [TestCase(5, 20, "1d12+1d4+1d2+2")]
+        [TestCase(5, 30, "1d20+1d6+1d2+2")]
+        [TestCase(5, 40, "1d20+1d12+1d6+2")]
         [TestCase(5, 50, "2d20+1d8+2")]
-        [TestCase(5, 60, "5d12")]
+        [TestCase(5, 60, "2d20+1d12+1d6+1d2")]
         [TestCase(6, 6, "6")]
         [TestCase(6, 7, "1d2+5")]
         [TestCase(6, 8, "1d3+5")]
         [TestCase(6, 9, "1d4+5")]
-        [TestCase(6, 10, "2d3+4")]
+        [TestCase(6, 10, "1d4+1d2+4")]
         [TestCase(6, 11, "1d6+5")]
         [TestCase(6, 13, "1d8+5")]
         [TestCase(6, 15, "1d10+5")]
         [TestCase(6, 18, "1d12+1d2+4")]
-        [TestCase(6, 20, "2d8+4")]
-        [TestCase(6, 24, "2d10+4")]
+        [TestCase(6, 20, "1d12+1d4+4")]
+        [TestCase(6, 24, "1d12+1d8+4")]
         [TestCase(6, 30, "1d20+1d6+4")]
         [TestCase(6, 36, "1d20+1d12+4")]
         [TestCase(6, 45, "2d20+1d2+3")]
         [TestCase(7, 7, "7")]
         [TestCase(7, 10, "1d4+6")]
-        [TestCase(7, 11, "2d3+5")]
+        [TestCase(7, 11, "1d4+1d2+5")]
         [TestCase(7, 12, "1d6+6")]
         [TestCase(7, 16, "1d10+6")]
         [TestCase(7, 18, "1d12+6")]
-        [TestCase(7, 30, "1d20+2d3+4")]
-        [TestCase(7, 42, "1d20+1d10+1d8+4")]
+        [TestCase(7, 30, "1d20+1d4+1d2+4")]
+        [TestCase(7, 42, "1d20+1d12+1d6+4")]
         [TestCase(7, 50, "2d20+1d6+4")]
         [TestCase(8, 8, "8")]
         [TestCase(8, 9, "1d2+7")]
-        [TestCase(8, 18, "2d6+6")]
+        [TestCase(8, 18, "1d10+1d2+6")]
         [TestCase(8, 16, "1d8+1d2+6")]
         [TestCase(9, 9, "9")]
         [TestCase(9, 14, "1d6+8")]
@@ -481,67 +499,67 @@ namespace DnDGen.RollGen.Tests.Unit
         [TestCase(10, 120, "1d100+1d12+8")]
         [TestCase(11, 11, "11")]
         [TestCase(11, 20, "1d10+10")]
-        [TestCase(11, 40, "1d20+2d6+8")]
+        [TestCase(11, 40, "1d20+1d10+1d2+8")]
         [TestCase(12, 12, "12")]
         [TestCase(12, 13, "1d2+11")]
-        [TestCase(12, 22, "2d6+10")]
+        [TestCase(12, 22, "1d10+1d2+10")]
         [TestCase(12, 24, "1d12+1d2+10")]
-        [TestCase(12, 30, "2d10+10")]
+        [TestCase(12, 30, "1d12+1d8+10")]
         [TestCase(13, 13, "13")]
         [TestCase(14, 14, "14")]
         [TestCase(14, 15, "1d2+13")]
         [TestCase(15, 15, "15")]
-        [TestCase(15, 30, "3d6+12")]
-        [TestCase(15, 50, "1d20+1d10+1d8+12")]
-        [TestCase(15, 150, "1d100+4d10+10")]
+        [TestCase(15, 30, "1d12+1d4+1d2+12")]
+        [TestCase(15, 50, "1d20+1d12+1d6+12")]
+        [TestCase(15, 150, "1d100+1d20+1d12+1d6+1d2+10")]
         [TestCase(16, 16, "16")]
         [TestCase(16, 17, "1d2+15")]
         [TestCase(17, 17, "17")]
         [TestCase(18, 18, "18")]
         [TestCase(18, 19, "1d2+17")]
-        [TestCase(18, 72, "2d20+1d10+1d8+14")]
+        [TestCase(18, 72, "2d20+1d12+1d6+14")]
         [TestCase(19, 19, "19")]
         [TestCase(20, 20, "20")]
         [TestCase(20, 50, "1d20+1d12+18")]
         [TestCase(20, 80, "3d20+1d4+16")]
-        [TestCase(20, 150, "1d100+2d12+1d10+16")]
+        [TestCase(20, 150, "1d100+1d20+1d12+1d2+16")]
         [TestCase(20, 160, "1d100+2d20+1d4+16")]
         [TestCase(20, 200, "1d100+4d20+1d6+14")]
-        [TestCase(20, 240, "2d100+2d12+16")]
+        [TestCase(20, 240, "2d100+1d20+1d4+16")]
         [TestCase(21, 30, "1d10+20")]
         [TestCase(21, 40, "1d20+20")]
         [TestCase(30, 50, "1d20+1d2+28")]
         [TestCase(30, 60, "1d20+1d12+28")]
         [TestCase(30, 100, "3d20+1d12+1d3+25")]
-        [TestCase(30, 120, "4d20+2d8+24")]
+        [TestCase(30, 120, "4d20+1d12+1d4+24")]
         [TestCase(30, 180, "1d100+2d20+1d12+1d3+25")]
-        [TestCase(30, 240, "2d100+1d8+1d6+26")]
-        [TestCase(30, 300, "2d100+3d20+3d6+22")]
-        [TestCase(30, 360, "3d100+3d12+24")]
+        [TestCase(30, 240, "2d100+1d12+1d2+26")]
+        [TestCase(30, 300, "2d100+3d20+1d12+1d4+1d2+22")]
+        [TestCase(30, 360, "3d100+1d20+1d12+1d4+24")]
         [TestCase(40, 160, "1d100+1d20+1d3+37")]
         [TestCase(40, 240, "2d100+1d3+37")]
-        [TestCase(40, 320, "2d100+4d20+2d4+32")]
-        [TestCase(40, 400, "3d100+3d20+2d4+32")]
-        [TestCase(40, 480, "4d100+4d12+32")]
+        [TestCase(40, 320, "2d100+4d20+1d6+1d2+32")]
+        [TestCase(40, 400, "3d100+3d20+1d6+1d2+32")]
+        [TestCase(40, 480, "4d100+2d20+1d6+1d2+32")]
         [TestCase(42, 42, "42")]
-        [TestCase(42, 96, "2d20+1d10+1d8+38")]
-        [TestCase(42, 600, "5d100+3d20+2d4+32")]
-        [TestCase(42, 783, "7d100+2d20+2d6+31")]
+        [TestCase(42, 96, "2d20+1d12+1d6+38")]
+        [TestCase(42, 600, "5d100+3d20+1d6+1d2+32")]
+        [TestCase(42, 783, "7d100+2d20+1d10+1d2+31")]
         [TestCase(42, 1336, "13d100+1d8+28")]
         [TestCase(42, 1337, "13d100+1d6+1d4+27")]
         [TestCase(42, 8245, "82d100+4d20+1d10-45")]
         [TestCase(42, 9266, "93d100+1d12+2d4-54")]
         [TestCase(42, 90210, "910d100+4d20+1d3-873")]
-        [TestCase(45, 150, "1d100+2d4+42")]
+        [TestCase(45, 150, "1d100+1d6+1d2+42")]
         [TestCase(50, 200, "1d100+2d20+1d12+1d3+45")]
-        [TestCase(50, 300, "2d100+2d20+2d8+44")]
+        [TestCase(50, 300, "2d100+2d20+1d12+1d4+44")]
         [TestCase(60, 240, "1d100+4d20+1d6+54")]
         [TestCase(60, 360, "3d100+1d4+56")]
-        [TestCase(70, 160, "4d20+2d8+64")]
-        [TestCase(70, 420, "3d100+4d12+1d10+62")]
+        [TestCase(70, 160, "4d20+1d12+1d4+64")]
+        [TestCase(70, 420, "3d100+2d20+1d12+1d4+1d2+62")]
         [TestCase(96, 96, "96")]
         [TestCase(96, 600, "5d100+1d10+90")]
-        [TestCase(96, 783, "6d100+4d20+1d12+2d4+83")]
+        [TestCase(96, 783, "6d100+4d20+1d12+1d6+1d2+83")]
         [TestCase(96, 1336, "12d100+2d20+2d8+80")]
         [TestCase(96, 1337, "12d100+4d12+1d10+79")]
         [TestCase(96, 8245, "82d100+2d12+1d10+11")]
@@ -552,8 +570,8 @@ namespace DnDGen.RollGen.Tests.Unit
         [TestCase(100, 800, "7d100+1d8+92")]
         [TestCase(100, 1000, "9d100+1d10+90")]
         [TestCase(100, 1200, "11d100+1d12+88")]
-        [TestCase(200, 800, "6d100+2d4+192")]
-        [TestCase(200, 1200, "10d100+2d6+188")]
+        [TestCase(200, 800, "6d100+1d6+1d2+192")]
+        [TestCase(200, 1200, "10d100+1d10+1d2+188")]
         [TestCase(200, 1600, "14d100+2d8+184")]
         [TestCase(200, 2000, "18d100+2d10+180")]
         [TestCase(300, 1200, "9d100+1d10+290")]
@@ -566,13 +584,13 @@ namespace DnDGen.RollGen.Tests.Unit
         [TestCase(400, 3200, "28d100+1d20+1d10+370")]
         [TestCase(400, 4000, "36d100+4d10+360")]
         [TestCase(400, 4800, "44d100+4d12+352")]
-        [TestCase(437, 1204, "7d100+3d20+1d12+2d4+424")]
+        [TestCase(437, 1204, "7d100+3d20+1d12+1d6+1d2+424")]
         [TestCase(500, 2000, "15d100+3d6+482")]
         [TestCase(500, 3000, "25d100+2d10+1d8+472")]
         [TestCase(600, 600, "600")]
-        [TestCase(600, 783, "1d100+4d20+1d6+1d4+593")]
+        [TestCase(600, 783, "1d100+4d20+1d8+1d2+593")]
         [TestCase(600, 1336, "7d100+2d20+1d6+590")]
-        [TestCase(600, 1337, "7d100+4d12+589")]
+        [TestCase(600, 1337, "7d100+2d20+1d6+1d2+589")]
         [TestCase(600, 2400, "18d100+2d10+580")]
         [TestCase(600, 3600, "30d100+1d20+1d12+568")]
         [TestCase(600, 8245, "77d100+2d12+521")]
@@ -586,9 +604,9 @@ namespace DnDGen.RollGen.Tests.Unit
         [TestCase(783, 9266, "85d100+3d20+1d12+694")]
         [TestCase(783, 90210, "903d100+1d20+1d12-122")]
         [TestCase(1000, 4000, "30d100+1d20+1d12+968")]
-        [TestCase(1000, 6000, "50d100+10d6+940")]
-        [TestCase(1000, 8000, "70d100+10d8+920")]
-        [TestCase(1000, 10_000, "90d100+10d10+900")]
+        [TestCase(1000, 6000, "50d100+2d20+1d8+1d6+946")]
+        [TestCase(1000, 8000, "70d100+3d20+1d12+1d3+925")]
+        [TestCase(1000, 10_000, "90d100+4d20+2d8+904")]
         [TestCase(1000, 12_000, "111d100+1d12+888")]
         [TestCase(1336, 1336, "1336")]
         [TestCase(1336, 1337, "1d2+1335")]
@@ -623,7 +641,7 @@ namespace DnDGen.RollGen.Tests.Unit
         [TestCase(8245, 90210, "827d100+4d20+1d10+1d8+7412")]
         [TestCase(9266, 9266, "9266")]
         [TestCase(9266, 90210, "817d100+3d20+2d3+8444")]
-        [TestCase(10_000, 40_000, "1578d20+2d10+8420")]
+        [TestCase(10_000, 40_000, "303d100+1d4+9696")]
         [TestCase(10_000, 60_000, "505d100+1d6+9494")]
         [TestCase(10_000, 80_000, "707d100+1d8+9292")]
         [TestCase(10_000, 100_000, "909d100+1d10+9090")]
@@ -650,8 +668,12 @@ namespace DnDGen.RollGen.Tests.Unit
         [TestCase(90_210, 90_210, "90210")]
         public void GetRollWithMostEvenDistribution(int lower, int upper, string expectedRoll)
         {
+            stopwatch.Start();
             var roll = RollHelper.GetRollWithMostEvenDistribution(lower, upper);
+            stopwatch.Stop();
+
             Assert.That(roll, Is.EqualTo(expectedRoll));
+            Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)));
         }
 
         [TestCase(1, 2, 2, "1")]
@@ -665,57 +687,61 @@ namespace DnDGen.RollGen.Tests.Unit
         [TestCase(15, 22, 45, "1d20+2d3+4")]
         public void GetRollWithMostEvenDistribution_WithBaseAmount(int baseAmount, int lower, int upper, string expectedRoll)
         {
+            stopwatch.Start();
             var roll = RollHelper.GetRollWithMostEvenDistribution(baseAmount, lower, upper);
+            stopwatch.Stop();
+
             Assert.That(roll, Is.EqualTo(expectedRoll));
+            Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)));
         }
 
         [TestCase(-2, -2, "-2")]
         [TestCase(-2, -1, "1d2-3")]
         [TestCase(-2, 0, "1d3-3")]
-        [TestCase(-2, 2, "2d3-4")]
+        [TestCase(-2, 2, "1d4+1d2-4")]
         [TestCase(-2, 3, "1d6-3")]
         [TestCase(-1, -1, "-1")]
         [TestCase(-1, 0, "1d2-2")]
         [TestCase(-1, 1, "1d3-2")]
-        [TestCase(-1, 3, "2d3-3")]
+        [TestCase(-1, 3, "1d4+1d2-3")]
         [TestCase(-1, 4, "1d6-2")]
         [TestCase(0, 0, "0")]
         [TestCase(0, 1, "1d2-1")]
         [TestCase(0, 2, "1d3-1")]
-        [TestCase(0, 4, "2d3-2")]
+        [TestCase(0, 4, "1d4+1d2-2")]
         [TestCase(0, 5, "1d6-1")]
         [TestCase(1, 1, "1")]
         [TestCase(1, 2, "1d2")]
         [TestCase(1, 3, "1d3")]
         [TestCase(1, 4, "1d4")]
-        [TestCase(1, 5, "2d3-1")]
+        [TestCase(1, 5, "1d4+1d2-1")]
         [TestCase(1, 6, "1d6")]
-        [TestCase(1, 7, "2d4-1")]
+        [TestCase(1, 7, "1d6+1d2-1")]
         [TestCase(1, 8, "1d8")]
         [TestCase(1, 9, "(1d3-1)*3+1d3")]
         [TestCase(1, 10, "1d10")]
-        [TestCase(1, 11, "2d6-1")]
+        [TestCase(1, 11, "1d10+1d2-1")]
         [TestCase(1, 12, "1d12")]
         [TestCase(1, 20, "1d20")]
         [TestCase(1, 36, "(1d12-1)*3+1d3")]
         [TestCase(1, 48, "(1d12-1)*4+1d4")]
-        [TestCase(1, 52, "2d20+1d12+1d3-3")]
+        [TestCase(1, 52, "(1d4-1)*13+1d12+1d2-1")]
         [TestCase(1, 100, "1d100")]
         [TestCase(1, 103, "1d100+1d4-1")]
         [TestCase(2, 2, "2")]
         [TestCase(2, 3, "1d2+1")]
         [TestCase(2, 4, "1d3+1")]
         [TestCase(2, 5, "1d4+1")]
-        [TestCase(2, 6, "2d3")]
+        [TestCase(2, 6, "1d4+1d2")]
         [TestCase(2, 7, "1d6+1")]
-        [TestCase(2, 8, "2d4")]
+        [TestCase(2, 8, "1d6+1d2")]
         [TestCase(2, 10, "(1d3-1)*3+1d3+1")]
-        [TestCase(2, 12, "2d6")]
+        [TestCase(2, 12, "1d10+1d2")]
         [TestCase(2, 13, "1d12+1")]
-        [TestCase(2, 15, "1d12+1d3")]
-        [TestCase(2, 20, "2d10")]
-        [TestCase(2, 24, "2d12")]
-        [TestCase(2, 40, "2d20")]
+        [TestCase(2, 15, "(1d2-1)*7+1d6+1d2")]
+        [TestCase(2, 20, "1d12+1d8")]
+        [TestCase(2, 24, "1d20+1d4")]
+        [TestCase(2, 40, "(1d3-1)*13+1d12+1d2")]
         [TestCase(2, 200, "2d100")]
         [TestCase(3, 3, "3")]
         [TestCase(3, 4, "1d2+2")]
@@ -792,41 +818,41 @@ namespace DnDGen.RollGen.Tests.Unit
         [TestCase(9, 30, "1d20+1d3+7")]
         [TestCase(10, 10, "10")]
         [TestCase(10, 11, "1d2+9")]
-        [TestCase(10, 20, "2d6+8")]
-        [TestCase(10, 24, "2d8+8")]
+        [TestCase(10, 20, "1d10+1d2+8")]
+        [TestCase(10, 24, "(1d3-1)*5+1d4+1d2+8")]
         [TestCase(10, 40, "1d20+1d12+8")]
         [TestCase(10, 50, "2d20+1d3+7")]
-        [TestCase(10, 60, "2d20+1d8+1d6+6")]
+        [TestCase(10, 60, "(1d3-1)*17+1d12+1d6+8")]
         [TestCase(10, 80, "3d20+1d12+1d3+5")]
-        [TestCase(10, 100, "4d20+2d8+4")]
-        [TestCase(10, 120, "1d100+1d12+8")]
+        [TestCase(10, 100, "4d20+1d12+1d4+4")]
+        [TestCase(10, 120, "(1d3-1)*37+1d20+1d12+1d6+1d2+6")]
         [TestCase(11, 11, "11")]
         [TestCase(11, 20, "1d10+10")]
         [TestCase(11, 40, "(1d10-1)*3+1d3+10")]
         [TestCase(12, 12, "12")]
         [TestCase(12, 13, "1d2+11")]
-        [TestCase(12, 22, "2d6+10")]
+        [TestCase(12, 22, "1d10+1d2+10")]
         [TestCase(12, 24, "1d12+1d2+10")]
-        [TestCase(12, 30, "2d10+10")]
+        [TestCase(12, 30, "1d12+1d8+10")]
         [TestCase(13, 13, "13")]
         [TestCase(14, 14, "14")]
         [TestCase(14, 15, "1d2+13")]
         [TestCase(15, 15, "15")]
         [TestCase(15, 30, "(1d8-1)*2+1d2+14")]
         [TestCase(15, 50, "(1d12-1)*3+1d3+14")]
-        [TestCase(15, 150, "1d100+4d10+10")]
+        [TestCase(15, 150, "(1d8-1)*17+1d12+1d6+13")]
         [TestCase(16, 16, "16")]
         [TestCase(16, 17, "1d2+15")]
         [TestCase(17, 17, "17")]
         [TestCase(18, 18, "18")]
         [TestCase(18, 19, "1d2+17")]
-        [TestCase(18, 72, "2d20+1d10+1d8+14")]
+        [TestCase(18, 72, "2d20+1d12+1d6+14")]
         [TestCase(19, 19, "19")]
         [TestCase(20, 20, "20")]
         [TestCase(20, 50, "1d20+1d12+18")]
         [TestCase(20, 80, "3d20+1d4+16")]
-        [TestCase(20, 150, "1d100+2d12+1d10+16")]
-        [TestCase(20, 160, "1d100+2d20+1d4+16")]
+        [TestCase(20, 150, "1d100+1d20+1d12+1d2+16")]
+        [TestCase(20, 160, "(1d3-1)*47+2d20+1d8+1d2+16")]
         [TestCase(20, 200, "1d100+4d20+1d6+14")]
         [TestCase(20, 240, "2d100+2d12+16")]
         [TestCase(21, 30, "1d10+20")]
@@ -869,10 +895,10 @@ namespace DnDGen.RollGen.Tests.Unit
         [TestCase(96, 9266, "92d100+3d20+1d6")]
         [TestCase(96, 90210, "910d100+1d20+1d6-816")]
         [TestCase(100, 400, "3d100+1d4+96")]
-        [TestCase(100, 600, "5d100+1d6+94")]
+        [TestCase(100, 600, "(1d3-1)*167+1d100+3d20+1d10+1d2+94")]
         [TestCase(100, 800, "7d100+1d8+92")]
         [TestCase(100, 1000, "9d100+1d10+90")]
-        [TestCase(100, 1200, "11d100+1d12+88")]
+        [TestCase(100, 1200, "(1d3-1)*367+3d100+3d20+1d12+1d2+92")]
         [TestCase(200, 800, "6d100+2d4+192")]
         [TestCase(200, 1200, "10d100+2d6+188")]
         [TestCase(200, 1600, "14d100+2d8+184")]
@@ -907,19 +933,19 @@ namespace DnDGen.RollGen.Tests.Unit
         [TestCase(783, 9266, "85d100+3d20+1d12+694")]
         [TestCase(783, 90210, "903d100+1d20+1d12-122")]
         [TestCase(1000, 4000, "30d100+1d20+1d12+968")]
-        [TestCase(1000, 6000, "50d100+2d20+1d8+1d6+946")]
+        [TestCase(1000, 6000, "(1d3-1)*1667+16d100+4d20+2d4+978")]
         [TestCase(1000, 8000, "70d100+3d20+1d12+1d3+925")]
         [TestCase(1000, 10_000, "90d100+4d20+2d8+904")]
-        [TestCase(1000, 12_000, "111d100+1d12+888")]
+        [TestCase(1000, 12_000, "(1d3-1)*3667+37d100+1d4+962")]
         [TestCase(1336, 1336, "1336")]
         [TestCase(1336, 1337, "1d2+1335")]
-        [TestCase(1336, 8245, "69d100+4d20+1d3+1262")]
+        [TestCase(1336, 8245, "(1d10-1)*691+6d100+5d20+1d2+1324")]
         [TestCase(1336, 9266, "80d100+2d6+1254")]
-        [TestCase(1336, 90210, "897d100+3d20+2d8+434")]
+        [TestCase(1336, 90210, "(1d3-1)*29625+(1d3-1)*9875+99d100+3d20+1d10+1d8+1232")]
         [TestCase(1337, 1337, "1337")]
-        [TestCase(1337, 8245, "69d100+4d20+1d2+1263")]
-        [TestCase(1337, 9266, "80d100+1d10+1256")]
-        [TestCase(1337, 90210, "897d100+3d20+1d12+1d3+435")]
+        [TestCase(1337, 8245, "(1d3-1)*2303+23d100+2d10+1d8+1311")]
+        [TestCase(1337, 9266, "(1d10-1)*793+8d100+1329")]
+        [TestCase(1337, 90210, "(1d2-1)*44437+448d100+4d20+1d6+1d4+883")]
         [TestCase(2000, 8000, "60d100+3d20+1d4+1936")]
         [TestCase(2000, 12_000, "101d100+1d2+1898")]
         [TestCase(2000, 16_000, "141d100+2d20+1d4+1856")]
@@ -956,10 +982,10 @@ namespace DnDGen.RollGen.Tests.Unit
         [TestCase(9266, 9266, "9266")]
         [TestCase(9266, 90210, "817d100+3d20+2d3+8444")]
         [TestCase(10_000, 40_000, "303d100+1d4+9696")]
-        [TestCase(10_000, 60_000, "505d100+1d6+9494")]
+        [TestCase(10_000, 60_000, "(1d3-1)*16667+168d100+3d10+1d8+9828")]
         [TestCase(10_000, 80_000, "707d100+1d8+9292")]
         [TestCase(10_000, 100_000, "909d100+1d10+9090")]
-        [TestCase(10_000, 120_000, "1111d100+1d12+8888")]
+        [TestCase(10_000, 120_000, "(1d3-1)*36667+370d100+4d10+9626")]
         [TestCase(20_000, 80_000, "606d100+2d4+19392")]
         [TestCase(20_000, 120_000, "1010d100+2d6+18988")]
         [TestCase(20_000, 160_000, "1414d100+2d8+18584")]
@@ -993,8 +1019,12 @@ namespace DnDGen.RollGen.Tests.Unit
         [TestCase(90_210, 90_210, "90210")]
         public void GetRollWithMostEvenDistribution_AllowMultipliers(int lower, int upper, string expectedRoll)
         {
+            stopwatch.Start();
             var roll = RollHelper.GetRollWithMostEvenDistribution(lower, upper, true);
+            stopwatch.Stop();
+
             Assert.That(roll, Is.EqualTo(expectedRoll));
+            Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)));
         }
 
         [TestCase(1, 2, 2, "1")]
@@ -1008,8 +1038,12 @@ namespace DnDGen.RollGen.Tests.Unit
         [TestCase(15, 22, 45, "(1d12-1)*2+1d2+6")]
         public void GetRollWithMostEvenDistribution_AllowMultipliers_WithBaseAmount(int baseAmount, int lower, int upper, string expectedRoll)
         {
+            stopwatch.Start();
             var roll = RollHelper.GetRollWithMostEvenDistribution(baseAmount, lower, upper, true);
+            stopwatch.Stop();
+
             Assert.That(roll, Is.EqualTo(expectedRoll));
+            Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)));
         }
 
         [TestCase(-2, -2, "-2")]
@@ -1342,8 +1376,12 @@ namespace DnDGen.RollGen.Tests.Unit
         [TestCase(90_210, 90_210, "90210")]
         public void GetRollWithMostEvenDistribution_AllowNonstandard(int lower, int upper, string expectedRoll)
         {
+            stopwatch.Start();
             var roll = RollHelper.GetRollWithMostEvenDistribution(lower, upper, allowNonstandardDice: true);
+            stopwatch.Stop();
+
             Assert.That(roll, Is.EqualTo(expectedRoll));
+            Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)));
         }
 
         [TestCase(1, 2, 2, "1")]
@@ -1357,8 +1395,12 @@ namespace DnDGen.RollGen.Tests.Unit
         [TestCase(15, 22, 45, "(1d12-1)*2+1d2+6")]
         public void GetRollWithMostEvenDistribution_WithBaseAmount_AllowNonstandard(int baseAmount, int lower, int upper, string expectedRoll)
         {
+            stopwatch.Start();
             var roll = RollHelper.GetRollWithMostEvenDistribution(baseAmount, lower, upper, allowNonstandardDice: true);
+            stopwatch.Stop();
+
             Assert.That(roll, Is.EqualTo(expectedRoll));
+            Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)));
         }
 
         [TestCase(-2, -2, "-2")]
@@ -1691,8 +1733,12 @@ namespace DnDGen.RollGen.Tests.Unit
         [TestCase(90_210, 90_210, "90210")]
         public void GetRollWithMostEvenDistribution_AllowMultipliersAndNonstandard(int lower, int upper, string expectedRoll)
         {
+            stopwatch.Start();
             var roll = RollHelper.GetRollWithMostEvenDistribution(lower, upper, true, true);
+            stopwatch.Stop();
+
             Assert.That(roll, Is.EqualTo(expectedRoll));
+            Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)));
         }
 
         [TestCase(1, 2, 2, "1")]
@@ -1706,8 +1752,12 @@ namespace DnDGen.RollGen.Tests.Unit
         [TestCase(15, 22, 45, "(1d12-1)*2+1d2+6")]
         public void GetRollWithMostEvenDistribution_WithBaseAmount_AllowMultipliersAndNonstandard(int baseAmount, int lower, int upper, string expectedRoll)
         {
+            stopwatch.Start();
             var roll = RollHelper.GetRollWithMostEvenDistribution(baseAmount, lower, upper, true, true);
+            stopwatch.Stop();
+
             Assert.That(roll, Is.EqualTo(expectedRoll));
+            Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)));
         }
     }
 }

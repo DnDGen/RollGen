@@ -32,11 +32,17 @@ namespace DnDGen.RollGen
             if (!collections.Any())
                 throw new ArgumentException($"Cannot generate a valid roll for range [{lower},{upper}]");
 
-            var rankings = collections.Select(c => (c.GetRankingForFewestDice(lower, upper), c.Build()));
-            var bestMatchingRanking = rankings.Min(r => r.Item1);
-            var bestMatch = rankings.First(r => r.Item1 == bestMatchingRanking);
+            var rankings = collections
+                .Select(c => new
+                {
+                    Roll = c.Build(),
+                    Ranking = c.GetRankingForFewestDice(lower, upper),
+                })
+                .Where(c => c.Ranking >= 0);
+            var bestMatchingRanking = rankings.Min(r => r.Ranking);
+            var bestMatch = rankings.First(r => r.Ranking == bestMatchingRanking);
 
-            return bestMatch.Item2;
+            return bestMatch.Roll;
         }
 
         /// <summary>
@@ -112,21 +118,28 @@ namespace DnDGen.RollGen
             if (!collections.Any())
                 throw new ArgumentException($"Cannot generate a valid roll for range [{lower},{adjustedUpper}]");
 
-            var rankings = collections.Select(c => (c.GetRankingForMostEvenDistribution(lower, upper), c.Build(), c));
-            var bestMatchingRanking = rankings.Min(r => r.Item1);
+            var rankings = collections
+                .Select(c => new
+                {
+                    Roll = c.Build(),
+                    Ranking = c.GetRankingForMostEvenDistribution(lower, adjustedUpper),
+                    AltRanking = c.GetAlternativeRankingForMostEvenDistribution(lower, adjustedUpper),
+                })
+                .Where(c => c.Ranking >= 0);
 
-            if (bestMatchingRanking >= long.MaxValue - 1)
+            var bestMatchingRanking = rankings.Min(r => r.Ranking);
+            var bestMatch = rankings.First(r => r.Ranking == bestMatchingRanking);
+
+            if (bestMatchingRanking == long.MaxValue)
             {
-                rankings = collections.Select(c => (c.GetAlternativeRankingForMostEvenDistribution(lower, upper), c.Build(), c));
-                bestMatchingRanking = rankings.Min(r => r.Item1);
+                bestMatchingRanking = rankings.Min(r => r.AltRanking);
+                bestMatch = rankings.First(r => r.AltRanking == bestMatchingRanking);
             }
 
-            var bestMatch = rankings.First(r => r.Item1 == bestMatchingRanking);
-
             if (roll == string.Empty)
-                return bestMatch.Item2;
+                return bestMatch.Roll;
             else
-                return $"{roll}+{bestMatch.Item2}";
+                return $"{roll}+{bestMatch.Roll}";
         }
 
         private static IEnumerable<RollCollection> GetRollCollections(int lower, int upper)

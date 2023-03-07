@@ -67,7 +67,7 @@ namespace DnDGen.RollGen
         public int GetRankingForFewestDice(int lower, int upper)
         {
             if (!Matches(lower, upper))
-                return int.MaxValue;
+                return int.MinValue;
 
             var rank = 0;
             if (!Rolls.Any())
@@ -83,7 +83,7 @@ namespace DnDGen.RollGen
         public long GetRankingForMostEvenDistribution(int lower, int upper)
         {
             if (!Matches(lower, upper))
-                return long.MaxValue;
+                return long.MinValue;
 
             if (!Rolls.Any())
                 return 0;
@@ -94,7 +94,7 @@ namespace DnDGen.RollGen
         public long GetAlternativeRankingForMostEvenDistribution(int lower, int upper)
         {
             if (!Matches(lower, upper))
-                return long.MaxValue;
+                return long.MinValue;
 
             if (!Rolls.Any())
                 return 0;
@@ -164,9 +164,8 @@ namespace DnDGen.RollGen
                             newRolls[newSum] += r1.Value;
 
                             //INFO: This means we went so high that we wrapped around
-                            //Need to return max - 1, so it doesn't conflict with rolls that do not match the range
                             if (newRolls[newSum] < 1)
-                                return long.MaxValue - 1;
+                                return long.MaxValue;
                         }
                     }
 
@@ -175,6 +174,7 @@ namespace DnDGen.RollGen
                 }
             }
 
+            //Since we are subtracting from the mode, the key of 0 is the cumulative number of ways we can roll the mode
             return rolls[0];
         }
     }
