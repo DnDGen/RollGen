@@ -1,6 +1,9 @@
 ﻿using NUnit.Framework;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace DnDGen.RollGen.Tests.Unit
 {
@@ -1195,6 +1198,64 @@ namespace DnDGen.RollGen.Tests.Unit
             Assert.That(ranking, Is.EqualTo(expectedRanking));
         }
 
+        [TestCaseSource(nameof(SlowRolls))]
+        public void Ranking_MostEvenDistribution_IsFast(long expectedRanking, int adj, int min, int max, List<(int Q, int D)> dice)
+        {
+            collection.Rolls.AddRange(dice.Select(d => new RollPrototype { Quantity = d.Q, Die = d.D }));
+            collection.Adjustment = adj;
+
+            var stopwatch = new Stopwatch();
+
+            stopwatch.Start();
+            var ranking = collection.GetRankingForMostEvenDistribution(min, max);
+            stopwatch.Stop();
+
+            Assert.That(ranking, Is.EqualTo(expectedRanking));
+            Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(0.1)));
+        }
+
+        public static IEnumerable SlowRolls
+        {
+            get
+            {
+                var testCases = new List<(long Ranking, int Adj, int Min, int Max, List<(int Q, int D)> Prototypes)>();
+                testCases.Add((583468631593496000, 424, 437, 1204, new List<(int Q, int D)>
+                {
+                    (7, 100),
+                    (3, 20),
+                    (1, 12),
+                    (1, 6),
+                    (1, 2),
+                }));
+                testCases.Add((1219873327734200, 590, 600, 1336, new List<(int Q, int D)>
+                {
+                    (7, 100),
+                    (2, 20),
+                    (1, 6),
+                }));
+                testCases.Add((long.MaxValue, 8232, 8245, 9266, new List<(int Q, int D)>
+                {
+                    (10, 100),
+                    (1, 20),
+                    (1, 12),
+                    (1, 2),
+                }));
+                testCases.Add((125048784834994020, 83, 96, 783, new List<(int Q, int D)>
+                {
+                    (6, 100),
+                    (4, 20),
+                    (1, 12),
+                    (1, 6),
+                    (1, 2),
+                }));
+
+                foreach (var testCase in testCases)
+                {
+                    yield return new TestCaseData(testCase.Ranking, testCase.Adj, testCase.Min, testCase.Max, testCase.Prototypes);
+                }
+            }
+        }
+
         [Test]
         public void Ranking_AlternativeMostEvenDistribution_ForOnlyAdjustmentInRange()
         {
@@ -1226,9 +1287,9 @@ namespace DnDGen.RollGen.Tests.Unit
             Assert.That(ranking, Is.EqualTo(long.MinValue));
         }
 
-        [TestCase(1, 101000)]
-        [TestCase(2, 201000)]
-        [TestCase(3, 301000)]
+        [TestCase(1, 1)]
+        [TestCase(2, 100)]
+        [TestCase(3, 7500)]
         public void Ranking_AlternativeMostEvenDistribution_ForOneRollInRange(int quantity, int expectedRanking)
         {
             collection.Adjustment = 9266;
@@ -1336,15 +1397,15 @@ namespace DnDGen.RollGen.Tests.Unit
             Assert.That(ranking, Is.EqualTo(long.MinValue));
         }
 
-        [TestCase(1, 1, 202000)]
-        [TestCase(1, 2, 302000)]
-        [TestCase(1, 3, 402000)]
-        [TestCase(2, 1, 302000)]
-        [TestCase(2, 2, 402000)]
-        [TestCase(2, 3, 502000)]
-        [TestCase(3, 1, 402000)]
-        [TestCase(3, 2, 502000)]
-        [TestCase(3, 3, 602000)]
+        [TestCase(1, 1, 20)]
+        [TestCase(1, 2, 400)]
+        [TestCase(1, 3, 8000)]
+        [TestCase(2, 1, 1900)]
+        [TestCase(2, 2, 37340)]
+        [TestCase(2, 3, 735050)]
+        [TestCase(3, 1, 149340)]
+        [TestCase(3, 2, 2973400)]
+        [TestCase(3, 3, 59204000)]
         public void Ranking_AlternativeMostEvenDistribution_ForMultipleRollsInRange(int quantity1, int quantity2, int expectedRanking)
         {
             collection.Adjustment = 9266;
@@ -1618,86 +1679,86 @@ namespace DnDGen.RollGen.Tests.Unit
             Assert.That(ranking, Is.EqualTo(long.MinValue));
         }
 
-        [TestCase(1, 2, 1, 2, -2, 202098)]
-        [TestCase(1, 2, 1, 4, -2, 202096)]
-        [TestCase(1, 2, 1, 6, -2, 202094)]
-        [TestCase(1, 2, 1, 8, -2, 202092)]
-        [TestCase(1, 4, 1, 2, -2, 202096)]
-        [TestCase(1, 4, 1, 4, -2, 202096)]
-        [TestCase(1, 4, 1, 6, -2, 202094)]
-        [TestCase(1, 4, 1, 8, -2, 202092)]
-        [TestCase(1, 6, 1, 2, -2, 202094)]
-        [TestCase(1, 6, 1, 4, -2, 202094)]
-        [TestCase(1, 6, 1, 6, -2, 202094)]
-        [TestCase(1, 6, 1, 8, -2, 202092)]
-        [TestCase(1, 8, 1, 2, -2, 202092)]
-        [TestCase(1, 8, 1, 4, -2, 202092)]
-        [TestCase(1, 8, 1, 6, -2, 202092)]
-        [TestCase(1, 8, 1, 8, -2, 202092)]
-        [TestCase(1, 2, 1, 2, -1, 202098)]
-        [TestCase(1, 2, 1, 4, -1, 202096)]
-        [TestCase(1, 2, 1, 6, -1, 202094)]
-        [TestCase(1, 2, 1, 8, -1, 202092)]
-        [TestCase(1, 4, 1, 2, -1, 202096)]
-        [TestCase(1, 4, 1, 4, -1, 202096)]
-        [TestCase(1, 4, 1, 6, -1, 202094)]
-        [TestCase(1, 4, 1, 8, -1, 202092)]
-        [TestCase(1, 6, 1, 2, -1, 202094)]
-        [TestCase(1, 6, 1, 4, -1, 202094)]
-        [TestCase(1, 6, 1, 6, -1, 202094)]
-        [TestCase(1, 6, 1, 8, -1, 202092)]
-        [TestCase(1, 8, 1, 2, -1, 202092)]
-        [TestCase(1, 8, 1, 4, -1, 202092)]
-        [TestCase(1, 8, 1, 6, -1, 202092)]
-        [TestCase(1, 8, 1, 8, -1, 202092)]
-        [TestCase(1, 2, 1, 2, 0, 202098)]
-        [TestCase(1, 2, 1, 4, 0, 202096)]
-        [TestCase(1, 2, 1, 6, 0, 202094)]
-        [TestCase(1, 2, 1, 8, 0, 202092)]
-        [TestCase(1, 4, 1, 2, 0, 202096)]
-        [TestCase(1, 4, 1, 4, 0, 202096)]
-        [TestCase(1, 4, 1, 6, 0, 202094)]
-        [TestCase(1, 4, 1, 8, 0, 202092)]
-        [TestCase(1, 6, 1, 2, 0, 202094)]
-        [TestCase(1, 6, 1, 4, 0, 202094)]
-        [TestCase(1, 6, 1, 6, 0, 202094)]
-        [TestCase(1, 6, 1, 8, 0, 202092)]
-        [TestCase(1, 8, 1, 2, 0, 202092)]
-        [TestCase(1, 8, 1, 4, 0, 202092)]
-        [TestCase(1, 8, 1, 6, 0, 202092)]
-        [TestCase(1, 8, 1, 8, 0, 202092)]
-        [TestCase(1, 2, 1, 2, 1, 202098)]
-        [TestCase(1, 2, 1, 4, 1, 202096)]
-        [TestCase(1, 2, 1, 6, 1, 202094)]
-        [TestCase(1, 2, 1, 8, 1, 202092)]
-        [TestCase(1, 4, 1, 2, 1, 202096)]
-        [TestCase(1, 4, 1, 4, 1, 202096)]
-        [TestCase(1, 4, 1, 6, 1, 202094)]
-        [TestCase(1, 4, 1, 8, 1, 202092)]
-        [TestCase(1, 6, 1, 2, 1, 202094)]
-        [TestCase(1, 6, 1, 4, 1, 202094)]
-        [TestCase(1, 6, 1, 6, 1, 202094)]
-        [TestCase(1, 6, 1, 8, 1, 202092)]
-        [TestCase(1, 8, 1, 2, 1, 202092)]
-        [TestCase(1, 8, 1, 4, 1, 202092)]
-        [TestCase(1, 8, 1, 6, 1, 202092)]
-        [TestCase(1, 8, 1, 8, 1, 202092)]
-        [TestCase(1, 2, 1, 2, 2, 202098)]
-        [TestCase(1, 2, 1, 4, 2, 202096)]
-        [TestCase(1, 2, 1, 6, 2, 202094)]
-        [TestCase(1, 2, 1, 8, 2, 202092)]
-        [TestCase(1, 4, 1, 2, 2, 202096)]
-        [TestCase(1, 4, 1, 4, 2, 202096)]
-        [TestCase(1, 4, 1, 6, 2, 202094)]
-        [TestCase(1, 4, 1, 8, 2, 202092)]
-        [TestCase(1, 6, 1, 2, 2, 202094)]
-        [TestCase(1, 6, 1, 4, 2, 202094)]
-        [TestCase(1, 6, 1, 6, 2, 202094)]
-        [TestCase(1, 6, 1, 8, 2, 202092)]
-        [TestCase(1, 8, 1, 2, 2, 202092)]
-        [TestCase(1, 8, 1, 4, 2, 202092)]
-        [TestCase(1, 8, 1, 6, 2, 202092)]
-        [TestCase(1, 8, 1, 8, 2, 202092)]
+        [TestCase(1, 2, 1, 2, -2, 2)]
+        [TestCase(1, 2, 1, 4, -2, 2)]
+        [TestCase(1, 2, 1, 6, -2, 2)]
+        [TestCase(1, 2, 1, 8, -2, 2)]
+        [TestCase(1, 4, 1, 2, -2, 2)]
+        [TestCase(1, 4, 1, 4, -2, 4)]
+        [TestCase(1, 4, 1, 6, -2, 4)]
+        [TestCase(1, 4, 1, 8, -2, 4)]
+        [TestCase(1, 6, 1, 2, -2, 2)]
+        [TestCase(1, 6, 1, 4, -2, 4)]
+        [TestCase(1, 6, 1, 6, -2, 6)]
+        [TestCase(1, 6, 1, 8, -2, 6)]
+        [TestCase(1, 8, 1, 2, -2, 2)]
+        [TestCase(1, 8, 1, 4, -2, 4)]
+        [TestCase(1, 8, 1, 6, -2, 6)]
+        [TestCase(1, 8, 1, 8, -2, 8)]
+        [TestCase(1, 2, 1, 2, -1, 2)]
+        [TestCase(1, 2, 1, 4, -1, 2)]
+        [TestCase(1, 2, 1, 6, -1, 2)]
+        [TestCase(1, 2, 1, 8, -1, 2)]
+        [TestCase(1, 4, 1, 2, -1, 2)]
+        [TestCase(1, 4, 1, 4, -1, 4)]
+        [TestCase(1, 4, 1, 6, -1, 4)]
+        [TestCase(1, 4, 1, 8, -1, 4)]
+        [TestCase(1, 6, 1, 2, -1, 2)]
+        [TestCase(1, 6, 1, 4, -1, 4)]
+        [TestCase(1, 6, 1, 6, -1, 6)]
+        [TestCase(1, 6, 1, 8, -1, 6)]
+        [TestCase(1, 8, 1, 2, -1, 2)]
+        [TestCase(1, 8, 1, 4, -1, 4)]
+        [TestCase(1, 8, 1, 6, -1, 6)]
+        [TestCase(1, 8, 1, 8, -1, 8)]
+        [TestCase(1, 2, 1, 2, 0, 2)]
+        [TestCase(1, 2, 1, 4, 0, 2)]
+        [TestCase(1, 2, 1, 6, 0, 2)]
+        [TestCase(1, 2, 1, 8, 0, 2)]
+        [TestCase(1, 4, 1, 2, 0, 2)]
+        [TestCase(1, 4, 1, 4, 0, 4)]
+        [TestCase(1, 4, 1, 6, 0, 4)]
+        [TestCase(1, 4, 1, 8, 0, 4)]
+        [TestCase(1, 6, 1, 2, 0, 2)]
+        [TestCase(1, 6, 1, 4, 0, 4)]
+        [TestCase(1, 6, 1, 6, 0, 6)]
+        [TestCase(1, 6, 1, 8, 0, 6)]
+        [TestCase(1, 8, 1, 2, 0, 2)]
+        [TestCase(1, 8, 1, 4, 0, 4)]
+        [TestCase(1, 8, 1, 6, 0, 6)]
+        [TestCase(1, 8, 1, 8, 0, 8)]
+        [TestCase(1, 2, 1, 2, 1, 2)]
+        [TestCase(1, 2, 1, 4, 1, 2)]
+        [TestCase(1, 2, 1, 6, 1, 2)]
+        [TestCase(1, 2, 1, 8, 1, 2)]
+        [TestCase(1, 4, 1, 2, 1, 2)]
+        [TestCase(1, 4, 1, 4, 1, 4)]
+        [TestCase(1, 4, 1, 6, 1, 4)]
+        [TestCase(1, 4, 1, 8, 1, 4)]
+        [TestCase(1, 6, 1, 2, 1, 2)]
+        [TestCase(1, 6, 1, 4, 1, 4)]
+        [TestCase(1, 6, 1, 6, 1, 6)]
+        [TestCase(1, 6, 1, 8, 1, 6)]
+        [TestCase(1, 8, 1, 2, 1, 2)]
+        [TestCase(1, 8, 1, 4, 1, 4)]
+        [TestCase(1, 8, 1, 6, 1, 6)]
+        [TestCase(1, 8, 1, 8, 1, 8)]
+        [TestCase(1, 2, 1, 2, 2, 2)]
+        [TestCase(1, 2, 1, 4, 2, 2)]
+        [TestCase(1, 2, 1, 6, 2, 2)]
+        [TestCase(1, 2, 1, 8, 2, 2)]
+        [TestCase(1, 4, 1, 2, 2, 2)]
+        [TestCase(1, 4, 1, 4, 2, 4)]
+        [TestCase(1, 4, 1, 6, 2, 4)]
+        [TestCase(1, 4, 1, 8, 2, 4)]
+        [TestCase(1, 6, 1, 2, 2, 2)]
+        [TestCase(1, 6, 1, 4, 2, 4)]
+        [TestCase(1, 6, 1, 6, 2, 6)]
+        [TestCase(1, 6, 1, 8, 2, 6)]
+        [TestCase(1, 8, 1, 2, 2, 2)]
+        [TestCase(1, 8, 1, 4, 2, 4)]
+        [TestCase(1, 8, 1, 6, 2, 6)]
+        [TestCase(1, 8, 1, 8, 2, 8)]
         public void Ranking_AlternativeMostEvenDistribution_ForMultipleRollsInRangeWithDifferentDice(int q1, int d1, int q2, int d2, int adjustment, int expectedRanking)
         {
             collection.Adjustment = adjustment;
@@ -1722,17 +1783,17 @@ namespace DnDGen.RollGen.Tests.Unit
             Assert.That(ranking, Is.EqualTo(expectedRanking));
         }
 
-        [TestCase(2, 101098)]
-        [TestCase(3, 101097)]
-        [TestCase(4, 101096)]
-        [TestCase(6, 101094)]
-        [TestCase(8, 101092)]
-        [TestCase(10, 101090)]
-        [TestCase(12, 101088)]
-        [TestCase(20, 101080)]
-        [TestCase(100, 101000)]
-        [TestCase(1000, 100100)]
-        [TestCase(Limits.Die, 91100)]
+        [TestCase(2, 1)]
+        [TestCase(3, 1)]
+        [TestCase(4, 1)]
+        [TestCase(6, 1)]
+        [TestCase(8, 1)]
+        [TestCase(10, 1)]
+        [TestCase(12, 1)]
+        [TestCase(20, 1)]
+        [TestCase(100, 1)]
+        [TestCase(1000, 1)]
+        [TestCase(Limits.Die, 1)]
         public void Ranking_AlternativeMostEvenDistribution_ForRollInRangeWithMaxDice(int die, int expectedRanking)
         {
             var prototype = new RollPrototype
@@ -2123,7 +2184,8 @@ namespace DnDGen.RollGen.Tests.Unit
             collection.Adjustment = 666;
 
             var distribution = collection.ComputeDistribution();
-            Assert.That(distribution, Is.EqualTo(D));
+            var rawDistribution = ComputeDistribution(collection.Rolls);
+            Assert.That(distribution, Is.EqualTo(D).And.EqualTo(rawDistribution));
         }
 
         [TestCase(1, 2, 1, 2, 2)]
@@ -2447,7 +2509,8 @@ namespace DnDGen.RollGen.Tests.Unit
             collection.Adjustment = 666;
 
             var distribution = collection.ComputeDistribution();
-            Assert.That(distribution, Is.EqualTo(D));
+            var rawDistribution = ComputeDistribution(collection.Rolls);
+            Assert.That(distribution, Is.EqualTo(D).And.EqualTo(rawDistribution));
         }
 
         [TestCase(2, 2)]
@@ -2613,11 +2676,15 @@ namespace DnDGen.RollGen.Tests.Unit
             collection.Adjustment = 666;
 
             var distribution = collection.ComputeDistribution();
-            Assert.That(distribution, Is.EqualTo(D));
+            var rawDistribution = ComputeDistribution(collection.Rolls);
+            Assert.That(distribution, Is.EqualTo(D).And.EqualTo(rawDistribution));
         }
 
         [TestCase(1, 1000, 1)]
         [TestCase(1, Limits.Die, 1)]
+        [TestCase(2, 2, 2)]
+        [TestCase(2, 10, 10)]
+        [TestCase(2, 100, 100)]
         [TestCase(3, 2, 3)]
         [TestCase(3, 6, 27)]
         [TestCase(3, 10, 75)]
@@ -2639,6 +2706,9 @@ namespace DnDGen.RollGen.Tests.Unit
         [TestCase(5, 100, 59896875)]
         [TestCase(5, 1000, 59896875, Ignore = "In practice, the only time we have nonstandard dice are when the quantity is 1")]
         [TestCase(5, Limits.Die, long.MaxValue, Ignore = "In practice, the only time we have nonstandard dice are when the quantity is 1")]
+        [TestCase(8, 2, 70)]
+        [TestCase(8, 10, 4816030)]
+        [TestCase(8, 100, 47938730314300)]
         [TestCase(10, 2, 252)]
         [TestCase(10, 6, 4395456)] //7.27% * 6^10 = 4395891, rounding error
         [TestCase(10, 10, 432457640)]
@@ -2646,6 +2716,9 @@ namespace DnDGen.RollGen.Tests.Unit
         [TestCase(10, 100, 430438025018576400)]
         [TestCase(10, 1000, long.MaxValue, Ignore = "In practice, the only time we have nonstandard dice are when the quantity is 1")]
         [TestCase(10, Limits.Die, long.MaxValue, Ignore = "In practice, the only time we have nonstandard dice are when the quantity is 1")]
+        [TestCase(16, 2, 12870)]
+        [TestCase(16, 10, 343900019857310)]
+        [TestCase(16, 100, long.MaxValue)]
         [TestCase(20, 2, 184756)]
         [TestCase(20, 6, 189456975899496)]
         [TestCase(20, 10, 3081918923741896840)]
@@ -2653,6 +2726,24 @@ namespace DnDGen.RollGen.Tests.Unit
         [TestCase(20, 100, long.MaxValue)]
         [TestCase(20, 1000, long.MaxValue, Ignore = "In practice, the only time we have nonstandard dice are when the quantity is 1")]
         [TestCase(20, Limits.Die, long.MaxValue, Ignore = "In practice, the only time we have nonstandard dice are when the quantity is 1")]
+        [TestCase(32, 2, 601080390)]
+        [TestCase(32, 10, long.MaxValue)]
+        [TestCase(32, 100, long.MaxValue)]
+        [TestCase(63, 2, 916312070471295267)]
+        [TestCase(63, 10, long.MaxValue)]
+        [TestCase(63, 100, long.MaxValue)]
+        [TestCase(64, 2, 1832624140942590534)]
+        [TestCase(64, 10, long.MaxValue)]
+        [TestCase(64, 100, long.MaxValue)]
+        [TestCase(65, 2, 3609714217008132870)]
+        [TestCase(65, 10, long.MaxValue)]
+        [TestCase(65, 100, long.MaxValue)]
+        [TestCase(66, 2, 7219428434016265740)]
+        [TestCase(66, 10, long.MaxValue)]
+        [TestCase(66, 100, long.MaxValue)]
+        [TestCase(67, 2, long.MaxValue)]
+        [TestCase(67, 10, long.MaxValue)]
+        [TestCase(67, 100, long.MaxValue)]
         [TestCase(100, 2, long.MaxValue)]
         [TestCase(100, 6, long.MaxValue)]
         [TestCase(100, 10, long.MaxValue)]
@@ -2660,6 +2751,9 @@ namespace DnDGen.RollGen.Tests.Unit
         [TestCase(100, 100, long.MaxValue)]
         [TestCase(100, 1000, long.MaxValue, Ignore = "In practice, the only time we have nonstandard dice are when the quantity is 1")]
         [TestCase(100, Limits.Die, long.MaxValue, Ignore = "In practice, the only time we have nonstandard dice are when the quantity is 1")]
+        [TestCase(128, 2, long.MaxValue)]
+        [TestCase(128, 10, long.MaxValue)]
+        [TestCase(128, 100, long.MaxValue)]
         [TestCase(1000, 2, long.MaxValue)]
         [TestCase(1000, 6, long.MaxValue)]
         [TestCase(1000, 10, long.MaxValue)]
@@ -2695,7 +2789,8 @@ namespace DnDGen.RollGen.Tests.Unit
             var distribution = collection.ComputeDistribution();
             stopwatch.Stop();
 
-            Assert.That(distribution, Is.EqualTo(D));
+            var rawDistribution = ComputeDistribution(collection.Rolls);
+            Assert.That(distribution, Is.EqualTo(D).And.EqualTo(rawDistribution));
             Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)));
         }
 
@@ -2731,8 +2826,48 @@ namespace DnDGen.RollGen.Tests.Unit
             var distribution = collection.ComputeDistribution();
             stopwatch.Stop();
 
-            Assert.That(distribution, Is.EqualTo(D));
+            var rawDistribution = ComputeDistribution(collection.Rolls);
+            Assert.That(distribution, Is.EqualTo(D).And.EqualTo(rawDistribution));
             Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)));
+        }
+
+        private long ComputeDistribution(List<RollPrototype> rollPrototypes)
+        {
+            var quantities = rollPrototypes.Sum(r => r.Quantity);
+            var mode = (rollPrototypes.Sum(r => r.Quantity * r.Die) + quantities) / 2;
+            var rolls = new Dictionary<int, long>() { { mode, 1 } };
+
+            for (var i = 0; i < rollPrototypes.Count; i++)
+            {
+                var nextRolls = Enumerable.Range(1, rollPrototypes[i].Die);
+                var q = rollPrototypes[i].Quantity;
+
+                while (q-- > 0)
+                {
+                    var newRolls = new Dictionary<int, long>();
+
+                    foreach (var r1 in rolls)
+                    {
+                        foreach (var r2 in nextRolls)
+                        {
+                            var newSum = r1.Key - r2;
+                            if (!newRolls.ContainsKey(newSum))
+                                newRolls[newSum] = 0;
+
+                            newRolls[newSum] += r1.Value;
+
+                            //INFO: This means we went so high that we wrapped around
+                            if (newRolls[newSum] < 1)
+                                return long.MaxValue;
+                        }
+                    }
+
+                    rolls = newRolls;
+                }
+            }
+
+            //Since we are subtracting from the mode, the key of 0 is the cumulative number of ways we can roll the mode
+            return rolls[0];
         }
     }
 }

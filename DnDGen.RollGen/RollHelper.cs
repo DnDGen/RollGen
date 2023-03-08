@@ -39,8 +39,7 @@ namespace DnDGen.RollGen
                     Ranking = c.GetRankingForFewestDice(lower, upper),
                 })
                 .Where(c => c.Ranking >= 0);
-            var bestMatchingRanking = rankings.Min(r => r.Ranking);
-            var bestMatch = rankings.First(r => r.Ranking == bestMatchingRanking);
+            var bestMatch = rankings.OrderBy(r => r.Ranking).First();
 
             return bestMatch.Roll;
         }
@@ -123,18 +122,16 @@ namespace DnDGen.RollGen
                 {
                     Roll = c.Build(),
                     Ranking = c.GetRankingForMostEvenDistribution(lower, adjustedUpper),
+                    Q = c.Rolls[0].Quantity,
                     AltRanking = c.GetAlternativeRankingForMostEvenDistribution(lower, adjustedUpper),
                 })
                 .Where(c => c.Ranking >= 0);
 
-            var bestMatchingRanking = rankings.Min(r => r.Ranking);
-            var bestMatch = rankings.First(r => r.Ranking == bestMatchingRanking);
-
-            if (bestMatchingRanking == long.MaxValue)
-            {
-                bestMatchingRanking = rankings.Min(r => r.AltRanking);
-                bestMatch = rankings.First(r => r.AltRanking == bestMatchingRanking);
-            }
+            var bestMatch = rankings
+                .OrderBy(r => r.Ranking)
+                .ThenBy(r => r.Q)
+                .ThenBy(r => r.AltRanking)
+                .First();
 
             if (roll == string.Empty)
                 return bestMatch.Roll;
@@ -152,57 +149,51 @@ namespace DnDGen.RollGen
                 return new[] { adjustmentCollection };
             }
 
+            var collections = GetRolls(lower, upper);
+            return collections;
+        }
+
+        private static IEnumerable<RollCollection> GetRolls(int lower, int upper)
+        {
             var range = upper - lower + 1;
             var dice = RollCollection.StandardDice
                 .Where(d => d <= range)
                 .OrderByDescending(d => d);
 
-            var collections = new List<RollCollection>();
-            var canBeCloned = collections.Where(c => !c.Matches(lower, upper));
+            var prototypes = new List<RollCollection>();
 
             foreach (var die in dice)
             {
-                var clones = new List<RollCollection>();
+                var diePrototype = BuildRollPrototype(lower, upper, die);
+                var collectionPrototype = new RollCollection();
+                collectionPrototype.Rolls.Add(diePrototype);
+                collectionPrototype.Adjustment = lower - collectionPrototype.Quantities;
 
-                foreach (var collection in canBeCloned)
+                if (collectionPrototype.Matches(lower, upper))
                 {
-                    var remainingUpper = upper - collection.Upper;
-                    var remainingLower = lower - collection.Lower;
-                    var remainingRange = remainingUpper - remainingLower + 1;
-
-                    if (remainingRange < die)
-                        continue;
-
-                    var clone = new RollCollection();
-                    clone.Rolls.AddRange(collection.Rolls);
-
-                    var additionalPrototype = BuildRollPrototype(remainingLower, remainingUpper, die);
-                    if (additionalPrototype.Quantity > Limits.Quantity)
-                        continue;
-
-                    clone.Rolls.Add(additionalPrototype);
-                    clone.Adjustment = lower - clone.Quantities;
-
-                    clones.Add(clone);
+                    prototypes.Add(collectionPrototype);
+                    continue;
                 }
 
-                collections.AddRange(clones);
+                collectionPrototype.Adjustment = 0;
+                var remainingUpper = upper - collectionPrototype.Upper;
+                var remainingLower = lower - collectionPrototype.Lower;
 
-                var dieCollection = new RollCollection();
-                var diePrototype = BuildRollPrototype(lower, upper, die);
-
-                if (diePrototype.Quantity <= Limits.Quantity)
+                foreach (var subrolls in GetRolls(remainingLower, remainingUpper))
                 {
-                    dieCollection.Rolls.Add(diePrototype);
-                    dieCollection.Adjustment = lower - dieCollection.Quantities;
+                    var subCollection = new RollCollection();
+                    subCollection.Rolls.Add(diePrototype);
+                    subCollection.Rolls.AddRange(subrolls.Rolls);
+                    subCollection.Adjustment = lower - subCollection.Quantities;
 
-                    collections.Add(dieCollection);
+                    if (subCollection.Matches(lower, upper))
+                    {
+                        prototypes.Add(subCollection);
+                    }
                 }
             }
 
-            var matchingCollections = collections.Where(c => c.Matches(lower, upper));
-
-            return matchingCollections;
+            return prototypes;
         }
 
         private static RollPrototype BuildRollPrototype(int lower, int upper, int die)
