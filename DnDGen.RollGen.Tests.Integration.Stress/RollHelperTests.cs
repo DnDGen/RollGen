@@ -26,9 +26,9 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
         [TestCase(false, true)]
         [TestCase(true, false)]
         [TestCase(true, true)]
-        public void StressRollWithMostEvenDistribution(bool multiplier, bool nonstadard)
+        public void StressRollWithMostEvenDistribution(bool multiplier, bool nonstandard)
         {
-            stressor.Stress(() => AssertGetRoll((int l, int u) => RollHelper.GetRollWithMostEvenDistribution(l, u, multiplier, nonstadard)));
+            stressor.Stress(() => AssertGetRoll((int l, int u) => RollHelper.GetRollWithMostEvenDistribution(l, u, multiplier, nonstandard)));
         }
 
         private void AssertGetRoll(Func<int, int, string> getRoll)
