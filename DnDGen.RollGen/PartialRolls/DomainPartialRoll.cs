@@ -192,17 +192,48 @@ namespace DnDGen.RollGen.PartialRolls
 
         private IEnumerable<T> GetIndividualRolls<T>(string rollExpression)
         {
-            //INFO: Not sure how to evaluate individual rolls from genuine expressions (6d5d4k3d2k1), so will compute those as 1 roll
-            if (!Roll.CanParse(rollExpression))
+            var trimmedExpression = rollExpression;
+
+            while (CanTrimParanthesesFromExpression(trimmedExpression))
             {
-                var evaluatedExpression = EvaluateExpression(rollExpression, e => GetTotalOfRolls<T>(e));
-                return new[] { evaluatedExpression };
+                trimmedExpression = trimmedExpression[1..^1];
             }
 
-            var roll = new Roll(rollExpression);
-            var rolls = roll.GetRolls(random);
+            //INFO: Not sure how to evaluate individual rolls from genuine expressions (6d5d4k3d2k1), so will compute those as 1 roll
+            if (Roll.CanParse(trimmedExpression))
+            {
+                var roll = new Roll(trimmedExpression);
+                var rolls = roll.GetRolls(random);
 
-            return rolls.Select(r => Utils.ChangeType<T>(r));
+                return rolls.Select(r => Utils.ChangeType<T>(r));
+            }
+
+            //INFO: Not sure how to evaluate individual rolls from genuine expressions (6d5d4k3d2k1), so will compute those as 1 roll
+            var evaluatedExpression = EvaluateExpression(trimmedExpression, e => GetTotalOfRolls<T>(e));
+            return new[] { evaluatedExpression };
+        }
+
+        private bool CanTrimParanthesesFromExpression(string rollExpression)
+        {
+            var wrappedInParantheses = rollExpression.StartsWith('(') && rollExpression.EndsWith(')');
+            if (!wrappedInParantheses)
+                return false;
+
+            var startCount = 0;
+            var endCount = 0;
+
+            for (var i = 1; i < rollExpression.Length - 1; i++)
+            {
+                if (rollExpression[i] == '(')
+                    startCount++;
+                else if (rollExpression[i] == ')')
+                    endCount++;
+
+                if (endCount > startCount)
+                    return false;
+            }
+
+            return true;
         }
 
         private T EvaluateExpression<T>(string rollExpression, Func<string, T> getRoll)
@@ -216,6 +247,14 @@ namespace DnDGen.RollGen.PartialRolls
         {
             var expressionWithReplacedRolls = rollExpression;
 
+            while (CanTrimParanthesesFromExpression(expressionWithReplacedRolls))
+            {
+                expressionWithReplacedRolls = expressionWithReplacedRolls[1..^1];
+            }
+
+            if (expressionEvaluator.IsValid(expressionWithReplacedRolls))
+                return expressionWithReplacedRolls;
+
             //1. Replace paranthetical expressions
             while (expressionWithReplacedRolls.Contains('('))
             {
@@ -223,20 +262,36 @@ namespace DnDGen.RollGen.PartialRolls
                 var innerExpressionLength = GetInnerExpressionLength(expressionWithReplacedRolls, openParanthesisIndex);
                 var innerExpression = expressionWithReplacedRolls.Substring(openParanthesisIndex + 1, innerExpressionLength);
 
-                var innerExpressionWithReplacedRolls = EvaluateExpression(innerExpression, getRoll);
-                var replacement = innerExpressionWithReplacedRolls.ToString();
+                var replacement = ReplaceRollsInExpression(innerExpression, getRoll);
 
-                if (NeedLeadingMultiplier(expressionWithReplacedRolls))
+                if (expressionEvaluator.IsValid(replacement))
                 {
-                    replacement = $"*{replacement}";
+                    replacement = expressionEvaluator.Evaluate<T>(replacement).ToString();
+
+                    if (NeedLeadingMultiplier(expressionWithReplacedRolls))
+                    {
+                        replacement = $"*{replacement}";
+                    }
+
+                    if (NeedFollowingMultiplier(expressionWithReplacedRolls))
+                    {
+                        replacement = $"{replacement}*";
+                    }
+
+                    expressionWithReplacedRolls = ReplaceFirst(expressionWithReplacedRolls, $"({innerExpression})", replacement);
+                }
+                //INFO: This means we might be inside a function declaration
+                else
+                {
+                    //This means we didn't change anything and should move on
+                    if (replacement == innerExpression)
+                        break;
+
+                    expressionWithReplacedRolls = ReplaceFirst(expressionWithReplacedRolls, $"({innerExpression})", $"({replacement})");
                 }
 
-                if (NeedFollowingMultiplier(expressionWithReplacedRolls))
-                {
-                    replacement = $"{replacement}*";
-                }
-
-                expressionWithReplacedRolls = ReplaceFirst(expressionWithReplacedRolls, $"({innerExpression})", replacement);
+                if (expressionEvaluator.IsValid(expressionWithReplacedRolls))
+                    return expressionWithReplacedRolls;
             }
 
             //2. Replace rolls
@@ -250,7 +305,7 @@ namespace DnDGen.RollGen.PartialRolls
                     || (expressionWithReplacedRolls.Length > matchIndex + match.Value.Length
                         && expressionWithReplacedRolls[matchIndex + match.Value.Length] == '.'))
                 {
-                    throw new ArgumentException($"Cannot have decimal values for die rolls");
+                    throw new ArgumentException($"Cannot have decimal values for die rolls: {expressionWithReplacedRolls}");
                 }
 
                 var matchValue = match.Value.Trim();
@@ -427,6 +482,116 @@ namespace DnDGen.RollGen.PartialRolls
         {
             CurrentRollExpression += $"%{value}";
             return this;
+        }
+
+        public override bool IsValid()
+        {
+            var trimmedExpression = CurrentRollExpression;
+
+            while (CanTrimParanthesesFromExpression(trimmedExpression))
+            {
+                trimmedExpression = trimmedExpression[1..^1];
+            }
+
+            if (Roll.CanParse(trimmedExpression))
+            {
+                var roll = new Roll(trimmedExpression);
+                return roll.IsValid;
+            }
+
+            var valid = ValidateExpression(trimmedExpression);
+            return valid;
+        }
+
+        private bool ValidateExpression(string rollExpression)
+        {
+            var expression = ValidateRollsInExpression(rollExpression);
+            if (!expression.Valid)
+                return false;
+
+            var valid = expressionEvaluator.IsValid(expression.ExpressionWithoutRolls);
+            return valid;
+        }
+
+        private (string ExpressionWithoutRolls, bool Valid) ValidateRollsInExpression(string rollExpression)
+        {
+            var expressionWithReplacedRolls = rollExpression;
+
+            while (CanTrimParanthesesFromExpression(expressionWithReplacedRolls))
+            {
+                expressionWithReplacedRolls = expressionWithReplacedRolls[1..^1];
+            }
+
+            if (expressionEvaluator.IsValid(expressionWithReplacedRolls))
+                return (expressionWithReplacedRolls, true);
+
+            //1. Replace paranthetical expressions
+            while (expressionWithReplacedRolls.Contains('('))
+            {
+                var openParanthesisIndex = expressionWithReplacedRolls.IndexOf('(');
+                var innerExpressionLength = GetInnerExpressionLength(expressionWithReplacedRolls, openParanthesisIndex);
+                var innerExpression = expressionWithReplacedRolls.Substring(openParanthesisIndex + 1, innerExpressionLength);
+
+                var replacement = ValidateRollsInExpression(innerExpression);
+                if (!replacement.Valid)
+                    return replacement;
+
+                if (expressionEvaluator.IsValid(replacement.ExpressionWithoutRolls))
+                {
+                    var evaluatedReplacement = expressionEvaluator.Evaluate<double>(replacement.ExpressionWithoutRolls).ToString();
+
+                    if (NeedLeadingMultiplier(expressionWithReplacedRolls))
+                    {
+                        evaluatedReplacement = $"*{evaluatedReplacement}";
+                    }
+
+                    if (NeedFollowingMultiplier(expressionWithReplacedRolls))
+                    {
+                        evaluatedReplacement = $"{evaluatedReplacement}*";
+                    }
+
+                    expressionWithReplacedRolls = ReplaceFirst(expressionWithReplacedRolls, $"({innerExpression})", evaluatedReplacement);
+                }
+                //INFO: This means we might be inside a function declaration
+                else
+                {
+                    //This means we didn't change anything and should move on
+                    if (replacement.ExpressionWithoutRolls == innerExpression)
+                        break;
+
+                    expressionWithReplacedRolls = ReplaceFirst(expressionWithReplacedRolls, $"({innerExpression})", $"({replacement.ExpressionWithoutRolls})");
+                }
+
+                if (expressionEvaluator.IsValid(expressionWithReplacedRolls))
+                    return (expressionWithReplacedRolls, true);
+            }
+
+            //2. Replace rolls
+            var match = strictRollRegex.Match(expressionWithReplacedRolls);
+
+            while (match.Success)
+            {
+                var matchIndex = expressionWithReplacedRolls.IndexOf(match.Value);
+                if ((matchIndex > 0
+                        && expressionWithReplacedRolls[matchIndex - 1] == '.')
+                    || (expressionWithReplacedRolls.Length > matchIndex + match.Value.Length
+                        && expressionWithReplacedRolls[matchIndex + match.Value.Length] == '.'))
+                {
+                    return (null, false);
+                }
+
+                var matchValue = match.Value.Trim();
+                var roll = new Roll(matchValue);
+                if (!roll.IsValid)
+                    return (null, false);
+
+                var replacement = roll.GetPotentialMaximum(true);
+
+                expressionWithReplacedRolls = ReplaceFirst(expressionWithReplacedRolls, matchValue, replacement.ToString());
+                match = strictRollRegex.Match(expressionWithReplacedRolls);
+            }
+
+            return (expressionWithReplacedRolls, true);
         }
     }
 }

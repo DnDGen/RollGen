@@ -501,5 +501,175 @@ namespace DnDGen.RollGen.Tests.Unit
             var evaluatedResult = dice.Roll(expression).AsTrueOrFalse();
             Assert.That(evaluatedResult, Is.EqualTo(result));
         }
+
+        [Test]
+        public void Describe_Constants()
+        {
+            var mockPartialRollWithQuantity = new Mock<PartialRoll>();
+            mockPartialRollFactory.Setup(f => f.Build("9266")).Returns(mockPartialRollWithQuantity.Object);
+
+            mockPartialRollWithQuantity.Setup(r => r.AsPotentialMinimum<int>()).Returns(9266);
+            mockPartialRollWithQuantity.Setup(r => r.AsPotentialMaximum<int>(true)).Returns(9266);
+
+            var description = dice.Describe("9266", 9266);
+            Assert.That(description, Is.EqualTo("Good"));
+        }
+
+        [Test]
+        public void Describe_Constants_WithCustom()
+        {
+            var mockPartialRollWithQuantity = new Mock<PartialRoll>();
+            mockPartialRollFactory.Setup(f => f.Build("9266")).Returns(mockPartialRollWithQuantity.Object);
+
+            mockPartialRollWithQuantity.Setup(r => r.AsPotentialMinimum<int>()).Returns(9266);
+            mockPartialRollWithQuantity.Setup(r => r.AsPotentialMaximum<int>(true)).Returns(9266);
+
+            var description = dice.Describe("9266", 9266, "Low", "Medium", "High");
+            Assert.That(description, Is.EqualTo("Medium"));
+        }
+
+        [TestCase(90210, "Good")]
+        [TestCase(42, "Bad")]
+        public void Describe_Constants_OutOfRange(int roll, string expected)
+        {
+            var mockPartialRollWithQuantity = new Mock<PartialRoll>();
+            mockPartialRollFactory.Setup(f => f.Build("9266")).Returns(mockPartialRollWithQuantity.Object);
+
+            mockPartialRollWithQuantity.Setup(r => r.AsPotentialMinimum<int>()).Returns(9266);
+            mockPartialRollWithQuantity.Setup(r => r.AsPotentialMaximum<int>(true)).Returns(9266);
+
+            var description = dice.Describe("9266", roll);
+            Assert.That(description, Is.EqualTo(expected));
+        }
+
+        [TestCase(90210, "High")]
+        [TestCase(42, "Low")]
+        public void Describe_Constants_WithCustom_OutOfRange(int roll, string expected)
+        {
+            var mockPartialRollWithQuantity = new Mock<PartialRoll>();
+            mockPartialRollFactory.Setup(f => f.Build("9266")).Returns(mockPartialRollWithQuantity.Object);
+
+            mockPartialRollWithQuantity.Setup(r => r.AsPotentialMinimum<int>()).Returns(9266);
+            mockPartialRollWithQuantity.Setup(r => r.AsPotentialMaximum<int>(true)).Returns(9266);
+
+            var description = dice.Describe("9266", roll, "Low", "Medium", "High");
+            Assert.That(description, Is.EqualTo(expected));
+        }
+
+        [TestCase(1, "Bad")]
+        [TestCase(2, "Bad")]
+        [TestCase(3, "Bad")]
+        [TestCase(4, "Bad")]
+        [TestCase(5, "Bad")]
+        [TestCase(6, "Bad")]
+        [TestCase(7, "Bad")]
+        [TestCase(8, "Bad")]
+        [TestCase(9, "Bad")]
+        [TestCase(10, "Bad")]
+        [TestCase(11, "Good")]
+        [TestCase(12, "Good")]
+        [TestCase(13, "Good")]
+        [TestCase(14, "Good")]
+        [TestCase(15, "Good")]
+        [TestCase(16, "Good")]
+        [TestCase(17, "Good")]
+        [TestCase(18, "Good")]
+        [TestCase(19, "Good")]
+        [TestCase(20, "Good")]
+        public void Describe_Roll(int roll, string expectedDescription)
+        {
+            var mockPartialRollWithQuantity = new Mock<PartialRoll>();
+            mockPartialRollFactory.Setup(f => f.Build("1d20")).Returns(mockPartialRollWithQuantity.Object);
+
+            mockPartialRollWithQuantity.Setup(r => r.AsPotentialMinimum<int>()).Returns(1);
+            mockPartialRollWithQuantity.Setup(r => r.AsPotentialMaximum<int>(true)).Returns(20);
+
+            var description = dice.Describe("1d20", roll);
+            Assert.That(description, Is.EqualTo(expectedDescription));
+        }
+
+        [TestCase(1, "Low")]
+        [TestCase(2, "Low")]
+        [TestCase(3, "Low")]
+        [TestCase(4, "Low")]
+        [TestCase(5, "Low")]
+        [TestCase(6, "Low")]
+        [TestCase(7, "Low")]
+        [TestCase(8, "Medium")]
+        [TestCase(9, "Medium")]
+        [TestCase(10, "Medium")]
+        [TestCase(11, "Medium")]
+        [TestCase(12, "Medium")]
+        [TestCase(13, "Medium")]
+        [TestCase(14, "High")]
+        [TestCase(15, "High")]
+        [TestCase(16, "High")]
+        [TestCase(17, "High")]
+        [TestCase(18, "High")]
+        [TestCase(19, "High")]
+        [TestCase(20, "High")]
+        public void Describe_Roll_WithCustom(int roll, string expectedDescription)
+        {
+            var mockPartialRollWithQuantity = new Mock<PartialRoll>();
+            mockPartialRollFactory.Setup(f => f.Build("1d20")).Returns(mockPartialRollWithQuantity.Object);
+
+            mockPartialRollWithQuantity.Setup(r => r.AsPotentialMinimum<int>()).Returns(1);
+            mockPartialRollWithQuantity.Setup(r => r.AsPotentialMaximum<int>(true)).Returns(20);
+
+            var description = dice.Describe("1d20", roll, "Low", "Medium", "High");
+            Assert.That(description, Is.EqualTo(expectedDescription));
+        }
+
+        [TestCase(101, "Good")]
+        [TestCase(0, "Bad")]
+        public void Describe_Roll_OutOfRange(int roll, string expected)
+        {
+            var mockPartialRollWithQuantity = new Mock<PartialRoll>();
+            mockPartialRollFactory.Setup(f => f.Build("1d100")).Returns(mockPartialRollWithQuantity.Object);
+
+            mockPartialRollWithQuantity.Setup(r => r.AsPotentialMinimum<int>()).Returns(1);
+            mockPartialRollWithQuantity.Setup(r => r.AsPotentialMaximum<int>(true)).Returns(100);
+
+            var description = dice.Describe("1d100", roll);
+            Assert.That(description, Is.EqualTo(expected));
+        }
+
+        [TestCase(101, "High")]
+        [TestCase(0, "Low")]
+        public void Describe_Roll_WithCustom_OutOfRange(int roll, string expected)
+        {
+            var mockPartialRollWithQuantity = new Mock<PartialRoll>();
+            mockPartialRollFactory.Setup(f => f.Build("1d100")).Returns(mockPartialRollWithQuantity.Object);
+
+            mockPartialRollWithQuantity.Setup(r => r.AsPotentialMinimum<int>()).Returns(1);
+            mockPartialRollWithQuantity.Setup(r => r.AsPotentialMaximum<int>(true)).Returns(100);
+
+            var description = dice.Describe("1d100", roll, "Low", "Medium", "High");
+            Assert.That(description, Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void IsValid_ReturnsValid()
+        {
+            var mockPartialRollWithQuantity = new Mock<PartialRoll>();
+            mockPartialRollFactory.Setup(f => f.Build("my roll expression")).Returns(mockPartialRollWithQuantity.Object);
+
+            mockPartialRollWithQuantity.Setup(r => r.IsValid()).Returns(true);
+
+            var valid = dice.IsValid("my roll expression");
+            Assert.That(valid, Is.True);
+        }
+
+        [Test]
+        public void IsValid_ReturnsInvalid()
+        {
+            var mockPartialRollWithQuantity = new Mock<PartialRoll>();
+            mockPartialRollFactory.Setup(f => f.Build("my roll expression")).Returns(mockPartialRollWithQuantity.Object);
+
+            mockPartialRollWithQuantity.Setup(r => r.IsValid()).Returns(false);
+
+            var valid = dice.IsValid("my roll expression");
+            Assert.That(valid, Is.False);
+        }
     }
 }

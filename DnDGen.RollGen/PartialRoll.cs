@@ -66,6 +66,8 @@ namespace DnDGen.RollGen
         /// <returns></returns>
         public abstract bool AsTrueOrFalse(int threshold);
 
+        public abstract bool IsValid();
+
         public PartialRoll d2() => d(2);
         public PartialRoll d3() => d(3);
         public PartialRoll d4() => d(4);

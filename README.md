@@ -40,12 +40,16 @@ var explicitExpressionSuccess = dice.Roll("2d6 >= 1d12").AsTrueOrFalse(); //Eval
 
 var containsRoll = dice.ContainsRoll("This contains a roll of 4d6k3 for rolling stats"); //will return true here
 var summedSentence = dice.ReplaceRollsWithSumExpression("This contains a roll of 4d6k3 for rolling stats"); //returns "This contains a roll of (5 + 3 + 2) for rolling stats"
-var rolledSentence = dice.ReplaceRollsWithSumExpression("This contains a roll of 4d6k3 for rolling stats"); //returns "This contains a roll of 10 for rolling stats"
-var rolledComplexSentence = dice.ReplaceWrappedExpression<double>("Fireball does {min(4d6,10) + 0.5} damage"); //returns "Fireball does 15.5 damage"
+var rolledSentence = dice.ReplaceExpressionWithTotal("This contains a roll of 4d6k3 for rolling stats"); //returns "This contains a roll of 10 for rolling stats"
+var rolledComplexSentenceMin = dice.ReplaceWrappedExpressions<double>("Fireball does {min(4d6,10) + 0.5} damage"); //returns "Fireball does 7.5 damage"
+var rolledComplexSentenceMax = dice.ReplaceWrappedExpressions<double>("Fireball does {max(4d6,10) + 0.5} damage"); //returns "Fireball does 15.5 damage"
 
+var optimizedRollWithFewestDice = RollHelper.GetRollWithFewestDice(1, 9); //returns "4d3-3", because it uses only 1 kind of dice compared to "1d8+1d2-1"
 var optimizedRoll = RollHelper.GetRollWithMostEvenDistribution(4, 9); //returns "1d6+3", which is the most evenly-distributed roll possible, whether optimizing for dice or distribution
 var optimizedRollWithMultipleDice = RollHelper.GetRollWithMostEvenDistribution(1, 9); //returns "1d8+1d2-1", because it more evenly-distributed than "4d3-3"
-var optimizedRollWithFewestDice = RollHelper.GetRollWithFewestDice(1, 9); //returns "4d3-3", because it uses only 1 kind of dice compared to "1d8+1d2-1"
+var optimizedRollWithMultipliers = RollHelper.GetRollWithMostEvenDistribution(1, 36, allowMultipliers: true); //returns "(1d12-1)*3+1d3"
+var optimizedRollWithNonstandardDice = RollHelper.GetRollWithMostEvenDistribution(1, 36, allowNonstandardDice: true); //returns "1d36"
+var optimizedRollWithMultipliersAndNonstandardDice = RollHelper.GetRollWithMostEvenDistribution(1, 45, true, true); //returns "(1d3-1)*15+(1d3-1)*5+1d5"
 
 var explodedRolls = dice.Roll(4).d6().Explode().AsIndividualRolls(); //If a 6 is rolled, then an additional roll is performed.  I.E., 3 + 6 + 5 + 4 + 1
 var expressionExplodedRolls = dice.Roll("3d4!").AsSum(); //Return the sum of the rolls, including bonus rolls from explosion on rolls of 4
@@ -53,10 +57,63 @@ var expressionExplodedKeptRolls = dice.Roll("3d4!k2").AsSum(); //Returns the sum
 var expressionExplodedMultipleRolls = dice.Roll("3d4!e3").AsSum(); //Return the sum of the rolls, including bonus rolls from explosion on rolls of 3 or 4
 var expressionExplodedMultipleKeptRolls = dice.Roll("3d4e1e2k2").AsSum(); //Returns the sum of 2 highest rolls, including bonus rolls from explosion on rolls of 1 or 2
 
-var transformedRolls = dice.Roll(3).d6().Transform(1).AsIndividualRolls(); //If a 1 is rolled, we will count it as a 6.  I.E., 3 + 1 + 6 = 3 + 6 + 6
+var transformedRolls = dice.Roll(3).d6().Transforming(1).AsIndividualRolls(); //If a 1 is rolled, we will count it as a 6.  I.E., 3 + 1 + 6 = 3 + 6 + 6
 var transformedMultipleRolls = dice.Roll("3d6t1t5").AsSum(); //Return the sum of the rolls, including 1's and 5's transformed to 6's
 var transformedExplodedKeptRolls = dice.Roll("3d6!t1k2").AsSum(); //Returns the sum of 2 highest rolls, including bonus rolls from explosion and transforming 1's to 6's.
 var transformedCustomRolls = dice.Roll("3d6t1:2").AsSum(); //Return the sum of the rolls, transforming 1's into 2's.
+
+//Returns a qualitative description of the roll, based on percentages
+var description = dice.Describe("3d6", 9); //Returns "Bad"
+description = dice.Describe("3d6", 13); //Returns "Good"
+description = dice.Describe("3d6", 12, "Bad", "Average", "Good"); //Returns "Average"
+description = dice.Describe("3d6", 6, "Bad", "Average", "Good"); //Returns "Bad"
+description = dice.Describe("3d6", 16, "Bad", "Average", "Good"); //Returns "Good"
+
+//Returns whether the roll is valid
+var valid = dice.IsValid("3d6+1"); //Returns TRUE
+valid = dice.IsValid("(3)d(6)+1"); //Returns TRUE
+valid = dice.IsValid("(1d2)d(3d4)+5d6"); //Returns TRUE
+valid = dice.IsValid("10000d10000"); //Returns TRUE
+valid = dice.IsValid("(100d100d100)d(100d100d100)"); //Returns TRUE
+
+valid = dice.IsValid("(0)d(6)+1"); //Returns FALSE, because quantity is too low
+valid = dice.IsValid("(3.1)d(6)+1"); //Returns FALSE, because decimals are not allowed for dice operations
+valid = dice.IsValid("0d6+1"); //Returns FALSE, because quantity is too low
+valid = dice.IsValid("10001d10000"); //Returns FALSE, because quantity is too high
+valid = dice.IsValid("(100d100d100+1)d(100d100d100)"); //Returns FALSE, because quantity could potentially be above the 10,000 limit
+
+valid = dice.IsValid("(3)d(-6)+1"); //Returns FALSE, because die is too low
+valid = dice.IsValid("(3)d(6.1)+1"); //Returns FALSE, because decimals are not allowed for dice operations
+valid = dice.IsValid("3d0+1"); //Returns FALSE, because die is too low
+valid = dice.IsValid("10000d10001"); //Returns FALSE, because die is too high
+valid = dice.IsValid("(100d100d100)d(100d100d100+1)"); //Returns FALSE, because die could potentially be above the 10,000 limit
+
+valid = dice.IsValid("4d6k3"); //Returns TRUE
+valid = dice.IsValid("(4)d(6)k(3)"); //Returns TRUE
+valid = dice.IsValid("(4)d(6)k(-1)"); //Returns FALSE, because keep value is too low
+valid = dice.IsValid("(4)d(6)k(3.1)"); //Returns FALSE, because decimals are not allowed for dice operations
+valid = dice.IsValid("4d6k10000"); //Returns TRUE
+valid = dice.IsValid("4d6k10001"); //Returns FALSE, because keep value is too high
+valid = dice.IsValid("4d6k(100d100d100+1)"); //Returns FALSE, because keep value could potentially be above the 10,000 limit
+
+valid = dice.IsValid("2d3!"); //Returns TRUE
+valid = dice.IsValid("2d3!e2"); //Returns TRUE
+valid = dice.IsValid("2d3!e2e1"); //Returns FALSE, because it explodes on all values
+
+valid = dice.IsValid("3d6t1"); //Returns TRUE
+valid = dice.IsValid("3d6t1t2"); //Returns TRUE
+valid = dice.IsValid("3d6t7"); //Returns TRUE
+valid = dice.IsValid("3d6t0"); //Returns FALSE, because transform target is too low
+valid = dice.IsValid("3d6t6:0"); //Returns TRUE
+valid = dice.IsValid("3d6t10001"); //Returns FALSE, because transform target is too high
+valid = dice.IsValid("3d6t6:10001"); //Returns TRUE
+
+valid = dice.IsValid("avg(1d12, 2d6, 3d4, 4d3, 6d2)"); //Returns TRUE, because this is a valid Albatross function
+valid = dice.IsValid("bad(1d12, 2d6, 3d4, 4d3, 6d2)"); //Returns FALSE, because "bad" is not a valid Albatross function
+
+valid = dice.IsValid("this is not a roll"); //Returns FALSE
+valid = dice.IsValid("this contains 3d6, but is not a roll"); //Returns FALSE
+valid = dice.IsValid("9266+90210-42*600/1337%1336+96d(783d82%45+922-2022/337)-min(1d2, 3d4, 5d6)+max(1d2, 3d4, 5d6)*avg(1d2, 3d4, 5d6)"); //Returns TRUE
 
 ```
 
@@ -77,6 +134,10 @@ In regards to the operators one can apply to a roll (Keeping, Exploding, Transfo
 3. Keep
 
 One can specify these commands in any order, as they will be evaluated in their order of operation.  For example, all of these rolls will parse the same: `4d3!t2k1`, `4d3!k1t2`, `4d3t2!k1`, `4d3t2k1!`, `4d3k1!t2`, `4d3k1t2!` - all will be evaluated as `4d3`, exploding on a `3`, then transforming `2` into `3`, then keeping the highest roll.
+
+Beyond this, order of operations is respected as outlined by the Albatross documentation: https://rushuiguan.github.io/expression/articles/operations.html#the-precedence-of-infix-operations
+
+The documentation also outlines supported functions (such as `min` and `max`) that can be used: https://rushuiguan.github.io/expression/articles/operations.html
 
 ### Getting `Dice` Objects
 
