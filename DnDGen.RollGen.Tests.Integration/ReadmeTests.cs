@@ -202,6 +202,13 @@ namespace DnDGen.RollGen.Tests.Integration
         }
 
         [Test]
+        public void OptimizedRollWithFewestDice()
+        {
+            var roll = RollHelper.GetRollWithFewestDice(1, 9);
+            Assert.That(roll, Is.EqualTo("4d3-3"));
+        }
+
+        [Test]
         public void OptimizedRoll()
         {
             var roll = RollHelper.GetRollWithMostEvenDistribution(4, 9);
@@ -216,10 +223,24 @@ namespace DnDGen.RollGen.Tests.Integration
         }
 
         [Test]
-        public void OptimizedRollWithFewestDice()
+        public void OptimizedRollWithMultipliers()
         {
-            var roll = RollHelper.GetRollWithFewestDice(1, 9);
-            Assert.That(roll, Is.EqualTo("4d3-3"));
+            var roll = RollHelper.GetRollWithMostEvenDistribution(1, 36, true);
+            Assert.That(roll, Is.EqualTo("(1d12-1)*3+1d3"));
+        }
+
+        [Test]
+        public void OptimizedRollWithNonstandardDice()
+        {
+            var roll = RollHelper.GetRollWithMostEvenDistribution(1, 36, false, true);
+            Assert.That(roll, Is.EqualTo("1d36"));
+        }
+
+        [Test]
+        public void OptimizedRollWithMultipliersAndNonstandardDice()
+        {
+            var roll = RollHelper.GetRollWithMostEvenDistribution(1, 45, true, true);
+            Assert.That(roll, Is.EqualTo("(1d3-1)*15+(1d3-1)*5+1d5"));
         }
 
         [Test]

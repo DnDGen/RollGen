@@ -22,10 +22,13 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
             stressor.Stress(() => AssertGetRoll((int l, int u) => RollHelper.GetRollWithFewestDice(l, u)));
         }
 
-        [Test]
-        public void StressRollWithMostEvenDistribution()
+        [TestCase(false, false)]
+        [TestCase(false, true)]
+        [TestCase(true, false)]
+        [TestCase(true, true)]
+        public void StressRollWithMostEvenDistribution(bool multiplier, bool nonstandard)
         {
-            stressor.Stress(() => AssertGetRoll((int l, int u) => RollHelper.GetRollWithMostEvenDistribution(l, u)));
+            stressor.Stress(() => AssertGetRoll((int l, int u) => RollHelper.GetRollWithMostEvenDistribution(l, u, multiplier, nonstandard)));
         }
 
         private void AssertGetRoll(Func<int, int, string> getRoll)
@@ -37,10 +40,9 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 
             var roll = getRoll(lower, upper);
 
-            Assert.That(roll, Is.Not.Empty.And.Matches("[0-9]d(100|20|12|10|8|6|4|3|2)"), roll);
-            Assert.That(dice.Roll(roll).IsValid(), Is.True, roll);
-            Assert.That(dice.Roll(roll).AsPotentialMinimum(), Is.EqualTo(lower), roll);
-            Assert.That(dice.Roll(roll).AsPotentialMaximum(), Is.EqualTo(upper), roll);
+            Assert.That(dice.Roll(roll).IsValid(), Is.True, $"Min: {lower}; Max: {upper}; Roll: {roll}");
+            Assert.That(dice.Roll(roll).AsPotentialMinimum(), Is.EqualTo(lower), $"Min: {lower}; Max: {upper}; Roll: {roll}");
+            Assert.That(dice.Roll(roll).AsPotentialMaximum(), Is.EqualTo(upper), $"Min: {lower}; Max: {upper}; Roll: {roll}");
         }
     }
 }

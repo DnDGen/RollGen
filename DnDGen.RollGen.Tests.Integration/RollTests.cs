@@ -351,7 +351,7 @@ namespace DnDGen.RollGen.Tests.Integration
         [TestCase("1d2+3d4", "1d(2d3)", 1, 100)]
         [TestCase("(1d2)+(3d4)", "1d2+1", 1, 100)]
         [TestCase("(1d2)d3", "(1d2+1)+1", 1, 100)]
-        [TestCase("1d(2d3)", "((1d2+1)+1)+1", 2, 100)]
+        [TestCase("1d(2d3)", "((1d2+1)+1)+1", 1, 100)]
         [TestCase("1d2+1", "(1d2+1)+(3d4+1)", 1, 100)]
         [TestCase("(1d2+1)", "(1d2+1)+(3d4+1)+1", 1, 100)]
         [TestCase("(1d2)+1", "(1d2+1)+1+(3d4+1)+1", 1, 100)]
