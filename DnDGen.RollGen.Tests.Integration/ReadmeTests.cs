@@ -226,7 +226,7 @@ namespace DnDGen.RollGen.Tests.Integration
         public void OptimizedRollWithMultipliers()
         {
             var roll = RollHelper.GetRollWithMostEvenDistribution(1, 36, true);
-            Assert.That(roll, Is.EqualTo("(1d6-1)*6+1d6"));
+            Assert.That(roll, Is.EqualTo("(1d12-1)*3+1d3"));
         }
 
         [Test]

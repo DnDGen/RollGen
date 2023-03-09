@@ -47,7 +47,7 @@ var rolledComplexSentenceMax = dice.ReplaceWrappedExpressions<double>("Fireball 
 var optimizedRollWithFewestDice = RollHelper.GetRollWithFewestDice(1, 9); //returns "4d3-3", because it uses only 1 kind of dice compared to "1d8+1d2-1"
 var optimizedRoll = RollHelper.GetRollWithMostEvenDistribution(4, 9); //returns "1d6+3", which is the most evenly-distributed roll possible, whether optimizing for dice or distribution
 var optimizedRollWithMultipleDice = RollHelper.GetRollWithMostEvenDistribution(1, 9); //returns "1d8+1d2-1", because it more evenly-distributed than "4d3-3"
-var optimizedRollWithMultipliers = RollHelper.GetRollWithMostEvenDistribution(1, 36, allowMultipliers: true); //returns "(1d6-1)*6+1d6"
+var optimizedRollWithMultipliers = RollHelper.GetRollWithMostEvenDistribution(1, 36, allowMultipliers: true); //returns "(1d12-1)*3+1d3"
 var optimizedRollWithNonstandardDice = RollHelper.GetRollWithMostEvenDistribution(1, 36, allowNonstandardDice: true); //returns "1d36"
 var optimizedRollWithMultipliersAndNonstandardDice = RollHelper.GetRollWithMostEvenDistribution(1, 45, true, true); //returns "(1d3-1)*15+(1d3-1)*5+1d5"
 

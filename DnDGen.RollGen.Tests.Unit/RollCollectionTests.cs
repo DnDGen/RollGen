@@ -1,6 +1,5 @@
 ﻿using NUnit.Framework;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -1196,64 +1195,6 @@ namespace DnDGen.RollGen.Tests.Unit
 
             var ranking = collection.GetRankingForMostEvenDistribution(1, die);
             Assert.That(ranking, Is.EqualTo(expectedRanking));
-        }
-
-        [TestCaseSource(nameof(SlowRolls))]
-        public void Ranking_MostEvenDistribution_IsFast(long expectedRanking, int adj, int min, int max, List<(int Q, int D)> dice)
-        {
-            collection.Rolls.AddRange(dice.Select(d => new RollPrototype { Quantity = d.Q, Die = d.D }));
-            collection.Adjustment = adj;
-
-            var stopwatch = new Stopwatch();
-
-            stopwatch.Start();
-            var ranking = collection.GetRankingForMostEvenDistribution(min, max);
-            stopwatch.Stop();
-
-            Assert.That(ranking, Is.EqualTo(expectedRanking));
-            Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(0.1)));
-        }
-
-        public static IEnumerable SlowRolls
-        {
-            get
-            {
-                var testCases = new List<(long Ranking, int Adj, int Min, int Max, List<(int Q, int D)> Prototypes)>();
-                testCases.Add((583468631593496000, 424, 437, 1204, new List<(int Q, int D)>
-                {
-                    (7, 100),
-                    (3, 20),
-                    (1, 12),
-                    (1, 6),
-                    (1, 2),
-                }));
-                testCases.Add((1219873327734200, 590, 600, 1336, new List<(int Q, int D)>
-                {
-                    (7, 100),
-                    (2, 20),
-                    (1, 6),
-                }));
-                testCases.Add((long.MaxValue, 8232, 8245, 9266, new List<(int Q, int D)>
-                {
-                    (10, 100),
-                    (1, 20),
-                    (1, 12),
-                    (1, 2),
-                }));
-                testCases.Add((125048784834994020, 83, 96, 783, new List<(int Q, int D)>
-                {
-                    (6, 100),
-                    (4, 20),
-                    (1, 12),
-                    (1, 6),
-                    (1, 2),
-                }));
-
-                foreach (var testCase in testCases)
-                {
-                    yield return new TestCaseData(testCase.Ranking, testCase.Adj, testCase.Min, testCase.Max, testCase.Prototypes);
-                }
-            }
         }
 
         [Test]

@@ -6,6 +6,12 @@ namespace DnDGen.RollGen
 {
     public static class RollHelper
     {
+        internal enum RankMode
+        {
+            FewestDice,
+            BestDistribution,
+        }
+
         /// <summary>
         /// This will return a roll of format XdY+Z
         /// </summary>
@@ -28,7 +34,7 @@ namespace DnDGen.RollGen
         /// <param name="upper">The inclusive upper range</param>
         public static string GetRollWithFewestDice(int lower, int upper)
         {
-            var collections = GetRollCollections(lower, upper);
+            var collections = GetRollCollections(lower, upper, RankMode.FewestDice);
             if (!collections.Any())
                 throw new ArgumentException($"Cannot generate a valid roll for range [{lower},{upper}]");
 
@@ -100,8 +106,25 @@ namespace DnDGen.RollGen
             if (allowNonstandardDice)
             {
                 var nonStandardCollection = new RollCollection();
-                nonStandardCollection.Rolls.Add(new RollPrototype { Die = range, Quantity = 1 });
-                nonStandardCollection.Adjustment = lower - 1;
+                while (range > 1)
+                {
+                    var die = range;
+                    var quantity = 1;
+
+                    if (range > Limits.Die)
+                    {
+                        die = Limits.Die;
+                        quantity = range / Limits.Die;
+                    }
+
+                    nonStandardCollection.Rolls.Add(new RollPrototype { Die = die, Quantity = quantity });
+
+                    var newLower = 1 - quantity;
+                    var newUpper = range - die * quantity;
+                    range = newUpper - newLower + 1;
+                }
+
+                nonStandardCollection.Adjustment = lower - nonStandardCollection.Quantities;
 
                 var nonStandardRoll = nonStandardCollection.Build();
 
@@ -113,7 +136,7 @@ namespace DnDGen.RollGen
 
             var adjustedUpper = lower + range - 1;
 
-            var collections = GetRollCollections(lower, adjustedUpper);
+            var collections = GetRollCollections(lower, adjustedUpper, RankMode.BestDistribution);
             if (!collections.Any())
                 throw new ArgumentException($"Cannot generate a valid roll for range [{lower},{adjustedUpper}]");
 
@@ -139,7 +162,7 @@ namespace DnDGen.RollGen
                 return $"{roll}+{bestMatch.Roll}";
         }
 
-        private static IEnumerable<RollCollection> GetRollCollections(int lower, int upper)
+        private static IEnumerable<RollCollection> GetRollCollections(int lower, int upper, RankMode rankMode)
         {
             var adjustmentCollection = new RollCollection();
             adjustmentCollection.Adjustment = upper;
@@ -149,11 +172,11 @@ namespace DnDGen.RollGen
                 return new[] { adjustmentCollection };
             }
 
-            var collections = GetRolls(lower, upper);
+            var collections = GetRolls(lower, upper, rankMode);
             return collections;
         }
 
-        private static IEnumerable<RollCollection> GetRolls(int lower, int upper)
+        private static IEnumerable<RollCollection> GetRolls(int lower, int upper, RankMode rankMode)
         {
             var range = upper - lower + 1;
             var dice = RollCollection.StandardDice
@@ -178,9 +201,24 @@ namespace DnDGen.RollGen
                 collectionPrototype.Adjustment = 0;
                 var remainingUpper = upper - collectionPrototype.Upper;
                 var remainingLower = lower - collectionPrototype.Lower;
+                var minRank = long.MaxValue;
 
-                foreach (var subrolls in GetRolls(remainingLower, remainingUpper))
+                foreach (var subrolls in GetRolls(remainingLower, remainingUpper, rankMode))
                 {
+                    subrolls.Adjustment = remainingLower - subrolls.Quantities;
+
+                    var subRank = rankMode switch
+                    {
+                        RankMode.FewestDice => subrolls.GetRankingForFewestDice(remainingLower, remainingUpper),
+                        RankMode.BestDistribution => subrolls.GetRankingForMostEvenDistribution(remainingLower, remainingUpper),
+                        _ => throw new ArgumentOutOfRangeException(nameof(rankMode), $"Not expected Rank Mode value: {rankMode}")
+                    };
+
+                    if (subRank > minRank)
+                        continue;
+
+                    minRank = Math.Min(subRank, minRank);
+
                     var subCollection = new RollCollection();
                     subCollection.Rolls.Add(diePrototype);
                     subCollection.Rolls.AddRange(subrolls.Rolls);
