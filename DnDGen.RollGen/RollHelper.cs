@@ -34,20 +34,55 @@ namespace DnDGen.RollGen
         /// <param name="upper">The inclusive upper range</param>
         public static string GetRollWithFewestDice(int lower, int upper)
         {
-            var collections = GetRollCollections(lower, upper, RankMode.FewestDice);
+            var range = upper - lower + 1;
+            var maxDie = RollCollection.StandardDice.Max();
+            var rangeLimit = Limits.Quantity * maxDie - Limits.Quantity + 1;
+            var roll = string.Empty;
+
+            var maxCollection = new RollCollection();
+            while (range > rangeLimit)
+            {
+                var die = maxDie;
+                var quantity = Math.Min(Limits.Quantity, range / maxDie);
+
+                if (range > Limits.Die)
+                {
+                    die = Limits.Die;
+                    quantity = range / Limits.Die;
+                }
+
+                maxCollection.Rolls.Add(new RollPrototype { Die = die, Quantity = quantity });
+
+                var newLower = 1 - quantity;
+                var newUpper = range - die * quantity;
+                range = newUpper - newLower + 1;
+            }
+
+            maxCollection.Adjustment = lower - maxCollection.Quantities;
+
+            if (maxCollection.Rolls.Any())
+            {
+                roll = maxCollection.Build();
+            }
+
+            var adjustedUpper = lower + range - 1;
+
+            var collections = GetRollCollections(lower, adjustedUpper, RankMode.FewestDice);
             if (!collections.Any())
                 throw new ArgumentException($"Cannot generate a valid roll for range [{lower},{upper}]");
 
-            var rankings = collections
-                .Select(c => new
-                {
-                    Roll = c.Build(),
-                    Ranking = c.GetRankingForFewestDice(lower, upper),
-                })
-                .Where(c => c.Ranking >= 0);
-            var bestMatch = rankings.OrderBy(r => r.Ranking).First();
+            var bestMatches = collections.GroupBy(c => c.Rolls.Count).OrderBy(g => g.Key).First();
+            if (bestMatches.Count() == 1)
+            {
+                return bestMatches.Single().Build();
+            }
 
-            return bestMatch.Roll;
+            var bestMatch = bestMatches.OrderBy(c => c.ComputeDistribution()).First();
+
+            if (roll == string.Empty)
+                return bestMatch.Build();
+            else
+                return $"{roll}+{bestMatch.Build()}";
         }
 
         /// <summary>
@@ -73,6 +108,8 @@ namespace DnDGen.RollGen
         /// </summary>
         /// <param name="lower">The inclusive lower range</param>
         /// <param name="upper">The inclusive upper range</param>
+        /// <param name="allowMultipliers">Allow the range to be factored</param>
+        /// <param name="allowNonstandardDice">Allow non-standard dice to be used</param>
         public static string GetRollWithMostEvenDistribution(int lower, int upper, bool allowMultipliers = false, bool allowNonstandardDice = false)
         {
             var roll = string.Empty;
@@ -140,26 +177,21 @@ namespace DnDGen.RollGen
             if (!collections.Any())
                 throw new ArgumentException($"Cannot generate a valid roll for range [{lower},{adjustedUpper}]");
 
-            var rankings = collections
-                .Select(c => new
-                {
-                    Roll = c.Build(),
-                    Ranking = c.GetRankingForMostEvenDistribution(lower, adjustedUpper),
-                    Q = c.Rolls[0].Quantity,
-                    AltRanking = c.GetAlternativeRankingForMostEvenDistribution(lower, adjustedUpper),
-                })
-                .Where(c => c.Ranking >= 0);
+            var bestMatches = collections.GroupBy(c => c.ComputeDistribution()).OrderBy(g => g.Key).First();
+            if (bestMatches.Count() == 1)
+            {
+                if (roll == string.Empty)
+                    return bestMatches.Single().Build();
+                else
+                    return $"{roll}+{bestMatches.Single().Build()}";
+            }
 
-            var bestMatch = rankings
-                .OrderBy(r => r.Ranking)
-                .ThenBy(r => r.Q)
-                .ThenBy(r => r.AltRanking)
-                .First();
+            var bestMatch = bestMatches.OrderBy(c => c.Quantities).First();
 
             if (roll == string.Empty)
-                return bestMatch.Roll;
+                return bestMatch.Build();
             else
-                return $"{roll}+{bestMatch.Roll}";
+                return $"{roll}+{bestMatch.Build()}";
         }
 
         private static IEnumerable<RollCollection> GetRollCollections(int lower, int upper, RankMode rankMode)
@@ -184,6 +216,7 @@ namespace DnDGen.RollGen
                 .OrderByDescending(d => d);
 
             var prototypes = new List<RollCollection>();
+            var minRank = long.MaxValue;
 
             foreach (var die in dice)
             {
@@ -194,31 +227,28 @@ namespace DnDGen.RollGen
 
                 if (collectionPrototype.Matches(lower, upper))
                 {
+                    var rank = rankMode switch
+                    {
+                        RankMode.FewestDice => collectionPrototype.Rolls.Count,
+                        RankMode.BestDistribution => collectionPrototype.ComputeDistribution(),
+                        _ => throw new ArgumentOutOfRangeException(nameof(rankMode), $"Not expected Rank Mode value: {rankMode}")
+                    };
+
+                    if (rank > minRank)
+                        continue;
+
+                    minRank = Math.Min(rank, minRank);
                     prototypes.Add(collectionPrototype);
+
                     continue;
                 }
 
                 collectionPrototype.Adjustment = 0;
                 var remainingUpper = upper - collectionPrototype.Upper;
                 var remainingLower = lower - collectionPrototype.Lower;
-                var minRank = long.MaxValue;
 
                 foreach (var subrolls in GetRolls(remainingLower, remainingUpper, rankMode))
                 {
-                    subrolls.Adjustment = remainingLower - subrolls.Quantities;
-
-                    var subRank = rankMode switch
-                    {
-                        RankMode.FewestDice => subrolls.GetRankingForFewestDice(remainingLower, remainingUpper),
-                        RankMode.BestDistribution => subrolls.GetRankingForMostEvenDistribution(remainingLower, remainingUpper),
-                        _ => throw new ArgumentOutOfRangeException(nameof(rankMode), $"Not expected Rank Mode value: {rankMode}")
-                    };
-
-                    if (subRank > minRank)
-                        continue;
-
-                    minRank = Math.Min(subRank, minRank);
-
                     var subCollection = new RollCollection();
                     subCollection.Rolls.Add(diePrototype);
                     subCollection.Rolls.AddRange(subrolls.Rolls);
@@ -226,6 +256,17 @@ namespace DnDGen.RollGen
 
                     if (subCollection.Matches(lower, upper))
                     {
+                        var rank = rankMode switch
+                        {
+                            RankMode.FewestDice => subCollection.Rolls.Count,
+                            RankMode.BestDistribution => subCollection.ComputeDistribution(),
+                            _ => throw new ArgumentOutOfRangeException(nameof(rankMode), $"Not expected Rank Mode value: {rankMode}")
+                        };
+
+                        if (rank > minRank)
+                            continue;
+
+                        minRank = Math.Min(rank, minRank);
                         prototypes.Add(subCollection);
                     }
                 }
