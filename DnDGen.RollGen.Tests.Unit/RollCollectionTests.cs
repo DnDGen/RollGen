@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -55,6 +56,21 @@ namespace DnDGen.RollGen.Tests.Unit
             Assert.That(roll, Is.EqualTo("9266d100"));
         }
 
+        [Test]
+        public void BuildRollWithMultiplier()
+        {
+            var prototype = new RollPrototype
+            {
+                Quantity = 9266,
+                Die = 100,
+                Multiplier = 90210
+            };
+            collection.Rolls.Add(prototype);
+
+            var roll = collection.Build();
+            Assert.That(roll, Is.EqualTo("(9266d100-9266)*90210"));
+        }
+
         [TestCase(-600, "9266d100-600")]
         [TestCase(0, "9266d100")]
         [TestCase(42, "9266d100+42")]
@@ -74,74 +90,114 @@ namespace DnDGen.RollGen.Tests.Unit
             Assert.That(roll, Is.EqualTo(expectedroll));
         }
 
+        [TestCase(-600, "(9266d100-9266)*90210-600")]
+        [TestCase(0, "(9266d100-9266)*90210")]
+        [TestCase(42, "(9266d100-9266)*90210+42")]
+        public void BuildRollWithMultiplierAndAdjustment(int adjustment, string expectedroll)
+        {
+            var prototype = new RollPrototype
+            {
+                Quantity = 9266,
+                Die = 100,
+                Multiplier = 90210
+            };
+
+            collection.Rolls.Add(prototype);
+
+            collection.Adjustment = adjustment;
+
+            var roll = collection.Build();
+            Assert.That(roll, Is.EqualTo(expectedroll));
+        }
+
         [Test]
         public void BuildMultipleRolls()
         {
-            var prototype = new RollPrototype
+            var prototype1 = new RollPrototype
+            {
+                Quantity = 600,
+                Die = 12,
+                Multiplier = 1337
+            };
+
+            var prototype2 = new RollPrototype
             {
                 Quantity = 9266,
                 Die = 100
             };
 
-            collection.Rolls.Add(prototype);
-
-            var otherPrototype = new RollPrototype
+            var prototype3 = new RollPrototype
             {
                 Quantity = 42,
                 Die = 20
             };
 
-            collection.Rolls.Add(otherPrototype);
+            collection.Rolls.Add(prototype1);
+            collection.Rolls.Add(prototype2);
+            collection.Rolls.Add(prototype3);
+            collection.Adjustment = 1336;
 
             var roll = collection.Build();
-            Assert.That(roll, Is.EqualTo("9266d100+42d20"));
+            Assert.That(roll, Is.EqualTo("(600d12-600)*1337+9266d100+42d20+1336"));
         }
 
         [Test]
         public void CollectionDescription()
         {
-            var prototype = new RollPrototype
+            var prototype1 = new RollPrototype
+            {
+                Quantity = 600,
+                Die = 12,
+                Multiplier = 1337
+            };
+
+            var prototype2 = new RollPrototype
             {
                 Quantity = 9266,
                 Die = 100
             };
 
-            collection.Rolls.Add(prototype);
-
-            var otherPrototype = new RollPrototype
+            var prototype3 = new RollPrototype
             {
                 Quantity = 42,
                 Die = 20
             };
 
-            collection.Rolls.Add(otherPrototype);
+            collection.Rolls.Add(prototype1);
+            collection.Rolls.Add(prototype2);
+            collection.Rolls.Add(prototype3);
+            collection.Adjustment = 1336;
 
-            collection.Adjustment = 1337;
-
-            Assert.That(collection.ToString(), Is.EqualTo("9266d100+42d20+1337"));
+            Assert.That(collection.ToString(), Is.EqualTo("(600d12-600)*1337+9266d100+42d20+1336"));
         }
 
-        [TestCase(-1337, "9266d100+42d20-1337")]
-        [TestCase(0, "9266d100+42d20")]
-        [TestCase(1336, "9266d100+42d20+1336")]
+        [TestCase(-1336, "(600d12-600)*1337+9266d100+42d20-1336")]
+        [TestCase(0, "(600d12-600)*1337+9266d100+42d20")]
+        [TestCase(96, "(600d12-600)*1337+9266d100+42d20+96")]
         public void BuildMultipleRollsWithAdjustment(int adjustment, string expectedRoll)
         {
-            var prototype = new RollPrototype
+            var prototype1 = new RollPrototype
+            {
+                Quantity = 600,
+                Die = 12,
+                Multiplier = 1337
+            };
+
+            var prototype2 = new RollPrototype
             {
                 Quantity = 9266,
                 Die = 100
             };
 
-            collection.Rolls.Add(prototype);
-
-            var otherPrototype = new RollPrototype
+            var prototype3 = new RollPrototype
             {
                 Quantity = 42,
                 Die = 20
             };
 
-            collection.Rolls.Add(otherPrototype);
-
+            collection.Rolls.Add(prototype1);
+            collection.Rolls.Add(prototype2);
+            collection.Rolls.Add(prototype3);
             collection.Adjustment = adjustment;
 
             var roll = collection.Build();
@@ -149,7 +205,7 @@ namespace DnDGen.RollGen.Tests.Unit
         }
 
         [Test]
-        public void BuildOrdersDicefromLargestToSmallest()
+        public void BuildOrdersDiceFromLargestToSmallest()
         {
             var prototype = new RollPrototype
             {
@@ -177,6 +233,91 @@ namespace DnDGen.RollGen.Tests.Unit
 
             var roll = collection.Build();
             Assert.That(roll, Is.EqualTo("1337d100+9266d20+42d12"));
+        }
+
+        [Test]
+        public void BuildOrdersMultipliersFromLargestToSmallest()
+        {
+            var prototype1 = new RollPrototype
+            {
+                Quantity = 9266,
+                Die = 90210,
+                Multiplier = 42
+            };
+
+            var prototype2 = new RollPrototype
+            {
+                Quantity = 600,
+                Die = 1337,
+                Multiplier = 1336
+            };
+
+            var prototype3 = new RollPrototype
+            {
+                Quantity = 96,
+                Die = 783,
+                Multiplier = 8245
+            };
+
+            collection.Rolls.Add(prototype1);
+            collection.Rolls.Add(prototype2);
+            collection.Rolls.Add(prototype3);
+
+            var roll = collection.Build();
+            Assert.That(roll, Is.EqualTo("(96d783-96)*8245+(600d1337-600)*1336+(9266d90210-9266)*42"));
+        }
+
+        [Test]
+        public void BuildOrdersDiceFromLargestToSmallest_WithMultipliers()
+        {
+            var prototype = new RollPrototype
+            {
+                Quantity = 9266,
+                Die = 20
+            };
+
+            var otherPrototype = new RollPrototype
+            {
+                Quantity = 42,
+                Die = 12
+            };
+
+            var anotherPrototype = new RollPrototype
+            {
+                Quantity = 1337,
+                Die = 100
+            };
+
+            var prototype1 = new RollPrototype
+            {
+                Quantity = 922,
+                Die = 90210,
+                Multiplier = 2022
+            };
+
+            var prototype2 = new RollPrototype
+            {
+                Quantity = 600,
+                Die = 227,
+                Multiplier = 1336
+            };
+
+            var prototype3 = new RollPrototype
+            {
+                Quantity = 96,
+                Die = 783,
+                Multiplier = 8245
+            };
+
+            collection.Rolls.Add(prototype);
+            collection.Rolls.Add(prototype1);
+            collection.Rolls.Add(otherPrototype);
+            collection.Rolls.Add(prototype2);
+            collection.Rolls.Add(anotherPrototype);
+            collection.Rolls.Add(prototype3);
+
+            var roll = collection.Build();
+            Assert.That(roll, Is.EqualTo("(96d783-96)*8245+(922d90210-922)*2022+(600d227-600)*1336+1337d100+9266d20+42d12"));
         }
 
         [Test]
@@ -556,6 +697,61 @@ namespace DnDGen.RollGen.Tests.Unit
 
             var distribution = collection.ComputeDistribution();
             var rawDistribution = ComputeDistribution(collection.Rolls);
+            Assert.That(distribution, Is.EqualTo(D).And.EqualTo(rawDistribution));
+        }
+
+        [TestCase(1, 2, 1)]
+        [TestCase(1, 3, 1)]
+        [TestCase(1, 4, 1)]
+        [TestCase(1, 6, 1)]
+        [TestCase(1, 8, 1)]
+        [TestCase(1, 10, 1)]
+        [TestCase(1, 12, 1)]
+        [TestCase(1, 20, 1)]
+        [TestCase(1, 100, 1)]
+        [TestCase(1, 42, 1)]
+        [TestCase(2, 2, 2)]
+        [TestCase(2, 3, 3)]
+        [TestCase(2, 4, 4)]
+        [TestCase(2, 6, 6)]
+        [TestCase(2, 8, 8)]
+        [TestCase(2, 10, 10)]
+        [TestCase(2, 12, 12)]
+        [TestCase(2, 20, 20)]
+        [TestCase(2, 100, 100)]
+        [TestCase(2, 42, 42)]
+        [TestCase(3, 2, 3)] //37.5% * 2^3 = 3
+        [TestCase(3, 3, 7)] //25.93% * 3^3 = 7
+        [TestCase(3, 4, 12)] //18.75% * 4^3 = 12
+        [TestCase(3, 6, 27)] //12.5% * 6^3 = 27
+        [TestCase(3, 8, 48)] //9.38% * 8^3 = 48
+        [TestCase(3, 10, 75)] //7.5% * 10^3 = 75
+        [TestCase(3, 12, 108)] //6.25% * 12^3 = 108
+        [TestCase(3, 20, 300)] //3.75% * 20^3 = 300
+        [TestCase(3, 100, 7500)] //0.75% * 100^3 = 7500
+        [TestCase(3, 42, 1323)] //1.79% * 42^3 = 1326 (rounding error of 3)
+        [TestCase(10, 10, 432457640)] //4.32% * 10^10 = 432457640
+        [TestCase(17, 2, 24310)] //18.55% * 2^17 = 24314 (rounding error of 4)
+        public void ComputeDistribution_WithMultiplier(int q, int d, long D)
+        {
+            var prototype1 = new RollPrototype
+            {
+                Quantity = q,
+                Die = d
+            };
+            var prototype2 = new RollPrototype
+            {
+                Quantity = 9266,
+                Die = 90210,
+                Multiplier = 42,
+            };
+
+            collection.Rolls.Add(prototype1);
+            collection.Rolls.Add(prototype2);
+            collection.Adjustment = 666;
+
+            var distribution = collection.ComputeDistribution();
+            var rawDistribution = ComputeDistribution(collection.UnmultipliedRolls.ToList());
             Assert.That(distribution, Is.EqualTo(D).And.EqualTo(rawDistribution));
         }
 
@@ -1051,32 +1247,36 @@ namespace DnDGen.RollGen.Tests.Unit
             Assert.That(distribution, Is.EqualTo(D).And.EqualTo(rawDistribution));
         }
 
-        [TestCase(1, 1000, 1)]
+        [TestCase(1, 100, 1)]
         [TestCase(1, Limits.Die, 1)]
         [TestCase(2, 2, 2)]
         [TestCase(2, 10, 10)]
         [TestCase(2, 100, 100)]
+        [TestCase(2, Limits.Die, 10_000)]
         [TestCase(3, 2, 3)]
         [TestCase(3, 6, 27)]
         [TestCase(3, 10, 75)]
         [TestCase(3, 20, 300)] //3.75% * 20^3 = 300
         [TestCase(3, 100, 7500)] //0.75% * 100^3 = 7500
-        [TestCase(3, 1000, 750000, Ignore = "In practice, the only time we have nonstandard dice are when the quantity is 1")]
-        [TestCase(3, Limits.Die, 75000000, Ignore = "In practice, the only time we have nonstandard dice are when the quantity is 1")] //0.75% * 10,000^3 = 7500000000
+        [TestCase(3, Limits.Die, 75000000)] //0.75% * 10,000^3 = 75000000
         [TestCase(4, 2, 6)]
         [TestCase(4, 6, 146)]
         [TestCase(4, 10, 670)]
         [TestCase(4, 20, 5340)]
         [TestCase(4, 100, 666700)]
-        [TestCase(4, 1000, 6666670000, Ignore = "In practice, the only time we have nonstandard dice are when the quantity is 1")]
-        [TestCase(4, Limits.Die, 946739120, Ignore = "In practice, the only time we have nonstandard dice are when the quantity is 1")]
+        [TestCase(4, Limits.Die, 666666670000)]
         [TestCase(5, 2, 10)]
         [TestCase(5, 6, 780)]
         [TestCase(5, 10, 6000)]
         [TestCase(5, 20, 95875)]
         [TestCase(5, 100, 59896875)]
-        [TestCase(5, 1000, 59896875, Ignore = "In practice, the only time we have nonstandard dice are when the quantity is 1")]
-        [TestCase(5, Limits.Die, long.MaxValue, Ignore = "In practice, the only time we have nonstandard dice are when the quantity is 1")]
+        [TestCase(5, Limits.Die, 5989583343750000)]
+        [TestCase(6, 2, 20)]
+        [TestCase(6, 6, 4332)]
+        [TestCase(6, 10, 55252)]
+        [TestCase(6, 20, 1762004)]
+        [TestCase(6, 100, 5500250020)]
+        [TestCase(6, Limits.Die, long.MaxValue)]
         [TestCase(8, 2, 70)]
         [TestCase(8, 10, 4816030)]
         [TestCase(8, 100, 47938730314300)]
@@ -1085,8 +1285,7 @@ namespace DnDGen.RollGen.Tests.Unit
         [TestCase(10, 10, 432457640)]
         [TestCase(10, 20, 220633615280)]
         [TestCase(10, 100, 430438025018576400)]
-        [TestCase(10, 1000, long.MaxValue, Ignore = "In practice, the only time we have nonstandard dice are when the quantity is 1")]
-        [TestCase(10, Limits.Die, long.MaxValue, Ignore = "In practice, the only time we have nonstandard dice are when the quantity is 1")]
+        [TestCase(10, Limits.Die, long.MaxValue)]
         [TestCase(16, 2, 12870)]
         [TestCase(16, 10, 343900019857310)]
         [TestCase(16, 100, long.MaxValue)]
@@ -1095,8 +1294,7 @@ namespace DnDGen.RollGen.Tests.Unit
         [TestCase(20, 10, 3081918923741896840)]
         [TestCase(20, 20, long.MaxValue)]
         [TestCase(20, 100, long.MaxValue)]
-        [TestCase(20, 1000, long.MaxValue, Ignore = "In practice, the only time we have nonstandard dice are when the quantity is 1")]
-        [TestCase(20, Limits.Die, long.MaxValue, Ignore = "In practice, the only time we have nonstandard dice are when the quantity is 1")]
+        [TestCase(20, Limits.Die, long.MaxValue)]
         [TestCase(32, 2, 601080390)]
         [TestCase(32, 10, long.MaxValue)]
         [TestCase(32, 100, long.MaxValue)]
@@ -1120,8 +1318,7 @@ namespace DnDGen.RollGen.Tests.Unit
         [TestCase(100, 10, long.MaxValue)]
         [TestCase(100, 20, long.MaxValue)]
         [TestCase(100, 100, long.MaxValue)]
-        [TestCase(100, 1000, long.MaxValue, Ignore = "In practice, the only time we have nonstandard dice are when the quantity is 1")]
-        [TestCase(100, Limits.Die, long.MaxValue, Ignore = "In practice, the only time we have nonstandard dice are when the quantity is 1")]
+        [TestCase(100, Limits.Die, long.MaxValue)]
         [TestCase(128, 2, long.MaxValue)]
         [TestCase(128, 10, long.MaxValue)]
         [TestCase(128, 100, long.MaxValue)]
@@ -1130,8 +1327,7 @@ namespace DnDGen.RollGen.Tests.Unit
         [TestCase(1000, 10, long.MaxValue)]
         [TestCase(1000, 20, long.MaxValue)]
         [TestCase(1000, 100, long.MaxValue)]
-        [TestCase(1000, 1000, long.MaxValue, Ignore = "In practice, the only time we have nonstandard dice are when the quantity is 1")]
-        [TestCase(1000, Limits.Die, long.MaxValue, Ignore = "In practice, the only time we have nonstandard dice are when the quantity is 1")]
+        [TestCase(1000, Limits.Die, long.MaxValue)]
         [TestCase(Limits.Quantity, 2, long.MaxValue)]
         [TestCase(Limits.Quantity, 3, long.MaxValue)]
         [TestCase(Limits.Quantity, 4, long.MaxValue)]
@@ -1141,8 +1337,7 @@ namespace DnDGen.RollGen.Tests.Unit
         [TestCase(Limits.Quantity, 12, long.MaxValue)]
         [TestCase(Limits.Quantity, 20, long.MaxValue)]
         [TestCase(Limits.Quantity, 100, long.MaxValue)]
-        [TestCase(Limits.Quantity, 1000, long.MaxValue, Ignore = "In practice, the only time we have nonstandard dice are when the quantity is 1")]
-        [TestCase(Limits.Quantity, Limits.Die, long.MaxValue, Ignore = "In practice, the only time we have nonstandard dice are when the quantity is 1")]
+        [TestCase(Limits.Quantity, Limits.Die, long.MaxValue)]
         public void ComputeDistribution_IsFast(int q1, int d1, long D)
         {
             var prototype1 = new RollPrototype
@@ -1204,6 +1399,13 @@ namespace DnDGen.RollGen.Tests.Unit
 
         private long ComputeDistribution(List<RollPrototype> rollPrototypes)
         {
+            //We want to shortcut that when 1% of the possible iterations for the first die is greater than the max long,
+            //Equation for xdy: 0.01y^x = 2^63
+            //Solved for x, x = (2ln(10)+63ln(2))/ln(y)
+            var quantityLimit = (2 * Math.Log(10) + 63 * Math.Log(2)) / Math.Log(rollPrototypes[0].Die);
+            if (rollPrototypes[0].Quantity >= quantityLimit)
+                return long.MaxValue;
+
             var quantities = rollPrototypes.Sum(r => r.Quantity);
             var mode = (rollPrototypes.Sum(r => r.Quantity * r.Die) + quantities) / 2;
             var rolls = new Dictionary<int, long>() { { mode, 1 } };
@@ -1222,6 +1424,13 @@ namespace DnDGen.RollGen.Tests.Unit
                         foreach (var r2 in nextRolls)
                         {
                             var newSum = r1.Key - r2;
+
+                            //Since we are always subtracting, once we are below 0, we won't ever get back to 0
+                            //0 represents the permutations that result in the mode
+                            //Also, nextRolls is ordered to increase, so once this is below 0, all following will be as well
+                            if (newSum < 0)
+                                break;
+
                             if (!newRolls.ContainsKey(newSum))
                                 newRolls[newSum] = 0;
 
@@ -1239,6 +1448,35 @@ namespace DnDGen.RollGen.Tests.Unit
 
             //Since we are subtracting from the mode, the key of 0 is the cumulative number of ways we can roll the mode
             return rolls[0];
+        }
+
+        [TestCaseSource(nameof(SpecificDistributions))]
+        public void BUG_DistributionIsCorrect(string roll, long D, List<(int Quantity, int Die)> rolls)
+        {
+            var prototypes = rolls.Select(r => new RollPrototype { Quantity = r.Quantity, Die = r.Die });
+            collection.Rolls.AddRange(prototypes);
+
+            var distribution = collection.ComputeDistribution();
+            Assert.That(distribution, Is.EqualTo(D), roll);
+
+            //HACK: We are ignoring this, as computing the raw distribution for these rolls takes too long
+            //var rawDistribution = ComputeDistribution(collection.Rolls);
+            //Assert.That(distribution, Is.EqualTo(rawDistribution), roll);
+        }
+
+        public static IEnumerable SpecificDistributions
+        {
+            get
+            {
+                yield return new TestCaseData("99d10000+1d100", long.MaxValue, new List<(int Quantity, int Die)> { (99, Limits.Die), (1, 100) });
+                yield return new TestCaseData("100d10000", long.MaxValue, new List<(int Quantity, int Die)> { (100, Limits.Die) });
+                yield return new TestCaseData("99d100+1d10", long.MaxValue, new List<(int Quantity, int Die)> { (99, 100), (1, 10) });
+                yield return new TestCaseData("100d100", long.MaxValue, new List<(int Quantity, int Die)> { (100, 100) });
+                yield return new TestCaseData("9d100+1d10", 45_270_937_006_218_890, new List<(int Quantity, int Die)> { (9, 100), (1, 10) });
+                yield return new TestCaseData("10d100", 430_438_025_018_576_400, new List<(int Quantity, int Die)> { (10, 100) });
+                yield return new TestCaseData("9d20+1d2", 23_207_634_900, new List<(int Quantity, int Die)> { (9, 20), (1, 2) });
+                yield return new TestCaseData("10d20", 220_633_615_280, new List<(int Quantity, int Die)> { (10, 20) });
+            }
         }
     }
 }

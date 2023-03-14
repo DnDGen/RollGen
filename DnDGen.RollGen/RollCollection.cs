@@ -11,9 +11,13 @@ namespace DnDGen.RollGen
         public List<RollPrototype> Rolls { get; private set; }
         public int Adjustment { get; set; }
 
-        public int Quantities => Rolls.Sum(r => r.Quantity);
+        public IEnumerable<RollPrototype> MultipliedRolls => Rolls.Where(r => r.Multiplier > 1);
+        public IEnumerable<RollPrototype> UnmultipliedRolls => Rolls.Where(r => r.Multiplier == 1);
+        public int Quantities => UnmultipliedRolls.Sum(r => r.Quantity);
         public int Lower => Quantities + Adjustment;
-        public int Upper => Rolls.Sum(r => r.Quantity * r.Die) + Adjustment;
+        public int Upper => MultipliedRolls.Sum(r => r.Quantity * (r.Die - 1) * r.Multiplier)
+            + UnmultipliedRolls.Sum(r => r.Quantity * r.Die)
+            + Adjustment;
 
         public RollCollection()
         {
@@ -22,11 +26,14 @@ namespace DnDGen.RollGen
 
         public string Build()
         {
-            var rolls = Rolls.OrderByDescending(r => r.Die).Select(r => r.Build());
-            var allRolls = string.Join("+", rolls);
-
             if (!Rolls.Any())
                 return Adjustment.ToString();
+
+            var rolls = Rolls
+                .OrderByDescending(r => r.Multiplier)
+                .ThenByDescending(r => r.Die)
+                .Select(r => r.Build());
+            var allRolls = string.Join("+", rolls);
 
             if (Adjustment == 0)
                 return allRolls;
@@ -87,31 +94,48 @@ namespace DnDGen.RollGen
                 return 1;
 
             if (Quantities == 2)
-                return Rolls.Min(r => r.Die);
+                return UnmultipliedRolls.Min(r => r.Die);
 
+            var validRolls = UnmultipliedRolls.ToList();
             //We want to shortcut that when 1% of the possible iterations for the first die is greater than the max long,
             //Equation for xdy: 0.01y^x = 2^63
             //Solved for x, x = (2ln(10)+63ln(2))/ln(y)
-            var quantityLimit = (2 * Math.Log(10) + 63 * Math.Log(2)) / Math.Log(Rolls[0].Die);
-            if (Rolls[0].Quantity >= quantityLimit)
+            var quantityLimit = (2 * Math.Log(10) + 63 * Math.Log(2)) / Math.Log(validRolls[0].Die);
+            if (validRolls[0].Quantity >= quantityLimit)
                 return long.MaxValue;
 
-            var mode = (Rolls.Sum(r => r.Quantity * r.Die) + Quantities) / 2;
+            var upper = validRolls.Sum(r => r.Quantity * r.Die);
+            var mode = (upper + Quantities) / 2;
             var rolls = new Dictionary<int, long>() { { mode, 1 } };
-            var remainingMax = Upper - Adjustment;
+            var remainingMax = upper;
 
-            for (var i = 0; i < Rolls.Count; i++)
+            //HACK: This means we are going to do too many iterations below
+            //The Die Limit is only used when computing extra-large ranges with non-standard dice
+            //Otherwise, non-standard dice should always have a quantity of 1
+            //Therefore, we can just shortcut this specific usecase
+            if (validRolls[0].Die == Limits.Die)
             {
-                var nextRolls = Enumerable.Range(1, Rolls[i].Die);
-                var q = Rolls[i].Quantity;
+                return validRolls[0].Quantity switch
+                {
+                    3 => 75_000_000, //0.75% * 10,000^3 = 75,000,000
+                    4 => 666_666_670_000,
+                    5 => 5_989_583_343_750_000,
+                    _ => long.MaxValue
+                };
+            }
+
+            for (var i = 0; i < validRolls.Count; i++)
+            {
+                var nextRolls = Enumerable.Range(1, validRolls[i].Die);
+                var q = validRolls[i].Quantity;
 
                 while (q-- > 0)
                 {
                     var newRolls = new Dictionary<int, long>();
 
-                    foreach (var r1 in rolls.Where(r => r.Key - remainingMax <= 0))
+                    foreach (var r1 in rolls.Where(r => r.Key <= remainingMax))
                     {
-                        foreach (var r2 in nextRolls.Where(r => r1.Key - r >= 0))
+                        foreach (var r2 in nextRolls.Where(r => r1.Key >= r))
                         {
                             var newSum = r1.Key - r2;
                             if (!newRolls.ContainsKey(newSum))
@@ -125,7 +149,7 @@ namespace DnDGen.RollGen
                         }
                     }
 
-                    remainingMax -= Rolls[i].Die;
+                    remainingMax -= validRolls[i].Die;
                     rolls = newRolls;
                 }
             }

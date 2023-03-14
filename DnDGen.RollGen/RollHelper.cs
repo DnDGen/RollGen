@@ -35,39 +35,8 @@ namespace DnDGen.RollGen
         public static string GetRollWithFewestDice(int lower, int upper)
         {
             var range = upper - lower + 1;
-            var maxDie = RollCollection.StandardDice.Max();
-            var rangeLimit = Limits.Quantity * maxDie - Limits.Quantity + 1;
-            var roll = string.Empty;
 
-            var maxCollection = new RollCollection();
-            while (range > rangeLimit)
-            {
-                var die = maxDie;
-                var quantity = Math.Min(Limits.Quantity, range / maxDie);
-
-                if (range > Limits.Die)
-                {
-                    die = Limits.Die;
-                    quantity = range / Limits.Die;
-                }
-
-                maxCollection.Rolls.Add(new RollPrototype { Die = die, Quantity = quantity });
-
-                var newLower = 1 - quantity;
-                var newUpper = range - die * quantity;
-                range = newUpper - newLower + 1;
-            }
-
-            maxCollection.Adjustment = lower - maxCollection.Quantities;
-
-            if (maxCollection.Rolls.Any())
-            {
-                roll = maxCollection.Build();
-            }
-
-            var adjustedUpper = lower + range - 1;
-
-            var collections = GetRollCollections(lower, adjustedUpper, RankMode.FewestDice);
+            var collections = GetRollCollections(lower, upper, RankMode.FewestDice);
             if (!collections.Any())
                 throw new ArgumentException($"Cannot generate a valid roll for range [{lower},{upper}]");
 
@@ -78,11 +47,7 @@ namespace DnDGen.RollGen
             }
 
             var bestMatch = bestMatches.OrderBy(c => c.ComputeDistribution()).First();
-
-            if (roll == string.Empty)
-                return bestMatch.Build();
-            else
-                return $"{roll}+{bestMatch.Build()}";
+            return bestMatch.Build();
         }
 
         /// <summary>
@@ -112,7 +77,6 @@ namespace DnDGen.RollGen
         /// <param name="allowNonstandardDice">Allow non-standard dice to be used</param>
         public static string GetRollWithMostEvenDistribution(int lower, int upper, bool allowMultipliers = false, bool allowNonstandardDice = false)
         {
-            var roll = string.Empty;
             var range = upper - lower + 1;
 
             //We asked for a constant
@@ -121,54 +85,37 @@ namespace DnDGen.RollGen
                 return lower.ToString();
             }
 
+            var collection = new RollCollection();
             if (allowMultipliers)
             {
                 var factored = GetFactoredRoll(lower, upper);
-                roll = factored.Roll;
+                collection.Rolls.AddRange(factored.Rolls);
                 range = factored.RemainingRange;
             }
 
             //The factoring handled the entire range
             if (range == 1)
             {
-                if (lower > 1)
-                    return $"{roll}+{lower - 1}";
-                else if (lower < 1)
-                    return $"{roll}{lower - 1}";
-                else
-                    return roll;
+                collection.Adjustment = lower - collection.Quantities;
+                return collection.Build();
             }
 
             //If we are allowing non-standard dice, we don't need to do computations for Distribution - we can just make an arbitrary die.
             if (allowNonstandardDice)
             {
-                var nonStandardCollection = new RollCollection();
                 while (range > 1)
                 {
-                    var die = range;
-                    var quantity = 1;
+                    var die = Math.Min(range, Limits.Die);
+                    var prototypes = BuildRollPrototypes(1, range, die);
+                    collection.Rolls.AddRange(prototypes);
 
-                    if (range > Limits.Die)
-                    {
-                        die = Limits.Die;
-                        quantity = range / Limits.Die;
-                    }
-
-                    nonStandardCollection.Rolls.Add(new RollPrototype { Die = die, Quantity = quantity });
-
-                    var newLower = 1 - quantity;
-                    var newUpper = range - die * quantity;
+                    var newLower = 1 - prototypes.Sum(p => p.Quantity);
+                    var newUpper = range - prototypes.Sum(p => p.Quantity * p.Die);
                     range = newUpper - newLower + 1;
                 }
 
-                nonStandardCollection.Adjustment = lower - nonStandardCollection.Quantities;
-
-                var nonStandardRoll = nonStandardCollection.Build();
-
-                if (roll == string.Empty)
-                    return nonStandardRoll;
-                else
-                    return $"{roll}+{nonStandardRoll}";
+                collection.Adjustment = lower - collection.Quantities;
+                return collection.Build();
             }
 
             var adjustedUpper = lower + range - 1;
@@ -180,18 +127,18 @@ namespace DnDGen.RollGen
             var bestMatches = collections.GroupBy(c => c.ComputeDistribution()).OrderBy(g => g.Key).First();
             if (bestMatches.Count() == 1)
             {
-                if (roll == string.Empty)
-                    return bestMatches.Single().Build();
-                else
-                    return $"{roll}+{bestMatches.Single().Build()}";
+                var match = bestMatches.Single();
+                collection.Rolls.AddRange(match.Rolls);
+                collection.Adjustment = lower - collection.Quantities;
+
+                return collection.Build();
             }
 
             var bestMatch = bestMatches.OrderBy(c => c.Quantities).First();
+            collection.Rolls.AddRange(bestMatch.Rolls);
+            collection.Adjustment = lower - collection.Quantities;
 
-            if (roll == string.Empty)
-                return bestMatch.Build();
-            else
-                return $"{roll}+{bestMatch.Build()}";
+            return collection.Build();
         }
 
         private static IEnumerable<RollCollection> GetRollCollections(int lower, int upper, RankMode rankMode)
@@ -220,88 +167,106 @@ namespace DnDGen.RollGen
 
             foreach (var die in dice)
             {
-                var diePrototype = BuildRollPrototype(lower, upper, die);
-                var collectionPrototype = new RollCollection();
-                collectionPrototype.Rolls.Add(diePrototype);
-                collectionPrototype.Adjustment = lower - collectionPrototype.Quantities;
+                var diePrototypes = BuildRollPrototypes(lower, upper, die);
+                if (!diePrototypes.Any())
+                    continue;
 
-                if (collectionPrototype.Matches(lower, upper))
+                var collection = new RollCollection();
+                collection.Rolls.AddRange(diePrototypes);
+                collection.Adjustment = lower - collection.Quantities;
+
+                var rank = GetRank(collection, rankMode);
+                if (rank > minRank)
+                    continue;
+
+                if (collection.Matches(lower, upper))
                 {
-                    var rank = rankMode switch
-                    {
-                        RankMode.FewestDice => collectionPrototype.Rolls.Count,
-                        RankMode.BestDistribution => collectionPrototype.ComputeDistribution(),
-                        _ => throw new ArgumentOutOfRangeException(nameof(rankMode), $"Not expected Rank Mode value: {rankMode}")
-                    };
-
-                    if (rank > minRank)
-                        continue;
-
                     minRank = Math.Min(rank, minRank);
-                    prototypes.Add(collectionPrototype);
+                    prototypes.Add(collection);
 
                     continue;
                 }
 
-                collectionPrototype.Adjustment = 0;
-                var remainingUpper = upper - collectionPrototype.Upper;
-                var remainingLower = lower - collectionPrototype.Lower;
+                collection.Adjustment = 0;
+                var remainingUpper = upper - collection.Upper;
+                var remainingLower = lower - collection.Lower;
 
                 foreach (var subrolls in GetRolls(remainingLower, remainingUpper, rankMode))
                 {
                     var subCollection = new RollCollection();
-                    subCollection.Rolls.Add(diePrototype);
+                    subCollection.Rolls.AddRange(diePrototypes);
                     subCollection.Rolls.AddRange(subrolls.Rolls);
                     subCollection.Adjustment = lower - subCollection.Quantities;
 
+                    rank = GetRank(subCollection, rankMode);
+                    if (rank > minRank)
+                        continue;
+
                     if (subCollection.Matches(lower, upper))
                     {
-                        var rank = rankMode switch
-                        {
-                            RankMode.FewestDice => subCollection.Rolls.Count,
-                            RankMode.BestDistribution => subCollection.ComputeDistribution(),
-                            _ => throw new ArgumentOutOfRangeException(nameof(rankMode), $"Not expected Rank Mode value: {rankMode}")
-                        };
-
-                        if (rank > minRank)
-                            continue;
-
                         minRank = Math.Min(rank, minRank);
                         prototypes.Add(subCollection);
                     }
                 }
             }
-
             return prototypes;
         }
 
-        private static RollPrototype BuildRollPrototype(int lower, int upper, int die)
+        private static long GetRank(RollCollection collection, RankMode rankMode) => rankMode switch
+        {
+            RankMode.FewestDice => collection.Rolls.Count,
+            RankMode.BestDistribution => collection.ComputeDistribution(),
+            _ => throw new ArgumentOutOfRangeException(nameof(rankMode), $"Not expected Rank Mode value: {rankMode}")
+        };
+
+        private static IEnumerable<RollPrototype> BuildRollPrototypes(int lower, int upper, int die)
         {
             var newQuantity = (upper - lower) / (die - 1);
+            var prototypes = new List<RollPrototype>();
 
-            return new RollPrototype
+            if (newQuantity > Limits.Quantity)
             {
-                Die = die,
-                Quantity = newQuantity
-            };
+                var maxRollsQuantity = newQuantity / Limits.Quantity;
+                var maxRoll = new RollPrototype
+                {
+                    Quantity = Limits.Quantity,
+                    Die = die,
+                };
+
+                var maxRolls = Enumerable.Repeat(maxRoll, maxRollsQuantity);
+                prototypes.AddRange(maxRolls);
+
+                newQuantity -= maxRollsQuantity * Limits.Quantity;
+            }
+
+            if (newQuantity > 0)
+            {
+                prototypes.Add(new RollPrototype
+                {
+                    Die = die,
+                    Quantity = newQuantity
+                });
+            }
+
+            //HACK: Have to make sure that the Upper value won't cause an overflow
+            if (prototypes.Sum(p => p.Quantity * (long)p.Die) > int.MaxValue)
+                return new List<RollPrototype>();
+
+            return prototypes;
         }
 
         /// <summary>
         /// This will return a roll of format (1dA-1)*BC..Y+(1dB-1)*CD..Y+...+(1dX-1)*Y+1dY+Z, where each variable is a standard die.
         /// An example is [1,48] = (1d12-1)*4+1d4
-        /// Another example is [5,40] = (1d6-1)*6+1d6+4
+        /// Another example is [5,40] = (1d12-1)*3+1d3+4
         /// This works when the total range is divisible by the standard die (2, 3, 4, 6, 8, 10, 12, 20, 100).
         /// If the range is not divisible by the standard dice (such as [1,7]), then non-standard dice are used (1dX+Y)
-        /// Or, if non-standard are not allowed, will use the Most Even distribution.
         /// </summary>
         /// <param name="lower">The inclusive lower range</param>
         /// <param name="upper">The inclusive upper range</param>
-        private static (string Roll, int RemainingRange) GetFactoredRoll(int lower, int upper)
+        private static (IEnumerable<RollPrototype> Rolls, int RemainingRange) GetFactoredRoll(int lower, int upper)
         {
             var range = upper - lower + 1;
-            if (lower == upper)
-                return (lower.ToString(), range);
-
             var dice = RollCollection.StandardDice
                 .Where(d => d <= range)
                 .OrderByDescending(d => d)
@@ -320,7 +285,7 @@ namespace DnDGen.RollGen
                 }
             }
 
-            var formula = string.Empty;
+            var rolls = new List<RollPrototype>();
 
             foreach (var die in dice.Where(factors.ContainsKey))
             {
@@ -334,21 +299,16 @@ namespace DnDGen.RollGen
                         product *= f;
                     }
 
-                    if (formula != string.Empty)
-                        formula += "+";
-
-                    if (product > 1)
+                    rolls.Add(new RollPrototype
                     {
-                        formula += $"(1d{die}-1)*{product}";
-                    }
-                    else
-                    {
-                        formula += $"1d{die}";
-                    }
+                        Quantity = 1,
+                        Die = die,
+                        Multiplier = product,
+                    });
                 }
             }
 
-            return (formula, range);
+            return (rolls, range);
         }
     }
 }

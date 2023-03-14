@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using System;
+using System.Diagnostics;
 
 namespace DnDGen.RollGen.Tests.Integration.Stress
 {
@@ -8,12 +9,14 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
     {
         private Dice dice;
         private Random random;
+        private Stopwatch stopwatch;
 
         [SetUp]
         public void Setup()
         {
             dice = GetNewInstanceOf<Dice>();
             random = GetNewInstanceOf<Random>();
+            stopwatch = new Stopwatch();
         }
 
         [Test]
@@ -33,16 +36,20 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 
         private void AssertGetRoll(Func<int, int, string> getRoll)
         {
-            var upper = random.Next(Limits.Die) + 1;
+            var upperLimit = random.Next(2) == 1 ? int.MaxValue : Limits.Die;
+            var upper = random.Next(upperLimit) + 1;
             var lower = random.Next(upper);
 
             Assert.That(lower, Is.LessThan(upper));
 
+            stopwatch.Start();
             var roll = getRoll(lower, upper);
+            stopwatch.Stop();
 
             Assert.That(dice.Roll(roll).IsValid(), Is.True, $"Min: {lower}; Max: {upper}; Roll: {roll}");
             Assert.That(dice.Roll(roll).AsPotentialMinimum(), Is.EqualTo(lower), $"Min: {lower}; Max: {upper}; Roll: {roll}");
             Assert.That(dice.Roll(roll).AsPotentialMaximum(), Is.EqualTo(upper), $"Min: {lower}; Max: {upper}; Roll: {roll}");
+            Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)));
         }
     }
 }
