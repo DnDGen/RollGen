@@ -1,4 +1,6 @@
 ﻿using NUnit.Framework;
+using System;
+using System.Diagnostics;
 using System.Linq;
 
 namespace DnDGen.RollGen.Tests.Integration
@@ -7,11 +9,13 @@ namespace DnDGen.RollGen.Tests.Integration
     public class RollHelperTests : IntegrationTests
     {
         private Dice dice;
+        private Stopwatch stopwatch;
 
         [SetUp]
         public void Setup()
         {
             dice = GetNewInstanceOf<Dice>();
+            stopwatch = new Stopwatch();
         }
 
         [TestCase(0, 0, "0")]
@@ -52,11 +56,15 @@ namespace DnDGen.RollGen.Tests.Integration
         [TestCase(10_000, 1_000_000, "10000d100")]
         public void RollWithFewestDice(int lower, int upper, string expectedRoll)
         {
+            stopwatch.Start();
             var roll = RollHelper.GetRollWithFewestDice(lower, upper);
+            stopwatch.Stop();
+
             Assert.That(roll, Is.EqualTo(expectedRoll));
             Assert.That(dice.Roll(roll).IsValid(), Is.True);
             Assert.That(dice.Roll(roll).AsPotentialMinimum(), Is.EqualTo(lower));
             Assert.That(dice.Roll(roll).AsPotentialMaximum(), Is.EqualTo(upper));
+            Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)));
         }
 
         [TestCase(73422562, 1673270503, "REPEAT+80d100+3d8+57262479", "10000d100", 1616)]
@@ -67,12 +75,16 @@ namespace DnDGen.RollGen.Tests.Integration
             var repeats = Enumerable.Repeat(repeatTerm, repeatCount);
             var expectedRoll = rollTemplate.Replace("REPEAT", string.Join("+", repeats));
 
+            stopwatch.Start();
             var roll = RollHelper.GetRollWithFewestDice(lower, upper);
+            stopwatch.Stop();
+
             Assert.That(roll, Has.Length.EqualTo(expectedRoll.Length));
             Assert.That(roll, Is.EqualTo(expectedRoll));
             Assert.That(dice.Roll(roll).IsValid(), Is.True);
             Assert.That(dice.Roll(roll).AsPotentialMinimum(), Is.EqualTo(lower));
             Assert.That(dice.Roll(roll).AsPotentialMaximum(), Is.EqualTo(upper));
+            Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)));
         }
 
         [TestCase(0, 0, "0")]
@@ -113,11 +125,15 @@ namespace DnDGen.RollGen.Tests.Integration
         [TestCase(10_000, 1_000_000, "10000d100")]
         public void RollWithMostEvenDistribution(int lower, int upper, string expectedRoll)
         {
+            stopwatch.Start();
             var roll = RollHelper.GetRollWithMostEvenDistribution(lower, upper);
+            stopwatch.Stop();
+
             Assert.That(roll, Is.EqualTo(expectedRoll));
             Assert.That(dice.Roll(roll).IsValid(), Is.True);
             Assert.That(dice.Roll(roll).AsPotentialMinimum(), Is.EqualTo(lower));
             Assert.That(dice.Roll(roll).AsPotentialMaximum(), Is.EqualTo(upper));
+            Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)));
         }
 
         [TestCase(73422562, 1673270503, "REPEAT+80d100+1d20+1d3+57262480", "10000d100", 1616)]
@@ -128,12 +144,16 @@ namespace DnDGen.RollGen.Tests.Integration
             var repeats = Enumerable.Repeat(repeatTerm, repeatCount);
             var expectedRoll = rollTemplate.Replace("REPEAT", string.Join("+", repeats));
 
+            stopwatch.Start();
             var roll = RollHelper.GetRollWithMostEvenDistribution(lower, upper);
+            stopwatch.Stop();
+
             Assert.That(roll, Has.Length.EqualTo(expectedRoll.Length));
             Assert.That(roll, Is.EqualTo(expectedRoll));
             Assert.That(dice.Roll(roll).IsValid(), Is.True);
             Assert.That(dice.Roll(roll).AsPotentialMinimum(), Is.EqualTo(lower));
             Assert.That(dice.Roll(roll).AsPotentialMaximum(), Is.EqualTo(upper));
+            Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)));
         }
 
         [TestCase(0, 0, "0")]
@@ -174,11 +194,15 @@ namespace DnDGen.RollGen.Tests.Integration
         [TestCase(10_000, 1_000_000, "99d10000+1d100+9900")]
         public void RollWithMostEvenDistribution_AllowNonstandard(int lower, int upper, string expectedRoll)
         {
+            stopwatch.Start();
             var roll = RollHelper.GetRollWithMostEvenDistribution(lower, upper, allowNonstandardDice: true);
+            stopwatch.Stop();
+
             Assert.That(roll, Is.EqualTo(expectedRoll));
             Assert.That(dice.Roll(roll).IsValid(), Is.True);
             Assert.That(dice.Roll(roll).AsPotentialMinimum(), Is.EqualTo(lower));
             Assert.That(dice.Roll(roll).AsPotentialMaximum(), Is.EqualTo(upper));
+            Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)));
         }
 
         [TestCase(73422562, 1673270503, "REPEAT+1d7942+73262561", "10000d10000", 16)]
@@ -189,12 +213,16 @@ namespace DnDGen.RollGen.Tests.Integration
             var repeats = Enumerable.Repeat(repeatTerm, repeatCount);
             var expectedRoll = rollTemplate.Replace("REPEAT", string.Join("+", repeats));
 
+            stopwatch.Start();
             var roll = RollHelper.GetRollWithMostEvenDistribution(lower, upper, allowNonstandardDice: true);
+            stopwatch.Stop();
+
             Assert.That(roll, Has.Length.EqualTo(expectedRoll.Length));
             Assert.That(roll, Is.EqualTo(expectedRoll));
             Assert.That(dice.Roll(roll).IsValid(), Is.True);
             Assert.That(dice.Roll(roll).AsPotentialMinimum(), Is.EqualTo(lower));
             Assert.That(dice.Roll(roll).AsPotentialMaximum(), Is.EqualTo(upper));
+            Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)));
         }
 
         [TestCase(0, 0, "0")]
@@ -235,11 +263,15 @@ namespace DnDGen.RollGen.Tests.Integration
         [TestCase(10_000, 1_000_000, "10000d100")]
         public void RollWithMostEvenDistribution_AllowMultipliers(int lower, int upper, string expectedRoll)
         {
+            stopwatch.Start();
             var roll = RollHelper.GetRollWithMostEvenDistribution(lower, upper, true);
+            stopwatch.Stop();
+
             Assert.That(roll, Is.EqualTo(expectedRoll));
             Assert.That(dice.Roll(roll).IsValid(), Is.True);
             Assert.That(dice.Roll(roll).AsPotentialMinimum(), Is.EqualTo(lower));
             Assert.That(dice.Roll(roll).AsPotentialMaximum(), Is.EqualTo(upper));
+            Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)));
         }
 
         [TestCase(73422562, 1673270503, "(1d2-1)*799923971+REPEAT+40d100+1d10+1d2+65342520", "10000d100", 808)]
@@ -250,12 +282,16 @@ namespace DnDGen.RollGen.Tests.Integration
             var repeats = Enumerable.Repeat(repeatTerm, repeatCount);
             var expectedRoll = rollTemplate.Replace("REPEAT", string.Join("+", repeats));
 
+            stopwatch.Start();
             var roll = RollHelper.GetRollWithMostEvenDistribution(lower, upper, true);
+            stopwatch.Stop();
+
             Assert.That(roll, Has.Length.EqualTo(expectedRoll.Length));
             Assert.That(roll, Is.EqualTo(expectedRoll));
             Assert.That(dice.Roll(roll).IsValid(), Is.True);
             Assert.That(dice.Roll(roll).AsPotentialMinimum(), Is.EqualTo(lower));
             Assert.That(dice.Roll(roll).AsPotentialMaximum(), Is.EqualTo(upper));
+            Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)));
         }
 
         [TestCase(0, 0, "0")]
@@ -296,11 +332,15 @@ namespace DnDGen.RollGen.Tests.Integration
         [TestCase(10_000, 1_000_000, "99d10000+1d100+9900")]
         public void RollWithMostEvenDistribution_AllowMultipliersAndNonstandard(int lower, int upper, string expectedRoll)
         {
+            stopwatch.Start();
             var roll = RollHelper.GetRollWithMostEvenDistribution(lower, upper, true, true);
+            stopwatch.Stop();
+
             Assert.That(roll, Is.EqualTo(expectedRoll));
             Assert.That(dice.Roll(roll).IsValid(), Is.True);
             Assert.That(dice.Roll(roll).AsPotentialMinimum(), Is.EqualTo(lower));
             Assert.That(dice.Roll(roll).AsPotentialMaximum(), Is.EqualTo(upper));
+            Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)));
         }
 
         [TestCase(73422562, 1673270503, "(1d2-1)*799923971+REPEAT+1d3971+73342561", "10000d10000", 8)]
@@ -311,12 +351,16 @@ namespace DnDGen.RollGen.Tests.Integration
             var repeats = Enumerable.Repeat(repeatTerm, repeatCount);
             var expectedRoll = rollTemplate.Replace("REPEAT", string.Join("+", repeats));
 
+            stopwatch.Start();
             var roll = RollHelper.GetRollWithMostEvenDistribution(lower, upper, true, true);
+            stopwatch.Stop();
+
             Assert.That(roll, Has.Length.EqualTo(expectedRoll.Length));
             Assert.That(roll, Is.EqualTo(expectedRoll));
             Assert.That(dice.Roll(roll).IsValid(), Is.True);
             Assert.That(dice.Roll(roll).AsPotentialMinimum(), Is.EqualTo(lower));
             Assert.That(dice.Roll(roll).AsPotentialMaximum(), Is.EqualTo(upper));
+            Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)));
         }
     }
 }

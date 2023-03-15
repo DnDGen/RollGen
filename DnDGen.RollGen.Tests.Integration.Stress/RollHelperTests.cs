@@ -42,14 +42,14 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
 
             Assert.That(lower, Is.LessThan(upper));
 
-            stopwatch.Start();
+            stopwatch.Restart();
             var roll = getRoll(lower, upper);
             stopwatch.Stop();
 
             Assert.That(dice.Roll(roll).IsValid(), Is.True, $"Min: {lower}; Max: {upper}; Roll: {roll}");
             Assert.That(dice.Roll(roll).AsPotentialMinimum(), Is.EqualTo(lower), $"Min: {lower}; Max: {upper}; Roll: {roll}");
             Assert.That(dice.Roll(roll).AsPotentialMaximum(), Is.EqualTo(upper), $"Min: {lower}; Max: {upper}; Roll: {roll}");
-            Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)));
+            Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)), $"Min: {lower}; Max: {upper}; Roll: {roll}");
         }
     }
 }
