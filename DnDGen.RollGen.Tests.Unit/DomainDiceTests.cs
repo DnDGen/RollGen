@@ -307,14 +307,14 @@ namespace DnDGen.RollGen.Tests.Unit
             Assert.That(result, Is.EqualTo("The druid attacks with his Flame Blade, dealing 9266 damage."));
         }
 
-        [Test, Ignore("Until generic partial rolls occur, this will be impossible")]
+        [Test]
         public void ReplaceWrappedExpressionsWithDouble()
         {
             var expression = "Bark {1d1/2}";
 
             var mockPartialRoll = new Mock<PartialRoll>();
             mockPartialRollFactory.Setup(f => f.Build("1d1/2")).Returns(mockPartialRoll.Object);
-            mockPartialRoll.Setup(r => r.AsSum()).Returns(9266); //should be 0.5
+            mockPartialRoll.Setup(r => r.AsSum<double>()).Returns(0.5);
 
             var result = dice.ReplaceWrappedExpressions<double>(expression);
             Assert.That(result, Is.EqualTo("Bark 0.5"));
