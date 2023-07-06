@@ -26,7 +26,7 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [TestCaseSource(nameof(ParsedExpressions))]
-        public void ParseExpression(string expression, int quantity, int die, int toKeep, int[] explodes, Dictionary<int, int> transforms)
+        public void ParseExpression(string expression, int quantity, int die, int toKeep, int[] explodes, Dictionary<int, int> transforms, bool valid)
         {
             roll = new Roll(expression);
             Assert.That(roll.Quantity, Is.EqualTo(quantity));
@@ -34,84 +34,86 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
             Assert.That(roll.ExplodeOn, Is.EquivalentTo(explodes));
             Assert.That(roll.AmountToKeep, Is.EqualTo(toKeep));
             Assert.That(roll.Transforms, Is.EquivalentTo(transforms));
-            Assert.That(roll.IsValid, Is.True);
+            Assert.That(roll.IsValid, Is.EqualTo(valid));
         }
 
         private static IEnumerable ParsedExpressions
         {
             get
             {
-                yield return new TestCaseData("1d2!", 1, 2, 0, new[] { 2 }, new Dictionary<int, int>());
-                yield return new TestCaseData("1d2!!", 1, 2, 0, new[] { 2 }, new Dictionary<int, int>());
-                yield return new TestCaseData(" 1 d 2 ", 1, 2, 0, new int[0], new Dictionary<int, int>());
-                yield return new TestCaseData(" 1 d 2 ! ", 1, 2, 0, new[] { 2 }, new Dictionary<int, int>());
-                yield return new TestCaseData(" 1 d 2 ! ! ", 1, 2, 0, new[] { 2 }, new Dictionary<int, int>());
-                yield return new TestCaseData("1d2k3", 1, 2, 3, new int[0], new Dictionary<int, int>());
-                yield return new TestCaseData("1d2!k3", 1, 2, 3, new[] { 2 }, new Dictionary<int, int>());
-                yield return new TestCaseData("1d2k3!", 1, 2, 3, new[] { 2 }, new Dictionary<int, int>());
-                yield return new TestCaseData("1d2!k3!", 1, 2, 3, new[] { 2 }, new Dictionary<int, int>());
-                yield return new TestCaseData(" 1 d 2 k 3 ", 1, 2, 3, new int[0], new Dictionary<int, int>());
-                yield return new TestCaseData(" 1 d 2 ! k 3 ", 1, 2, 3, new[] { 2 }, new Dictionary<int, int>());
-                yield return new TestCaseData(" 1 d 2 k 3 ! ", 1, 2, 3, new[] { 2 }, new Dictionary<int, int>());
-                yield return new TestCaseData(" 1 d 2 ! k 3 ! ", 1, 2, 3, new[] { 2 }, new Dictionary<int, int>());
-                yield return new TestCaseData("d2", 1, 2, 0, new int[0], new Dictionary<int, int>());
-                yield return new TestCaseData("d2!", 1, 2, 0, new[] { 2 }, new Dictionary<int, int>());
-                yield return new TestCaseData("d2!!", 1, 2, 0, new[] { 2 }, new Dictionary<int, int>());
-                yield return new TestCaseData(" d 2 ", 1, 2, 0, new int[0], new Dictionary<int, int>());
-                yield return new TestCaseData(" d 2 ! ", 1, 2, 0, new[] { 2 }, new Dictionary<int, int>());
-                yield return new TestCaseData(" d 2 ! ! ", 1, 2, 0, new[] { 2 }, new Dictionary<int, int>());
-                yield return new TestCaseData("1230d456k789", 1230, 456, 789, new int[0], new Dictionary<int, int>());
-                yield return new TestCaseData("1230d456!k789", 1230, 456, 789, new[] { 456 }, new Dictionary<int, int>());
-                yield return new TestCaseData("1230d456k789!", 1230, 456, 789, new[] { 456 }, new Dictionary<int, int>());
-                yield return new TestCaseData("1230d456!k789!", 1230, 456, 789, new[] { 456 }, new Dictionary<int, int>());
-                yield return new TestCaseData(" 1230 d 456 k 789 ", 1230, 456, 789, new int[0], new Dictionary<int, int>());
-                yield return new TestCaseData(" 1230 d 456 ! k 789 ", 1230, 456, 789, new[] { 456 }, new Dictionary<int, int>());
-                yield return new TestCaseData(" 1230 d 456 k 789 ! ", 1230, 456, 789, new[] { 456 }, new Dictionary<int, int>());
-                yield return new TestCaseData(" 1230 d 456 ! k 789 ! ", 1230, 456, 789, new[] { 456 }, new Dictionary<int, int>());
-                yield return new TestCaseData("92d66k42", 92, 66, 42, new int[0], new Dictionary<int, int>());
-                yield return new TestCaseData("92 d 66 k 42 ", 92, 66, 42, new int[0], new Dictionary<int, int>());
-                yield return new TestCaseData("92d66!k42", 92, 66, 42, new[] { 66 }, new Dictionary<int, int>());
-                yield return new TestCaseData("92d66k42!", 92, 66, 42, new[] { 66 }, new Dictionary<int, int>());
-                yield return new TestCaseData("92d66!k42!", 92, 66, 42, new[] { 66 }, new Dictionary<int, int>());
-                yield return new TestCaseData("92 d 66 ! k 42 ", 92, 66, 42, new[] { 66 }, new Dictionary<int, int>());
-                yield return new TestCaseData("92 d 66 k 42 ! ", 92, 66, 42, new[] { 66 }, new Dictionary<int, int>());
-                yield return new TestCaseData("92 d 66 ! k 42 ! ", 92, 66, 42, new[] { 66 }, new Dictionary<int, int>());
-                yield return new TestCaseData("3d6", 3, 6, 0, new int[0], new Dictionary<int, int>());
-                yield return new TestCaseData("3d6t1t2", 3, 6, 0, new int[0], new Dictionary<int, int> { { 1, 6 }, { 2, 6 } });
-                yield return new TestCaseData("3d6t1:2t3:4k5", 3, 6, 5, new int[0], new Dictionary<int, int> { { 1, 2 }, { 3, 4 } });
-                yield return new TestCaseData("3d6t1t3:4k5", 3, 6, 5, new int[0], new Dictionary<int, int> { { 1, 6 }, { 3, 4 } });
-                yield return new TestCaseData("3d6t1:2t3k5", 3, 6, 5, new int[0], new Dictionary<int, int> { { 1, 2 }, { 3, 6 } });
-                yield return new TestCaseData("4d6!t1t2k3", 4, 6, 3, new[] { 6 }, new Dictionary<int, int> { { 1, 6 }, { 2, 6 } });
+                yield return new TestCaseData("1d2!", 1, 2, 0, new[] { 2 }, new Dictionary<int, int>(), true);
+                yield return new TestCaseData("1d2!!", 1, 2, 0, new[] { 2 }, new Dictionary<int, int>(), true);
+                yield return new TestCaseData(" 1 d 2 ", 1, 2, 0, new int[0], new Dictionary<int, int>(), true);
+                yield return new TestCaseData(" 1 d 2 ! ", 1, 2, 0, new[] { 2 }, new Dictionary<int, int>(), true);
+                yield return new TestCaseData(" 1 d 2 ! ! ", 1, 2, 0, new[] { 2 }, new Dictionary<int, int>(), true);
+                yield return new TestCaseData("1d2k3", 1, 2, 3, new int[0], new Dictionary<int, int>(), true);
+                yield return new TestCaseData("1d2!k3", 1, 2, 3, new[] { 2 }, new Dictionary<int, int>(), true);
+                yield return new TestCaseData("1d2k3!", 1, 2, 3, new[] { 2 }, new Dictionary<int, int>(), true);
+                yield return new TestCaseData("1d2!k3!", 1, 2, 3, new[] { 2 }, new Dictionary<int, int>(), true);
+                yield return new TestCaseData(" 1 d 2 k 3 ", 1, 2, 3, new int[0], new Dictionary<int, int>(), true);
+                yield return new TestCaseData(" 1 d 2 ! k 3 ", 1, 2, 3, new[] { 2 }, new Dictionary<int, int>(), true);
+                yield return new TestCaseData(" 1 d 2 k 3 ! ", 1, 2, 3, new[] { 2 }, new Dictionary<int, int>(), true);
+                yield return new TestCaseData(" 1 d 2 ! k 3 ! ", 1, 2, 3, new[] { 2 }, new Dictionary<int, int>(), true);
+                yield return new TestCaseData("d2", 1, 2, 0, new int[0], new Dictionary<int, int>(), true);
+                yield return new TestCaseData("d2!", 1, 2, 0, new[] { 2 }, new Dictionary<int, int>(), true);
+                yield return new TestCaseData("d2!!", 1, 2, 0, new[] { 2 }, new Dictionary<int, int>(), true);
+                yield return new TestCaseData(" d 2 ", 1, 2, 0, new int[0], new Dictionary<int, int>(), true);
+                yield return new TestCaseData(" d 2 ! ", 1, 2, 0, new[] { 2 }, new Dictionary<int, int>(), true);
+                yield return new TestCaseData(" d 2 ! ! ", 1, 2, 0, new[] { 2 }, new Dictionary<int, int>(), true);
+                yield return new TestCaseData("1230d456k789", 1230, 456, 789, new int[0], new Dictionary<int, int>(), true);
+                yield return new TestCaseData("1230d456!k789", 1230, 456, 789, new[] { 456 }, new Dictionary<int, int>(), true);
+                yield return new TestCaseData("1230d456k789!", 1230, 456, 789, new[] { 456 }, new Dictionary<int, int>(), true);
+                yield return new TestCaseData("1230d456!k789!", 1230, 456, 789, new[] { 456 }, new Dictionary<int, int>(), true);
+                yield return new TestCaseData(" 1230 d 456 k 789 ", 1230, 456, 789, new int[0], new Dictionary<int, int>(), true);
+                yield return new TestCaseData(" 1230 d 456 ! k 789 ", 1230, 456, 789, new[] { 456 }, new Dictionary<int, int>(), true);
+                yield return new TestCaseData(" 1230 d 456 k 789 ! ", 1230, 456, 789, new[] { 456 }, new Dictionary<int, int>(), true);
+                yield return new TestCaseData(" 1230 d 456 ! k 789 ! ", 1230, 456, 789, new[] { 456 }, new Dictionary<int, int>(), true);
+                yield return new TestCaseData("92d66k42", 92, 66, 42, new int[0], new Dictionary<int, int>(), true);
+                yield return new TestCaseData("92 d 66 k 42 ", 92, 66, 42, new int[0], new Dictionary<int, int>(), true);
+                yield return new TestCaseData("92d66!k42", 92, 66, 42, new[] { 66 }, new Dictionary<int, int>(), true);
+                yield return new TestCaseData("92d66k42!", 92, 66, 42, new[] { 66 }, new Dictionary<int, int>(), true);
+                yield return new TestCaseData("92d66!k42!", 92, 66, 42, new[] { 66 }, new Dictionary<int, int>(), true);
+                yield return new TestCaseData("92 d 66 ! k 42 ", 92, 66, 42, new[] { 66 }, new Dictionary<int, int>(), true);
+                yield return new TestCaseData("92 d 66 k 42 ! ", 92, 66, 42, new[] { 66 }, new Dictionary<int, int>(), true);
+                yield return new TestCaseData("92 d 66 ! k 42 ! ", 92, 66, 42, new[] { 66 }, new Dictionary<int, int>(), true);
+                yield return new TestCaseData("3d6", 3, 6, 0, new int[0], new Dictionary<int, int>(), true);
+                yield return new TestCaseData("3d6t1t2", 3, 6, 0, new int[0], new Dictionary<int, int> { { 1, 6 }, { 2, 6 } }, true);
+                yield return new TestCaseData("3d6t1:2t3:4k5", 3, 6, 5, new int[0], new Dictionary<int, int> { { 1, 2 }, { 3, 4 } }, true);
+                yield return new TestCaseData("3d6t1t3:4k5", 3, 6, 5, new int[0], new Dictionary<int, int> { { 1, 6 }, { 3, 4 } }, true);
+                yield return new TestCaseData("3d6t1:2t3k5", 3, 6, 5, new int[0], new Dictionary<int, int> { { 1, 2 }, { 3, 6 } }, true);
+                yield return new TestCaseData("4d6!t1t2k3", 4, 6, 3, new[] { 6 }, new Dictionary<int, int> { { 1, 6 }, { 2, 6 } }, true);
+                yield return new TestCaseData("-1d-2", -1, -2, 0, new int[0], new Dictionary<int, int>(), false);
+                yield return new TestCaseData("-1d-2t-3:-4e-5k-6", -1, -2, -6, new[] { -5 }, new Dictionary<int, int> { { -3, -4 } }, false);
                 //From README
-                yield return new TestCaseData("4d6", 4, 6, 0, new int[0], new Dictionary<int, int>());
-                yield return new TestCaseData("92d66", 92, 66, 0, new int[0], new Dictionary<int, int>());
-                yield return new TestCaseData("3d4", 3, 4, 0, new int[0], new Dictionary<int, int>());
-                yield return new TestCaseData("1d6", 1, 6, 0, new int[0], new Dictionary<int, int>());
-                yield return new TestCaseData("2d6", 2, 6, 0, new int[0], new Dictionary<int, int>());
-                yield return new TestCaseData("3d6", 3, 6, 0, new int[0], new Dictionary<int, int>());
-                yield return new TestCaseData("5d6", 5, 6, 0, new int[0], new Dictionary<int, int>());
-                yield return new TestCaseData("4d6k3", 4, 6, 3, new int[0], new Dictionary<int, int>());
-                yield return new TestCaseData("3d4k2", 3, 4, 2, new int[0], new Dictionary<int, int>());
-                yield return new TestCaseData("1d8", 1, 8, 0, new int[0], new Dictionary<int, int>());
-                yield return new TestCaseData("1d2", 1, 2, 0, new int[0], new Dictionary<int, int>());
-                yield return new TestCaseData("4d3", 4, 3, 0, new int[0], new Dictionary<int, int>());
-                yield return new TestCaseData("4d6!", 4, 6, 0, new[] { 6 }, new Dictionary<int, int>());
-                yield return new TestCaseData("3d4!", 3, 4, 0, new[] { 4 }, new Dictionary<int, int>());
-                yield return new TestCaseData("3d4!k2", 3, 4, 2, new[] { 4 }, new Dictionary<int, int>());
-                yield return new TestCaseData("3d4!e3", 3, 4, 0, new[] { 4, 3 }, new Dictionary<int, int>());
-                yield return new TestCaseData("3d4e1e2k2", 3, 4, 2, new[] { 1, 2 }, new Dictionary<int, int>());
-                yield return new TestCaseData("3d6t1", 3, 6, 0, new int[0], new Dictionary<int, int> { { 1, 6 } });
-                yield return new TestCaseData("3d6t1t5", 3, 6, 0, new int[0], new Dictionary<int, int> { { 1, 6 }, { 5, 6 } });
-                yield return new TestCaseData("3d6!t1k2", 3, 6, 2, new[] { 6 }, new Dictionary<int, int> { { 1, 6 } });
-                yield return new TestCaseData("3d6t1:2", 3, 6, 0, new int[0], new Dictionary<int, int> { { 1, 2 } });
-                yield return new TestCaseData("4d3t2k1", 4, 3, 1, new int[0], new Dictionary<int, int> { { 2, 3 } });
-                yield return new TestCaseData("4d3k1t2", 4, 3, 1, new int[0], new Dictionary<int, int> { { 2, 3 } });
-                yield return new TestCaseData("4d3!t2k1", 4, 3, 1, new[] { 3 }, new Dictionary<int, int> { { 2, 3 } });
-                yield return new TestCaseData("4d3!k1t2", 4, 3, 1, new[] { 3 }, new Dictionary<int, int> { { 2, 3 } });
-                yield return new TestCaseData("4d3t2!k1", 4, 3, 1, new[] { 3 }, new Dictionary<int, int> { { 2, 3 } });
-                yield return new TestCaseData("4d3k1!t2", 4, 3, 1, new[] { 3 }, new Dictionary<int, int> { { 2, 3 } });
-                yield return new TestCaseData("4d3t2k1!", 4, 3, 1, new[] { 3 }, new Dictionary<int, int> { { 2, 3 } });
-                yield return new TestCaseData("4d3k1t2!", 4, 3, 1, new[] { 3 }, new Dictionary<int, int> { { 2, 3 } });
+                yield return new TestCaseData("4d6", 4, 6, 0, new int[0], new Dictionary<int, int>(), true);
+                yield return new TestCaseData("92d66", 92, 66, 0, new int[0], new Dictionary<int, int>(), true);
+                yield return new TestCaseData("3d4", 3, 4, 0, new int[0], new Dictionary<int, int>(), true);
+                yield return new TestCaseData("1d6", 1, 6, 0, new int[0], new Dictionary<int, int>(), true);
+                yield return new TestCaseData("2d6", 2, 6, 0, new int[0], new Dictionary<int, int>(), true);
+                yield return new TestCaseData("3d6", 3, 6, 0, new int[0], new Dictionary<int, int>(), true);
+                yield return new TestCaseData("5d6", 5, 6, 0, new int[0], new Dictionary<int, int>(), true);
+                yield return new TestCaseData("4d6k3", 4, 6, 3, new int[0], new Dictionary<int, int>(), true);
+                yield return new TestCaseData("3d4k2", 3, 4, 2, new int[0], new Dictionary<int, int>(), true);
+                yield return new TestCaseData("1d8", 1, 8, 0, new int[0], new Dictionary<int, int>(), true);
+                yield return new TestCaseData("1d2", 1, 2, 0, new int[0], new Dictionary<int, int>(), true);
+                yield return new TestCaseData("4d3", 4, 3, 0, new int[0], new Dictionary<int, int>(), true);
+                yield return new TestCaseData("4d6!", 4, 6, 0, new[] { 6 }, new Dictionary<int, int>(), true);
+                yield return new TestCaseData("3d4!", 3, 4, 0, new[] { 4 }, new Dictionary<int, int>(), true);
+                yield return new TestCaseData("3d4!k2", 3, 4, 2, new[] { 4 }, new Dictionary<int, int>(), true);
+                yield return new TestCaseData("3d4!e3", 3, 4, 0, new[] { 4, 3 }, new Dictionary<int, int>(), true);
+                yield return new TestCaseData("3d4e1e2k2", 3, 4, 2, new[] { 1, 2 }, new Dictionary<int, int>(), true);
+                yield return new TestCaseData("3d6t1", 3, 6, 0, new int[0], new Dictionary<int, int> { { 1, 6 } }, true);
+                yield return new TestCaseData("3d6t1t5", 3, 6, 0, new int[0], new Dictionary<int, int> { { 1, 6 }, { 5, 6 } }, true);
+                yield return new TestCaseData("3d6!t1k2", 3, 6, 2, new[] { 6 }, new Dictionary<int, int> { { 1, 6 } }, true);
+                yield return new TestCaseData("3d6t1:2", 3, 6, 0, new int[0], new Dictionary<int, int> { { 1, 2 } }, true);
+                yield return new TestCaseData("4d3t2k1", 4, 3, 1, new int[0], new Dictionary<int, int> { { 2, 3 } }, true);
+                yield return new TestCaseData("4d3k1t2", 4, 3, 1, new int[0], new Dictionary<int, int> { { 2, 3 } }, true);
+                yield return new TestCaseData("4d3!t2k1", 4, 3, 1, new[] { 3 }, new Dictionary<int, int> { { 2, 3 } }, true);
+                yield return new TestCaseData("4d3!k1t2", 4, 3, 1, new[] { 3 }, new Dictionary<int, int> { { 2, 3 } }, true);
+                yield return new TestCaseData("4d3t2!k1", 4, 3, 1, new[] { 3 }, new Dictionary<int, int> { { 2, 3 } }, true);
+                yield return new TestCaseData("4d3k1!t2", 4, 3, 1, new[] { 3 }, new Dictionary<int, int> { { 2, 3 } }, true);
+                yield return new TestCaseData("4d3t2k1!", 4, 3, 1, new[] { 3 }, new Dictionary<int, int> { { 2, 3 } }, true);
+                yield return new TestCaseData("4d3k1t2!", 4, 3, 1, new[] { 3 }, new Dictionary<int, int> { { 2, 3 } }, true);
             }
         }
 

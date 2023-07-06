@@ -7,14 +7,15 @@ namespace DnDGen.RollGen.Tests.Unit.Expressions
     [TestFixture]
     public class RegexConstantsTests
     {
-        [TestCase(RegexConstants.CommonRollRegexPattern, "d *\\d+(?: *("
+        [TestCase(RegexConstants.NumberPattern, "-?\\d+")]
+        [TestCase(RegexConstants.CommonRollRegexPattern, "d *" + RegexConstants.NumberPattern + "(?: *("
             + "( *!)" //explode default
-            + "|( *(e *\\d+))" //explode specific
-            + "|( *(t *\\d+ *: *\\d+))" //transform specific
-            + "|( *(t *\\d+))" //transform
-            + "|( *(k *\\d+))" //keep
+            + "|( *(e *" + RegexConstants.NumberPattern + "))" //explode specific
+            + "|( *(t *" + RegexConstants.NumberPattern + " *: *" + RegexConstants.NumberPattern + "))" //transform specific
+            + "|( *(t *" + RegexConstants.NumberPattern + "))" //transform
+            + "|( *(k *" + RegexConstants.NumberPattern + "))" //keep
             + ")*)")]
-        [TestCase(RegexConstants.StrictRollPattern, "(?:(?:\\d* +)|(?:\\d+ *)|^)" + RegexConstants.CommonRollRegexPattern)]
+        [TestCase(RegexConstants.StrictRollPattern, "(?:(?:\\d* +)|(?:(?<=\\D|^)" + RegexConstants.NumberPattern + " *)|^)" + RegexConstants.CommonRollRegexPattern)]
         [TestCase(RegexConstants.LenientRollPattern, "\\d* *" + RegexConstants.CommonRollRegexPattern)]
         [TestCase(RegexConstants.ExpressionWithoutDieRollsPattern, "(?:[-+]?\\d*\\.?\\d+[%/\\+\\-\\*])+(?:[-+]?\\d*\\.?\\d+)")]
         [TestCase(RegexConstants.BooleanExpressionPattern, "[<=>]")]
@@ -62,17 +63,32 @@ namespace DnDGen.RollGen.Tests.Unit.Expressions
         [TestCase(" 1 d 4 e 2 e 3 ! ", true)]
         [TestCase("1d4e4", true)]
         [TestCase(" 1 d 4 e 4 ", true)]
+        [TestCase("1d1", true)]
+        [TestCase("-1d1", true)]
+        [TestCase("1d-1", true)]
+        [TestCase("-1d-1", true)]
+        [TestCase("-1d-2!t-3:-4k-5", true)]
+        [TestCase("--1d2", true, false)]
+        [TestCase("1d-2", true)]
+        [TestCase("1d--2", false)]
+        [TestCase("--1d--2", false)]
+        [TestCase("-23d-45", true)]
+        [TestCase("0d0", true)]
+        [TestCase("00d00", true)]
+        [TestCase("not a roll", false)]
+        [TestCase("1d2-3d4", true, false)]
+        [TestCase("Roll this: -5d6", true, false)]
         //From README
         [TestCase("4d6", true)]
         [TestCase("92d66", true)]
-        [TestCase("5+3d4*2", true, Ignore = "This is only a partial match")]
-        [TestCase("((1d2)d5k1)d6", true, Ignore = "This is only a partial match")]
+        [TestCase("5+3d4*2", true, false)]
+        [TestCase("((1d2)d5k1)d6", true, false)]
         [TestCase("4d6k3", true)]
         [TestCase("3d4k2", true)]
-        [TestCase("5+3d4*3", true, Ignore = "This is only a partial match")]
-        [TestCase("1d6+3", true, Ignore = "This is only a partial match")]
-        [TestCase("1d8+1d2-1", true, Ignore = "This is only a partial match")]
-        [TestCase("4d3-3", true, Ignore = "This is only a partial match")]
+        [TestCase("5+3d4*3", true, false)]
+        [TestCase("1d6+3", true, false)]
+        [TestCase("1d8+1d2-1", true, false)]
+        [TestCase("4d3-3", true, false)]
         [TestCase("4d6!", true)]
         [TestCase("3d4!", true)]
         [TestCase("3d4!k2", true)]
@@ -90,9 +106,9 @@ namespace DnDGen.RollGen.Tests.Unit.Expressions
         [TestCase("4d3k1!t2", true)]
         [TestCase("4d3t2k1!", true)]
         [TestCase("4d3k1t2!", true)]
-        public void StrictRollRegexMatches(string source, bool isMatch)
+        public void StrictRollRegexMatches(string source, bool isMatch, bool verifyMatchContents = true)
         {
-            VerifyMatch(RegexConstants.StrictRollPattern, source, isMatch);
+            VerifyMatch(RegexConstants.StrictRollPattern, source, isMatch, verifyMatchContents);
         }
 
         private void VerifyMatch(string pattern, string source, bool isMatch, bool verifyMatchContents = true)

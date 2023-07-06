@@ -53,12 +53,12 @@ namespace DnDGen.RollGen.PartialRolls
                     continue;
                 }
 
-                if (!char.IsDigit(toParse[i]) && !number.Any())
+                if (!char.IsDigit(toParse[i]) && !number.Any() && toParse[i] != '-')
                 {
                     key = toParse[i];
                     continue;
                 }
-                else if (char.IsDigit(toParse[i]))
+                else if (char.IsDigit(toParse[i]) || (!number.Any() && toParse[i] == '-'))
                 {
                     number += toParse[i];
                     continue;
