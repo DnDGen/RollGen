@@ -164,6 +164,9 @@ namespace DnDGen.RollGen.Tests.Integration
         [TestCase("1d6", false)]
         [TestCase("1d6+3", false)]
         [TestCase("1 d 6", false)]
+        [TestCase("xdy", false)]
+        [TestCase("invalid", false)]
+        [TestCase("this is not a roll", false)]
         public void IsValid_ReturnsValidity(string expression, bool expected)
         {
             var actual = expressionEvaluator.IsValid(expression);

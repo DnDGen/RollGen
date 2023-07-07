@@ -133,6 +133,9 @@ namespace DnDGen.RollGen.Tests.Integration
         [TestCase("10001d10000", false)]
         [TestCase("10000d10001", false)]
         [TestCase("10001d10001", false)]
+        [TestCase("xdy", false)]
+        [TestCase("invalid", false)]
+        [TestCase("this is not a roll", false)]
         public void IsValid_Expression(string rollExpression, bool expected)
         {
             var actual = dice.IsValid(rollExpression);
