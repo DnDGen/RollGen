@@ -29,7 +29,7 @@ namespace DnDGen.RollGen.Tests.Integration
         [TestCase("(100d100)d(100d100)", true)]
         [TestCase("100d100d(100d100)", true)]
         [TestCase("(0)d(6)+1", false)]
-        [TestCase("(-3)d(6)+1", false, Ignore = "This is interpreted as -1(3d6)+1, which is valid")]
+        [TestCase("(-3)d(6)+1", false)]
         [TestCase("(3.1)d(6)+1", false)]
         [TestCase("0d6+1", false)]
         [TestCase("10001d10000", false)]
@@ -57,7 +57,7 @@ namespace DnDGen.RollGen.Tests.Integration
         [TestCase("3d6t10001", false)]
         [TestCase("3d6t6:10001", true)]
         [TestCase("3d6t6:0", true)]
-        [TestCase("3d6t6:(-1)", true, Ignore = "Negative transform targets are not detected correctly")]
+        [TestCase("3d6t6:(-1)", true)]
         [TestCase("avg(1d12, 2d6, 3d4, 4d3, 6d2)", true)]
         [TestCase("bad(1d12, 2d6, 3d4, 4d3, 6d2)", false)]
         [TestCase("this is not a roll", false)]
@@ -121,9 +121,39 @@ namespace DnDGen.RollGen.Tests.Integration
         [TestCase("4d3t2k1!", true)]
         [TestCase("4d3k1!t2", true)]
         [TestCase("4d3k1t2!", true)]
-        public void IsValid(string rollExpression, bool expected)
+        [TestCase("1d1", true)]
+        [TestCase("-1d1", false)]
+        [TestCase("1d-1", false)]
+        [TestCase("-1d-1", false)]
+        [TestCase("10000d1", true)]
+        [TestCase("10001d1", false)]
+        [TestCase("1d10000", true)]
+        [TestCase("1d10001", false)]
+        [TestCase("10000d10000", true)]
+        [TestCase("10001d10000", false)]
+        [TestCase("10000d10001", false)]
+        [TestCase("10001d10001", false)]
+        public void IsValid_Expression(string rollExpression, bool expected)
         {
             var actual = dice.IsValid(rollExpression);
+            Assert.That(actual, Is.EqualTo(expected));
+        }
+
+        [TestCase(1, 1, true)]
+        [TestCase(-1, 1, false)]
+        [TestCase(1, -1, false)]
+        [TestCase(-1, -1, false)]
+        [TestCase(Limits.Quantity, 1, true)]
+        [TestCase(Limits.Quantity + 1, 1, false)]
+        [TestCase(1, Limits.Die, true)]
+        [TestCase(1, Limits.Die + 1, false)]
+        [TestCase(Limits.Quantity, Limits.Die, true)]
+        [TestCase(Limits.Quantity + 1, Limits.Die, false)]
+        [TestCase(Limits.Quantity, Limits.Die + 1, false)]
+        [TestCase(Limits.Quantity + 1, Limits.Die + 1, false)]
+        public void IsValid_Numeric(int quantity, int die, bool expected)
+        {
+            var actual = dice.Roll(quantity).d(die).IsValid();
             Assert.That(actual, Is.EqualTo(expected));
         }
     }

@@ -25,9 +25,6 @@ namespace DnDGen.RollGen
 
         public PartialRoll Roll(int quantity = 1)
         {
-            if (quantity > Limits.Quantity)
-                throw new ArgumentException($"Cannot roll more than {Limits.Quantity} die rolls at a time");
-
             return partialRollFactory.Build(quantity);
         }
 
