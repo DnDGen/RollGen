@@ -47,7 +47,7 @@ namespace DnDGen.RollGen.Expressions
             try
             {
                 var unevaluatedMatch = parser.Compile(expression).EvalValue(null);
-                return true;
+                return unevaluatedMatch != null;
             }
             catch
             {
