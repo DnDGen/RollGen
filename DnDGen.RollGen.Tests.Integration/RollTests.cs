@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using System.Collections;
 using System.Linq;
 
 namespace DnDGen.RollGen.Tests.Integration
@@ -12,6 +13,43 @@ namespace DnDGen.RollGen.Tests.Integration
         public void Setup()
         {
             dice = GetNewInstanceOf<Dice>();
+        }
+
+        [Repeat(100)]
+        [TestCaseSource(nameof(NumericRolls))]
+        public void RollNumericRange(int quantity, int die)
+        {
+            var roll = dice.Roll(quantity).d(die);
+            var sum = roll.AsSum();
+            var min = roll.AsPotentialMinimum();
+            var max = roll.AsPotentialMaximum();
+
+            Assert.That(min, Is.EqualTo(quantity));
+            Assert.That(max, Is.EqualTo(quantity * die));
+            Assert.That(sum, Is.InRange(quantity, quantity * die));
+        }
+
+        public static IEnumerable NumericRolls
+        {
+            get
+            {
+                var numbers = new[]
+                {
+                    1, 2, 10, 100, 1000, 10_000,
+                    9266, 90210, 42, 600, 1337,
+                    1336, 96, 783, 8245,
+                    69, 420,
+                    922, 2022, 227,
+                };
+
+                foreach (var q in numbers.Where(n => n <= Limits.Quantity))
+                {
+                    foreach (var d in numbers.Where(n => n <= Limits.Die))
+                    {
+                        yield return new TestCaseData(q, d);
+                    }
+                }
+            }
         }
 
         [TestCase("1d2", 1, 2)]
