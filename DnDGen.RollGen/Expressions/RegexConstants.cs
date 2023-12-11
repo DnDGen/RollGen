@@ -14,5 +14,7 @@
         public const string ExpressionWithoutDieRollsPattern = "(?:[-+]?\\d*\\.?\\d+[%/\\+\\-\\*])+(?:[-+]?\\d*\\.?\\d+)";
         public const string LenientRollPattern = "\\d* *" + CommonRollRegexPattern;
         public const string BooleanExpressionPattern = "[<=>]";
+
+        public static string RepeatedRollPattern(string roll) => $"{roll}(\\+{roll})+";
     }
 }

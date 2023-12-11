@@ -1,5 +1,7 @@
 ﻿using NUnit.Framework;
+using System;
 using System.Collections;
+using System.Diagnostics;
 using System.Linq;
 
 namespace DnDGen.RollGen.Tests.Integration
@@ -8,11 +10,13 @@ namespace DnDGen.RollGen.Tests.Integration
     public class RollTests : IntegrationTests
     {
         private Dice dice;
+        private Stopwatch stopwatch;
 
         [SetUp]
         public void Setup()
         {
             dice = GetNewInstanceOf<Dice>();
+            stopwatch = new Stopwatch();
         }
 
         [Repeat(100)]
@@ -528,6 +532,78 @@ namespace DnDGen.RollGen.Tests.Integration
 
             Assert.That(rolls, Has.All.InRange(expectedMinimum, expectedMaximum));
             Assert.That(rolls.Count(), Is.EqualTo(rollCount));
+        }
+
+        [TestCase(133_851, 2_126_438_624, "REPEAT+7825d100+14d8-21343988", "10000d100", 2147)]
+        [TestCase(20_133_851, 2_146_438_624, "REPEAT+7825d100+14d8-1343988", "10000d100", 2147)]
+        [TestCase(73_422_562, 1_673_270_503, "REPEAT+80d100+3d8+57262479", "10000d100", 1616)]
+        [TestCase(239_762_129, 792_745_843, "REPEAT+5694d100+4d3+234176431", "10000d100", 558)]
+        [TestCase(524_600_879, 1_213_158_805, "REPEAT+5130d100+8d8+517645741", "10000d100", 695)]
+        public void IsValid_OfLargeRoll_IsFast(int lower, int upper, string rollTemplate, string repeatTerm, int repeatCount)
+        {
+            var repeats = Enumerable.Repeat(repeatTerm, repeatCount);
+            var largeRoll = rollTemplate.Replace("REPEAT", string.Join("+", repeats));
+
+            stopwatch.Start();
+            var valid = dice.Roll(largeRoll).IsValid();
+            stopwatch.Stop();
+
+            Assert.That(valid, Is.True);
+            Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)));
+        }
+
+        [TestCase(133_851, 2_126_438_624, "REPEAT+7825d100+14d8-21343988", "10000d100", 2147)]
+        [TestCase(20_133_851, 2_146_438_624, "REPEAT+7825d100+14d8-1343988", "10000d100", 2147)]
+        [TestCase(73_422_562, 1_673_270_503, "REPEAT+80d100+3d8+57262479", "10000d100", 1616)]
+        [TestCase(239_762_129, 792_745_843, "REPEAT+5694d100+4d3+234176431", "10000d100", 558)]
+        [TestCase(524_600_879, 1_213_158_805, "REPEAT+5130d100+8d8+517645741", "10000d100", 695)]
+        public void AsSum_OfLargeRoll_IsFast(int lower, int upper, string rollTemplate, string repeatTerm, int repeatCount)
+        {
+            var repeats = Enumerable.Repeat(repeatTerm, repeatCount);
+            var largeRoll = rollTemplate.Replace("REPEAT", string.Join("+", repeats));
+
+            stopwatch.Start();
+            var roll = dice.Roll(largeRoll).AsSum();
+            stopwatch.Stop();
+
+            Assert.That(roll, Is.AtLeast(lower).And.AtMost(upper));
+            Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)));
+        }
+
+        [TestCase(133_851, 2_126_438_624, "REPEAT+7825d100+14d8-21343988", "10000d100", 2147)]
+        [TestCase(20_133_851, 2_146_438_624, "REPEAT+7825d100+14d8-1343988", "10000d100", 2147)]
+        [TestCase(73_422_562, 1_673_270_503, "REPEAT+80d100+3d8+57262479", "10000d100", 1616)]
+        [TestCase(239_762_129, 792_745_843, "REPEAT+5694d100+4d3+234176431", "10000d100", 558)]
+        [TestCase(524_600_879, 1_213_158_805, "REPEAT+5130d100+8d8+517645741", "10000d100", 695)]
+        public void AsMinimum_OfLargeRoll_IsFast(int lower, int upper, string rollTemplate, string repeatTerm, int repeatCount)
+        {
+            var repeats = Enumerable.Repeat(repeatTerm, repeatCount);
+            var largeRoll = rollTemplate.Replace("REPEAT", string.Join("+", repeats));
+
+            stopwatch.Start();
+            var roll = dice.Roll(largeRoll).AsPotentialMinimum();
+            stopwatch.Stop();
+
+            Assert.That(roll, Is.EqualTo(lower));
+            Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)));
+        }
+
+        [TestCase(133_851, 2_126_438_624, "REPEAT+7825d100+14d8-21343988", "10000d100", 2147)]
+        [TestCase(20_133_851, 2_146_438_624, "REPEAT+7825d100+14d8-1343988", "10000d100", 2147)]
+        [TestCase(73_422_562, 1_673_270_503, "REPEAT+80d100+3d8+57262479", "10000d100", 1616)]
+        [TestCase(239_762_129, 792_745_843, "REPEAT+5694d100+4d3+234176431", "10000d100", 558)]
+        [TestCase(524_600_879, 1_213_158_805, "REPEAT+5130d100+8d8+517645741", "10000d100", 695)]
+        public void AsMaximum_OfLargeRoll_IsFast(int lower, int upper, string rollTemplate, string repeatTerm, int repeatCount)
+        {
+            var repeats = Enumerable.Repeat(repeatTerm, repeatCount);
+            var largeRoll = rollTemplate.Replace("REPEAT", string.Join("+", repeats));
+
+            stopwatch.Start();
+            var roll = dice.Roll(largeRoll).AsPotentialMaximum();
+            stopwatch.Stop();
+
+            Assert.That(roll, Is.EqualTo(upper));
+            Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)));
         }
     }
 }

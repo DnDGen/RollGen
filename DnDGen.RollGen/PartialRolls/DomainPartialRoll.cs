@@ -424,6 +424,21 @@ namespace DnDGen.RollGen.PartialRolls
             return source;
         }
 
+        private string ReplaceAll(string source, string target, string replacement)
+        {
+            var index = source.IndexOf(target);
+
+            while (index > -1)
+            {
+                source = source.Remove(index, target.Length);
+                source = source.Insert(index, replacement);
+
+                index = source.IndexOf(target);
+            }
+
+            return source;
+        }
+
         public override PartialRoll Plus(string expression)
         {
             CurrentRollExpression += $"+({expression})";
@@ -585,7 +600,18 @@ namespace DnDGen.RollGen.PartialRolls
                 if (!roll.IsValid)
                     return (null, false);
 
+
                 var replacement = roll.GetPotentialMaximum(true);
+                var repeatedRollPattern = RegexConstants.RepeatedRollPattern(matchValue);
+                var repeatedRollRegex = new Regex(repeatedRollPattern);
+                var repeatedMatch = repeatedRollRegex.Match(expressionWithReplacedRolls);
+
+                if (repeatedMatch.Success)
+                {
+                    var count = new Regex(Regex.Escape(matchValue)).Matches(repeatedMatch.Value).Count;
+                    replacement *= count;
+                    matchValue = repeatedMatch.Value.Trim();
+                }
 
                 expressionWithReplacedRolls = ReplaceFirst(expressionWithReplacedRolls, matchValue, replacement.ToString());
                 match = strictRollRegex.Match(expressionWithReplacedRolls);
