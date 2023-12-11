@@ -600,7 +600,6 @@ namespace DnDGen.RollGen.PartialRolls
                 if (!roll.IsValid)
                     return (null, false);
 
-
                 var replacement = roll.GetPotentialMaximum(true);
                 var repeatedRollPattern = RegexConstants.RepeatedRollPattern(matchValue);
                 var repeatedRollRegex = new Regex(repeatedRollPattern);
