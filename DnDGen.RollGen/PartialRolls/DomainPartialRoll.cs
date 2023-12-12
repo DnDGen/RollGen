@@ -309,9 +309,29 @@ namespace DnDGen.RollGen.PartialRolls
                 }
 
                 var matchValue = match.Value.Trim();
-                var replacement = getRoll(matchValue);
+                var repeatedRoll = RegexConstants.GetRepeatedRoll(matchValue, expressionWithReplacedRolls);
+                var replacement = string.Empty;
 
-                expressionWithReplacedRolls = ReplaceFirst(expressionWithReplacedRolls, matchValue, replacement.ToString());
+                if (repeatedRoll.Match.Success && typeof(T) == typeof(int))
+                {
+                    var remaining = repeatedRoll.MatchCount;
+                    var total = 0;
+
+                    while (remaining-- > 0)
+                    {
+                        var rawRoll = getRoll(matchValue);
+                        total += Convert.ToInt32(rawRoll.ToString());
+                    }
+
+                    matchValue = repeatedRoll.Match.Value.Trim();
+                    replacement = total.ToString();
+                }
+                else
+                {
+                    replacement = getRoll(matchValue).ToString();
+                }
+
+                expressionWithReplacedRolls = ReplaceFirst(expressionWithReplacedRolls, matchValue, replacement);
                 match = strictRollRegex.Match(expressionWithReplacedRolls);
             }
 
@@ -601,15 +621,12 @@ namespace DnDGen.RollGen.PartialRolls
                     return (null, false);
 
                 var replacement = roll.GetPotentialMaximum(true);
-                var repeatedRollPattern = RegexConstants.RepeatedRollPattern(matchValue);
-                var repeatedRollRegex = new Regex(repeatedRollPattern);
-                var repeatedMatch = repeatedRollRegex.Match(expressionWithReplacedRolls);
+                var repeatedRoll = RegexConstants.GetRepeatedRoll(matchValue, expressionWithReplacedRolls);
 
-                if (repeatedMatch.Success)
+                if (repeatedRoll.Match.Success)
                 {
-                    var count = new Regex(Regex.Escape(matchValue)).Matches(repeatedMatch.Value).Count;
-                    replacement *= count;
-                    matchValue = repeatedMatch.Value.Trim();
+                    replacement *= repeatedRoll.MatchCount;
+                    matchValue = repeatedRoll.Match.Value.Trim();
                 }
 
                 expressionWithReplacedRolls = ReplaceFirst(expressionWithReplacedRolls, matchValue, replacement.ToString());

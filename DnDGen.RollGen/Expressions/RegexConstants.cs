@@ -1,4 +1,6 @@
-﻿namespace DnDGen.RollGen.Expressions
+﻿using System.Text.RegularExpressions;
+
+namespace DnDGen.RollGen.Expressions
 {
     internal static class RegexConstants
     {
@@ -15,6 +17,21 @@
         public const string LenientRollPattern = "\\d* *" + CommonRollRegexPattern;
         public const string BooleanExpressionPattern = "[<=>]";
 
-        public static string RepeatedRollPattern(string roll) => $"{roll}(\\+{roll})+";
+        private static string RepeatedRollPattern(string roll) => $"{roll}(\\+{roll})+";
+
+        public static (Match Match, int MatchCount) GetRepeatedRoll(string roll, string source)
+        {
+            var repeatedRollPattern = RepeatedRollPattern(roll);
+            var repeatedRollRegex = new Regex(repeatedRollPattern);
+            var repeatedMatch = repeatedRollRegex.Match(source);
+            var matchCount = 0;
+
+            if (repeatedMatch.Success)
+            {
+                matchCount = new Regex(roll).Matches(repeatedMatch.Value).Count;
+            }
+
+            return (repeatedMatch, matchCount);
+        }
     }
 }

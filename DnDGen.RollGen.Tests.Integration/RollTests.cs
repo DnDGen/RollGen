@@ -567,7 +567,7 @@ namespace DnDGen.RollGen.Tests.Integration
             stopwatch.Stop();
 
             Assert.That(roll, Is.AtLeast(lower).And.AtMost(upper));
-            Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)));
+            Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)).Or.LessThan(TimeSpan.FromSeconds(repeatCount * .005)));
         }
 
         [TestCase(133_851, 2_126_438_624, "REPEAT+7825d100+14d8-21343988", "10000d100", 2147)]
