@@ -309,9 +309,43 @@ namespace DnDGen.RollGen.PartialRolls
                 }
 
                 var matchValue = match.Value.Trim();
-                var replacement = getRoll(matchValue);
+                var repeatedRoll = RegexConstants.GetRepeatedRoll(matchValue, expressionWithReplacedRolls);
+                var replacement = string.Empty;
 
-                expressionWithReplacedRolls = ReplaceFirst(expressionWithReplacedRolls, matchValue, replacement.ToString());
+                if (repeatedRoll.IsMatch && typeof(T) == typeof(int))
+                {
+                    var remaining = repeatedRoll.MatchCount;
+                    var total = 0;
+
+                    while (remaining-- > 0)
+                    {
+                        var rawRoll = getRoll(matchValue);
+                        total += Convert.ToInt32(rawRoll.ToString());
+                    }
+
+                    matchValue = repeatedRoll.Match.Trim();
+                    replacement = total.ToString();
+                }
+                else if (repeatedRoll.IsMatch && typeof(T) == typeof(double))
+                {
+                    var remaining = repeatedRoll.MatchCount;
+                    var total = 0d;
+
+                    while (remaining-- > 0)
+                    {
+                        var rawRoll = getRoll(matchValue);
+                        total += Convert.ToDouble(rawRoll.ToString());
+                    }
+
+                    matchValue = repeatedRoll.Match.Trim();
+                    replacement = total.ToString();
+                }
+                else
+                {
+                    replacement = getRoll(matchValue).ToString();
+                }
+
+                expressionWithReplacedRolls = ReplaceFirst(expressionWithReplacedRolls, matchValue, replacement, repeatedRoll.Index);
                 match = strictRollRegex.Match(expressionWithReplacedRolls);
             }
 
@@ -416,9 +450,11 @@ namespace DnDGen.RollGen.PartialRolls
             return Utils.ChangeType<T>(maximum);
         }
 
-        private string ReplaceFirst(string source, string target, string replacement)
+        private string ReplaceFirst(string source, string target, string replacement, int index = -1)
         {
-            var index = source.IndexOf(target);
+            if (index == -1)
+                index = source.IndexOf(target);
+
             source = source.Remove(index, target.Length);
             source = source.Insert(index, replacement);
             return source;
@@ -586,8 +622,15 @@ namespace DnDGen.RollGen.PartialRolls
                     return (null, false);
 
                 var replacement = roll.GetPotentialMaximum(true);
+                var repeatedRoll = RegexConstants.GetRepeatedRoll(matchValue, expressionWithReplacedRolls);
 
-                expressionWithReplacedRolls = ReplaceFirst(expressionWithReplacedRolls, matchValue, replacement.ToString());
+                if (repeatedRoll.IsMatch)
+                {
+                    replacement *= repeatedRoll.MatchCount;
+                    matchValue = repeatedRoll.Match.Trim();
+                }
+
+                expressionWithReplacedRolls = ReplaceFirst(expressionWithReplacedRolls, matchValue, replacement.ToString(), repeatedRoll.Index);
                 match = strictRollRegex.Match(expressionWithReplacedRolls);
             }
 

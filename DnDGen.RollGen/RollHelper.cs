@@ -248,10 +248,6 @@ namespace DnDGen.RollGen
                 });
             }
 
-            //HACK: Have to make sure that the Upper value won't cause an overflow
-            if (prototypes.Sum(p => p.Quantity * (long)p.Die) > int.MaxValue)
-                return new List<RollPrototype>();
-
             return prototypes;
         }
 

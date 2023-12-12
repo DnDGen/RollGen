@@ -1,6 +1,7 @@
 ﻿using NUnit.Framework;
 using System;
 using System.Diagnostics;
+using System.Linq;
 
 namespace DnDGen.RollGen.Tests.Unit
 {
@@ -343,6 +344,21 @@ namespace DnDGen.RollGen.Tests.Unit
         [TestCase(90_210, 90_210, "90210")]
         public void GetRollWithFewestDice(int lower, int upper, string expectedRoll)
         {
+            stopwatch.Start();
+            var roll = RollHelper.GetRollWithFewestDice(lower, upper);
+            stopwatch.Stop();
+
+            Assert.That(roll, Is.EqualTo(expectedRoll), $"[{lower},{upper}]");
+            Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)), $"[{lower},{upper}]");
+        }
+
+        [TestCase(133_851, 2_126_438_624, "REPEAT+7825d100+14d8-21343988", "10000d100", 2147)]
+        [TestCase(20_133_851, 2_146_438_624, "REPEAT+7825d100+14d8-1343988", "10000d100", 2147)]
+        public void GetRollWithFewestDice_HighUpper(int lower, int upper, string rollTemplate, string repeatTerm, int repeatCount)
+        {
+            var repeats = Enumerable.Repeat(repeatTerm, repeatCount);
+            var expectedRoll = rollTemplate.Replace("REPEAT", string.Join("+", repeats));
+
             stopwatch.Start();
             var roll = RollHelper.GetRollWithFewestDice(lower, upper);
             stopwatch.Stop();

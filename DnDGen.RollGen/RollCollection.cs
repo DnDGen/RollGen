@@ -15,8 +15,10 @@ namespace DnDGen.RollGen
         public IEnumerable<RollPrototype> UnmultipliedRolls => Rolls.Where(r => r.Multiplier == 1);
         public int Quantities => UnmultipliedRolls.Sum(r => r.Quantity);
         public int Lower => Quantities + Adjustment;
-        public int Upper => MultipliedRolls.Sum(r => r.Quantity * (r.Die - 1) * r.Multiplier)
-            + UnmultipliedRolls.Sum(r => r.Quantity * r.Die)
+        public int Upper => (int)rawUpper;
+
+        private long rawUpper => MultipliedRolls.Sum(r => r.Quantity * (r.Die - 1) * (long)r.Multiplier)
+            + UnmultipliedRolls.Sum(r => r.Quantity * (long)r.Die)
             + Adjustment;
 
         public RollCollection()
@@ -48,6 +50,7 @@ namespace DnDGen.RollGen
         {
             return lower == Lower
                 && upper == Upper
+                && Lower <= Upper
                 && !Rolls.Any(r => !r.IsValid);
         }
 
