@@ -316,6 +316,7 @@ namespace DnDGen.RollGen.PartialRolls
                 {
                     var remaining = repeatedRoll.MatchCount;
                     var total = 0;
+                    //var total = 0L;
 
                     while (remaining-- > 0)
                     {

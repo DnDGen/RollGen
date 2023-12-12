@@ -3533,6 +3533,17 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
+        public void IsValid_ChecksRepeatedRoll_Valid_AvoidOverflow()
+        {
+            var repeatedRoll = string.Join("+", Enumerable.Repeat("10000d10000", 22));
+            BuildPartialRoll("9266d9010+11d100000000+11d100000000-1000000000");
+            mockExpressionEvaluator.Setup(e => e.IsValid("83486660+50400+1786232")).Returns(true);
+
+            var valid = partialRoll.IsValid();
+            Assert.That(valid, Is.True);
+        }
+
+        [Test]
         public void IsValid_ChecksRepeatedRoll_Invalid()
         {
             BuildPartialRoll("9266d9010+42d600+42d600++1337d1336");
@@ -3573,6 +3584,17 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
+        public void AsSum_ChecksRepeatedRoll_AvoidOverflow()
+        {
+            var repeatedRoll = string.Join("+", Enumerable.Repeat("10000d10000", 22));
+            BuildPartialRoll($"9266d9010+{repeatedRoll}-1000000000");
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>("40627451+25914+894451")).Returns(8245);
+
+            var sum = partialRoll.AsSum();
+            Assert.That(sum, Is.EqualTo(8245));
+        }
+
+        [Test]
         public void AsSum_ChecksMultipleRepeatedRolls()
         {
             BuildPartialRoll("9266d9010+42d600+42d600+1337d1336+1337d1336+96d783");
@@ -3586,6 +3608,17 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         public void AsAverage_ChecksRepeatedRoll()
         {
             BuildPartialRoll("9266d9010+42d600+42d600+1337d1336");
+            mockExpressionEvaluator.Setup(e => e.Evaluate<double>("41747963+25242+893784.5")).Returns(8245);
+
+            var average = partialRoll.AsPotentialAverage();
+            Assert.That(average, Is.EqualTo(8245));
+        }
+
+        [Test]
+        public void AsAverage_ChecksRepeatedRoll_AvoidOverflow()
+        {
+            var repeatedRoll = string.Join("+", Enumerable.Repeat("10000d10000", 22));
+            BuildPartialRoll("9266d9010+11d100000000+11d100000000-1000000000");
             mockExpressionEvaluator.Setup(e => e.Evaluate<double>("41747963+25242+893784.5")).Returns(8245);
 
             var average = partialRoll.AsPotentialAverage();
@@ -3613,6 +3646,17 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         }
 
         [Test]
+        public void AsMax_ChecksRepeatedRoll_AvoidOverflow()
+        {
+            var repeatedRoll = string.Join("+", Enumerable.Repeat("10000d10000", 22));
+            BuildPartialRoll("9266d9010+11d100000000+11d100000000-1000000000");
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>("83486660+50400+1786232")).Returns(8245);
+
+            var max = partialRoll.AsPotentialMaximum();
+            Assert.That(max, Is.EqualTo(8245));
+        }
+
+        [Test]
         public void AsMax_ChecksMultipleRepeatedRolls()
         {
             BuildPartialRoll("9266d9010+42d600+42d600+1337d1336+1337d1336+96d783");
@@ -3626,6 +3670,17 @@ namespace DnDGen.RollGen.Tests.Unit.PartialRolls
         public void AsMin_ChecksRepeatedRoll()
         {
             BuildPartialRoll("9266d9010+42d600+42d600+1337d1336");
+            mockExpressionEvaluator.Setup(e => e.Evaluate<int>("9266+84+1337")).Returns(8245);
+
+            var min = partialRoll.AsPotentialMinimum();
+            Assert.That(min, Is.EqualTo(8245));
+        }
+
+        [Test]
+        public void AsMin_ChecksRepeatedRoll_AvoidOverflow()
+        {
+            var repeatedRoll = string.Join("+", Enumerable.Repeat("10000d10000", 22));
+            BuildPartialRoll("9266d9010+11d100000000+11d100000000-1000000000");
             mockExpressionEvaluator.Setup(e => e.Evaluate<int>("9266+84+1337")).Returns(8245);
 
             var min = partialRoll.AsPotentialMinimum();
