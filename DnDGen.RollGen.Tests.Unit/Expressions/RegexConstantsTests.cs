@@ -154,5 +154,58 @@ namespace DnDGen.RollGen.Tests.Unit.Expressions
         {
             VerifyMatch(RegexConstants.BooleanExpressionPattern, source, isMatch, false);
         }
+
+        [TestCase("1d4", "2d3")]
+        [TestCase("1d2", "1d20")]
+        [TestCase("1d2", "1d2+1d20")]
+        [TestCase("2d4", "12d4")]
+        [TestCase("2d4", "12d4+2d4")]
+        [TestCase("1d6", "1d6-1d6")]
+        [TestCase("3d8", "3d8")]
+        public void GetRepeatedRoll_ReturnsNoMatch(string roll, string source)
+        {
+            var result = RegexConstants.GetRepeatedRoll(roll, source);
+            Assert.That(result.IsMatch, Is.False);
+            Assert.That(result.Match, Is.Empty);
+            Assert.That(result.Index, Is.EqualTo(-1));
+            Assert.That(result.MatchCount, Is.Zero);
+        }
+
+        [TestCase("1d4", "1d4+1d4", "1d4+1d4", 0, 2)]
+        [TestCase("1d4", "2d6+1d4+1d4", "1d4+1d4", 4, 2)]
+        [TestCase("1d4", "1d4+1d4+2d3", "1d4+1d4", 0, 2)]
+        [TestCase("10000d6", "10000d6+10000d6+9266d6+4", "10000d6+10000d6", 0, 2)]
+        [TestCase("1d2", "1d2+1d2+1d2+1d20", "1d2+1d2+1d2", 0, 3)]
+        [TestCase("2d4", "12d4+2d4+2d4+2d4+2d4", "2d4+2d4+2d4+2d4", 5, 4)]
+        [TestCase("2d4", "12d4+2d4+2d4+2d4+2d4-1d20", "2d4+2d4+2d4+2d4", 5, 4)]
+        [TestCase("1d20", "1d20+1d20+1d20-1d20", "1d20+1d20+1d20", 0, 3)]
+        [TestCase("3d8", "3d8+3d8+3d8-3d8", "3d8+3d8+3d8", 0, 3)]
+        [TestCase("3d8", "3d8+3d8+3d8/2", "3d8+3d8", 0, 2)]
+        [TestCase("3d8", "3d8+3d8+(3d8)/(3d8)", "3d8+3d8", 0, 2)]
+        [TestCase("3d8", "3d8+3d8+3d8*2", "3d8+3d8", 0, 2)]
+        [TestCase("3d8", "3d8+3d8+(3d8)*(3d8)", "3d8+3d8", 0, 2)]
+        [TestCase("3d8", "3d8+3d8+3d8%2", "3d8+3d8", 0, 2)]
+        [TestCase("3d8", "3d8+3d8+(3d8)%(3d8)", "3d8+3d8", 0, 2)]
+        [TestCase("4d10", "2+4d10+4d10+4d10", "4d10+4d10+4d10", 2, 3)]
+        [TestCase("4d10", "(4d10)+4d10+4d10+4d10", "4d10+4d10+4d10", 7, 3)]
+        [TestCase("4d10", "(4d10+4d10)+4d10+4d10", "4d10+4d10", 1, 2)]
+        [TestCase("4d10", "4d10+(4d10+4d10)+4d10+4d10", "4d10+4d10", 6, 2)]
+        [TestCase("4d10", "(4d10+4d12)+4d10+4d10", "4d10+4d10", 12, 2)]
+        [TestCase("4d10", "2-4d10+4d10+4d10", "4d10+4d10", 7, 2)]
+        [TestCase("4d10", "4d10-4d10+4d10+4d10", "4d10+4d10", 10, 2)]
+        [TestCase("4d10", "2/4d10+4d10+4d10", "4d10+4d10", 7, 2)]
+        [TestCase("4d10", "(4d10)/(4d10)+4d10+4d10", "4d10+4d10", 14, 2)]
+        [TestCase("4d10", "2*4d10+4d10+4d10", "4d10+4d10", 7, 2)]
+        [TestCase("4d10", "(4d10)*(4d10)+4d10+4d10", "4d10+4d10", 14, 2)]
+        [TestCase("4d10", "2%4d10+4d10+4d10", "4d10+4d10", 7, 2)]
+        [TestCase("4d10", "(4d10)%(4d10)+4d10+4d10", "4d10+4d10", 14, 2)]
+        public void GetRepeatedRoll_ReturnsMatch(string roll, string source, string expectedMatch, int expectedIndex, int expectedCount)
+        {
+            var result = RegexConstants.GetRepeatedRoll(roll, source);
+            Assert.That(result.IsMatch, Is.True);
+            Assert.That(result.Match, Is.EqualTo(expectedMatch));
+            Assert.That(result.Index, Is.EqualTo(expectedIndex));
+            Assert.That(result.MatchCount, Is.EqualTo(expectedCount));
+        }
     }
 }
