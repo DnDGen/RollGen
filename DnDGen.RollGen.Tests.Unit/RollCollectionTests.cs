@@ -1480,7 +1480,25 @@ namespace DnDGen.RollGen.Tests.Unit
         }
 
         [Test]
-        public void IfUpperIsGreaterThanMaxInt_CollectionIsInvalid()
+        public void IfUpperIsGreaterThanMaxInt_CollectionIsInvalid_BecauseUpperWontMatch()
+        {
+            var quantity = 22;
+            while (quantity-- > 0)
+            {
+                var prototype = new RollPrototype
+                {
+                    Quantity = Limits.Quantity,
+                    Die = Limits.Die
+                };
+                collection.Rolls.Add(prototype);
+            }
+
+            var isMatch = collection.Matches(22 * Limits.Quantity, int.MaxValue);
+            Assert.That(isMatch, Is.False);
+        }
+
+        [Test]
+        public void IfUpperIsGreaterThanMaxInt_CollectionIsStillValid_WhenAdjustmentLowersItWithinRange()
         {
             var quantity = 22;
             while (quantity-- > 0)
@@ -1496,7 +1514,7 @@ namespace DnDGen.RollGen.Tests.Unit
             collection.Adjustment = -1_000_000_000;
 
             var isMatch = collection.Matches(22 * Limits.Quantity - 1_000_000_000, 1_200_000_000);
-            Assert.That(isMatch, Is.False);
+            Assert.That(isMatch, Is.True);
         }
 
         [Test]

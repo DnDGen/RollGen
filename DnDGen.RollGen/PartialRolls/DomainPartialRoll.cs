@@ -315,8 +315,8 @@ namespace DnDGen.RollGen.PartialRolls
                 if (repeatedRoll.IsMatch && typeof(T) == typeof(int))
                 {
                     var remaining = repeatedRoll.MatchCount;
-                    var total = 0;
-                    //var total = 0L;
+                    //var total = 0;
+                    var total = 0L;
 
                     while (remaining-- > 0)
                     {
@@ -622,7 +622,7 @@ namespace DnDGen.RollGen.PartialRolls
                 if (!roll.IsValid)
                     return (null, false);
 
-                var replacement = roll.GetPotentialMaximum(true);
+                var replacement = (long)roll.GetPotentialMaximum(true);
                 var repeatedRoll = RegexConstants.GetRepeatedRoll(matchValue, expressionWithReplacedRolls);
 
                 if (repeatedRoll.IsMatch)
