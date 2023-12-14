@@ -1478,5 +1478,63 @@ namespace DnDGen.RollGen.Tests.Unit
                 yield return new TestCaseData("10d20", 220_633_615_280, new List<(int Quantity, int Die)> { (10, 20) });
             }
         }
+
+        [Test]
+        public void IfUpperIsGreaterThanMaxInt_CollectionIsInvalid_BecauseUpperWontMatch()
+        {
+            var quantity = 22;
+            while (quantity-- > 0)
+            {
+                var prototype = new RollPrototype
+                {
+                    Quantity = Limits.Quantity,
+                    Die = Limits.Die
+                };
+                collection.Rolls.Add(prototype);
+            }
+
+            var isMatch = collection.Matches(22 * Limits.Quantity, int.MaxValue);
+            Assert.That(isMatch, Is.False);
+        }
+
+        [Test]
+        public void IfUpperIsGreaterThanMaxInt_CollectionIsStillValid_WhenAdjustmentLowersItWithinRange()
+        {
+            var quantity = 22;
+            while (quantity-- > 0)
+            {
+                var prototype = new RollPrototype
+                {
+                    Quantity = Limits.Quantity,
+                    Die = Limits.Die
+                };
+                collection.Rolls.Add(prototype);
+            }
+
+            collection.Adjustment = -1_000_000_000;
+
+            var isMatch = collection.Matches(22 * Limits.Quantity - 1_000_000_000, 1_200_000_000);
+            Assert.That(isMatch, Is.True);
+        }
+
+        [Test]
+        public void IfUpperIsLessThanMaxInt_CollectionIsValid()
+        {
+            var quantity = 21;
+            while (quantity-- > 0)
+            {
+                var prototype = new RollPrototype
+                {
+                    Quantity = Limits.Quantity,
+                    Die = Limits.Die
+                };
+                collection.Rolls.Add(prototype);
+            }
+
+            collection.Adjustment = -1_000_000_000;
+
+            var isMatch = collection.Matches(21 * Limits.Quantity - 1_000_000_000, 1_100_000_000);
+            Assert.That(isMatch, Is.True);
+        }
     }
 }

@@ -67,9 +67,11 @@ namespace DnDGen.RollGen.Tests.Integration
             Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)));
         }
 
-        [TestCase(73422562, 1673270503, "REPEAT+80d100+3d8+57262479", "10000d100", 1616)]
-        [TestCase(239762129, 792745843, "REPEAT+5694d100+4d3+234176431", "10000d100", 558)]
-        [TestCase(524600879, 1213158805, "REPEAT+5130d100+8d8+517645741", "10000d100", 695)]
+        [TestCase(133_851, 2_126_438_624, "REPEAT+7825d100+14d8-21343988", "10000d100", 2147)]
+        [TestCase(20_133_851, 2_146_438_624, "REPEAT+7825d100+14d8-1343988", "10000d100", 2147)]
+        [TestCase(73_422_562, 1_673_270_503, "REPEAT+80d100+3d8+57262479", "10000d100", 1616)]
+        [TestCase(239_762_129, 792_745_843, "REPEAT+5694d100+4d3+234176431", "10000d100", 558)]
+        [TestCase(524_600_879, 1_213_158_805, "REPEAT+5130d100+8d8+517645741", "10000d100", 695)]
         public void RollWithFewestDice_LongRoll(int lower, int upper, string rollTemplate, string repeatTerm, int repeatCount)
         {
             var repeats = Enumerable.Repeat(repeatTerm, repeatCount);

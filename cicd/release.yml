@@ -1,0 +1,35 @@
+pool:
+  vmImage: 'windows-latest'
+
+trigger: none
+pr: none
+
+resources:
+  pipelines:
+  - pipeline: DnDGen.RollGen
+    source: 'DnDGen.RollGen - Build'
+    trigger: 
+      branches:
+      - master
+
+jobs:
+
+- deployment: RollGen_Nuget
+  displayName: Deploy RollGen NuGet Package
+  environment: Prod
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+        - task: NuGetCommand@2
+          displayName: 'NuGet push'
+          inputs:
+            command: push
+            packagesToPush: '$(Pipeline.Workspace)/**/*.nupkg'
+            nuGetFeedType: external
+            publishFeedCredentials: NuGet.org
+        - task: GitHubRelease@1
+          displayName: 'GitHub release (create)'
+          inputs:
+            gitHubConnection: 'github.com_cidthecoatrack'
+            assets: '$(Pipeline.Workspace)/**/*.nupkg'
