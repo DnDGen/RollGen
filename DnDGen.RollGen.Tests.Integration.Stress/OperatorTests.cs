@@ -26,7 +26,7 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
         private void AssertPlus()
         {
             var quantity = random.Next(Limits.Quantity) + 1;
-            var plus = random.Next(int.MaxValue - quantity) + random.NextDouble();
+            var plus = random.Next(int.MaxValue - quantity) + random.Next(100) / 100d;
 
             var roll = dice.Roll(quantity).Plus(plus);
 
@@ -57,7 +57,7 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
         private void AssertMinus()
         {
             var quantity = random.Next(Limits.Quantity) + 1;
-            var minus = random.Next(quantity * 2) + random.NextDouble();
+            var minus = random.Next(quantity * 2) + random.Next(100) / 100d;
 
             var roll = dice.Roll(quantity).Minus(minus);
 
@@ -73,7 +73,7 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
         private void AssertTimes()
         {
             var quantity = random.Next(Limits.Quantity) + 1;
-            var times = random.Next(int.MaxValue / quantity) + 1 + random.NextDouble();
+            var times = random.Next(int.MaxValue / quantity) + 1 + random.Next(100) / 100d;
 
             var roll = dice.Roll(quantity).Times(times);
 
@@ -91,7 +91,7 @@ namespace DnDGen.RollGen.Tests.Integration.Stress
             var quantity = random.Next(Limits.Quantity) + 1;
             //HACK: Making sure divisor is >= 1, because when it is less, sometimes the division expression ends up in something Albatross doesn't like,
             //such as '3/9.12030227907016E-05' (it doesn't like the scientific notation)
-            var dividedBy = random.Next(Limits.Quantity) + 1 + random.NextDouble();
+            var dividedBy = random.Next(Limits.Quantity) + 1 + random.Next(100) / 100d;
 
             var roll = dice.Roll(quantity).DividedBy(dividedBy);
 
