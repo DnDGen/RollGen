@@ -25,11 +25,11 @@ jobs:
           displayName: 'NuGet push'
           inputs:
             command: push
-            packagesToPush: '$(Pipeline.Workspace)/**/*.nupkg'
+            packagesToPush: '$(Pipeline.Workspace)/**/DnDGen.RollGen.*.nupkg'
             nuGetFeedType: external
             publishFeedCredentials: NuGet.org
         - task: GitHubRelease@1
           displayName: 'GitHub release (create)'
           inputs:
             gitHubConnection: 'github.com_cidthecoatrack'
-            assets: '$(Pipeline.Workspace)/**/*.nupkg'
+            assets: '$(Pipeline.Workspace)/**/DnDGen.RollGen.*.nupkg'
