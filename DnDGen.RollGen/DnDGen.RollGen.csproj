@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>net6.0</TargetFrameworks>
-    <Version>15.5.6</Version>
+    <Version>15.5.7</Version>
     <Authors>Karl M. Speer</Authors>
     <Company>DnDGen</Company>
     <Product>RollGen</Product>
@@ -19,8 +19,7 @@
 		15.5.4: More efficient repeated roll evaluation
     15.5.5: README updates
     15.5.6: Fix too-small doubles in Stress tests
-		15.5.5: 
-		15.5.6: Pipeline optimizations
+		15.5.7: Pipeline optimizations
 	</PackageReleaseNotes>
   </PropertyGroup>
 
