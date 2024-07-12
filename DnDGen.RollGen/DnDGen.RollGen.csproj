@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
-    <TargetFrameworks>net6.0</TargetFrameworks>
+    <TargetFrameworks>net8.0</TargetFrameworks>
     <Version>15.5.7</Version>
     <Authors>Karl M. Speer</Authors>
     <Company>DnDGen</Company>
@@ -22,17 +21,15 @@
 		15.5.7: Pipeline optimizations
 	</PackageReleaseNotes>
   </PropertyGroup>
-
   <ItemGroup>
     <None Include="18531-twenty-sided-dice-vector-thumb.png">
       <Pack>True</Pack>
-      <PackagePath></PackagePath>
+      <PackagePath>
+      </PackagePath>
     </None>
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Albatross.Expression" Version="3.0.13" />
     <PackageReference Include="Ninject" Version="3.3.6" />
   </ItemGroup>
-
 </Project>
