@@ -1,21 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
-	  <TargetFrameworks>net6.0</TargetFrameworks>
-
+    <TargetFrameworks>net8.0</TargetFrameworks>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Ninject" Version="3.3.6" />
-    <PackageReference Include="nunit" Version="4.0.1" />
+    <PackageReference Include="nunit" Version="4.1.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\DnDGen.RollGen.Tests.Integration\DnDGen.RollGen.Tests.Integration.csproj" />
     <ProjectReference Include="..\DnDGen.RollGen\DnDGen.RollGen.csproj" />
   </ItemGroup>
-
 </Project>
