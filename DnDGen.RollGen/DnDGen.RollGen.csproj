@@ -1,9 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net6.0</TargetFrameworks>
     <Version>16.0.0</Version>
     <TargetFrameworks>net8.0</TargetFrameworks>
-    <Version>15.5.7</Version>
     <Authors>Karl M. Speer</Authors>
     <Company>DnDGen</Company>
     <Product>RollGen</Product>
