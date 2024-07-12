@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFrameworks>net6.0</TargetFrameworks>
+    <Version>16.0.0</Version>
+    <TargetFrameworks>net8.0</TargetFrameworks>
     <Version>15.5.7</Version>
     <Authors>Karl M. Speer</Authors>
     <Company>DnDGen</Company>
@@ -15,24 +16,18 @@
     <PackageIconUrl />
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageReleaseNotes>
-		15.5.3: Bug #82
-		15.5.4: More efficient repeated roll evaluation
-    15.5.5: README updates
-    15.5.6: Fix too-small doubles in Stress tests
-		15.5.7: Pipeline optimizations
-	</PackageReleaseNotes>
+      16.0.0: .Net 8
+    </PackageReleaseNotes>
   </PropertyGroup>
-
   <ItemGroup>
     <None Include="18531-twenty-sided-dice-vector-thumb.png">
       <Pack>True</Pack>
-      <PackagePath></PackagePath>
+      <PackagePath>
+      </PackagePath>
     </None>
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Albatross.Expression" Version="3.0.13" />
     <PackageReference Include="Ninject" Version="3.3.6" />
   </ItemGroup>
-
 </Project>

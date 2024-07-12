@@ -1,17 +1,17 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DnDGen.RollGen", "DnDGen.RollGen\DnDGen.RollGen.csproj", "{F7A023C3-F9D4-4E4F-97FE-088386E4052A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DnDGen.RollGen", "DnDGen.RollGen\DnDGen.RollGen.csproj", "{F7A023C3-F9D4-4E4F-97FE-088386E4052A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DnDGen.RollGen.Tests.Unit", "DnDGen.RollGen.Tests.Unit\DnDGen.RollGen.Tests.Unit.csproj", "{0C2BE08D-5A3C-4138-B7F5-17F3900E5AB8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DnDGen.RollGen.Tests.Unit", "DnDGen.RollGen.Tests.Unit\DnDGen.RollGen.Tests.Unit.csproj", "{0C2BE08D-5A3C-4138-B7F5-17F3900E5AB8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DnDGen.RollGen.Tests.Integration", "DnDGen.RollGen.Tests.Integration\DnDGen.RollGen.Tests.Integration.csproj", "{A3938051-33F4-4284-9A4B-9DC0BB29E6FC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DnDGen.RollGen.Tests.Integration", "DnDGen.RollGen.Tests.Integration\DnDGen.RollGen.Tests.Integration.csproj", "{A3938051-33F4-4284-9A4B-9DC0BB29E6FC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DnDGen.RollGen.Tests.Integration.IoC", "DnDGen.RollGen.Tests.Integration.IoC\DnDGen.RollGen.Tests.Integration.IoC.csproj", "{A13979CD-A8BF-4DD4-938D-466C29EDC586}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DnDGen.RollGen.Tests.Integration.IoC", "DnDGen.RollGen.Tests.Integration.IoC\DnDGen.RollGen.Tests.Integration.IoC.csproj", "{A13979CD-A8BF-4DD4-938D-466C29EDC586}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DnDGen.RollGen.Tests.Integration.Stress", "DnDGen.RollGen.Tests.Integration.Stress\DnDGen.RollGen.Tests.Integration.Stress.csproj", "{08F3948A-47A1-451A-AA56-79F0740471BD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DnDGen.RollGen.Tests.Integration.Stress", "DnDGen.RollGen.Tests.Integration.Stress\DnDGen.RollGen.Tests.Integration.Stress.csproj", "{08F3948A-47A1-451A-AA56-79F0740471BD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
