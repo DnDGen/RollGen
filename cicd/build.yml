@@ -41,16 +41,21 @@ steps:
     projects: 'DnDGen.RollGen.Tests.Integration.Stress/DnDGen.RollGen.Tests.Integration.Stress.csproj'
     arguments: '-v normal --configuration Stress'
 
-- task: tmarkovski.projectversionasvariable.versionintovariable.projectversionasvariable@1
+- task: PowerShell@2
   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
   displayName: 'Get Project Version'
   inputs:
-    path: DnDGen.RollGen/DnDGen.RollGen.csproj
+    targetType: 'inline'
+    script: |
+         $xml = [Xml] (Get-Content ./DnDGen.RollGen/DnDGen.RollGen.csproj)
+         $version = $xml.Project.PropertyGroup.Version
+         echo $version
+         echo "##vso[task.setvariable variable=version]$version"
     
 - script: |
-     echo "Tagging with version $(Version.MajorMinorBuild)"
-     git tag $(Version.MajorMinorBuild)
-     git push origin $(Version.MajorMinorBuild)
+     echo "Tagging with version $(version)"
+     git tag $(version)
+     git push origin $(version)
   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
   displayName: 'Tag Version'
   workingDirectory: $(Build.SourcesDirectory)
